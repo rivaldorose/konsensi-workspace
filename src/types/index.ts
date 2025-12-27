@@ -98,4 +98,5 @@ export interface Goal {
 }
 
 export * from './marketing'
+export * from './document'
 
