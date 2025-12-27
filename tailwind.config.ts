@@ -11,31 +11,25 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#65da0b',
-          dark: '#4da808',
+          DEFAULT: '#71ec13',
+          dark: '#62d10f',
           50: '#F5FFF0',
-          500: '#65da0b',
+          500: '#71ec13',
           900: '#669944',
         },
         secondary: {
           DEFAULT: '#1A3D32',
           light: '#2D5F4F',
-          500: '#1A3D32',
+          500: '#2D5F4F',
           900: '#09130F',
         },
         background: {
-          light: '#f7f8f5',
+          light: '#f7f8f6',
           dark: '#182210',
         },
-        dark: {
-          nav: '#131d0c',
-        },
-        nav: {
-          bg: '#18230f',
-        },
-        konsensi: {
-          dark: '#131c0d',
-        },
+        'konsensi-green': '#182210',
+        'dark-nav': '#131d0c',
+        'nav-bg': '#18230f',
         surface: {
           light: '#ffffff',
           dark: '#222f18',
@@ -43,10 +37,13 @@ const config: Config = {
         text: {
           main: '#131d0c',
           subtle: '#5c6b53',
+          secondary: '#6e9a4c',
+          dark: '#131b0d',
         },
         border: {
           color: '#ecf4e6',
           dark: '#3a4d2e',
+          light: '#ecf3e7',
         },
         card: {
           light: '#ffffff',
