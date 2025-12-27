@@ -11,10 +11,10 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#b4ff7a',
+          DEFAULT: '#5abd0f',
           dark: '#8bc34a',
           50: '#F5FFF0',
-          500: '#b4ff7a',
+          500: '#5abd0f',
           900: '#669944',
         },
         secondary: {
@@ -24,8 +24,8 @@ const config: Config = {
           900: '#09130F',
         },
         background: {
-          light: '#f7f8f5',
-          dark: '#18230f',
+          light: '#f7f8f6',
+          dark: '#182210',
         },
         dark: {
           nav: '#131d0c',
