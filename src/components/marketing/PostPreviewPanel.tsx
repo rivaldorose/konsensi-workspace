@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import type { MarketingPost } from '@/types/marketing'
 import { format } from 'date-fns'
 
@@ -32,6 +33,8 @@ export default function PostPreviewPanel({
   onSaveDraft,
   onDelete
 }: PostPreviewPanelProps) {
+  const router = useRouter()
+  
   if (!post) return null
 
   const scheduledDate = post.scheduled_date ? new Date(post.scheduled_date) : null
@@ -203,7 +206,7 @@ export default function PostPreviewPanel({
             Save as Draft
           </button>
           <button
-            onClick={() => onDelete(post.id)}
+            onClick={() => router.push(`/marketing/${post.id}/delete`)}
             className="w-full h-10 rounded-lg border border-transparent text-red-600 text-sm font-bold hover:bg-red-50 transition-colors"
           >
             Delete Post
