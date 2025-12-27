@@ -92,8 +92,8 @@ export default function DocumentCard({ document, onOpen, onShare, onFavorite }: 
     }
 
     if (showMenu) {
-      document.addEventListener('mousedown', handleClickOutside)
-      return () => document.removeEventListener('mousedown', handleClickOutside)
+      window.document.addEventListener('mousedown', handleClickOutside)
+      return () => window.document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [showMenu])
 
