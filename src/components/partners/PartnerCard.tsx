@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import type { Partner } from '@/types'
 
 interface PartnerCardProps {
@@ -105,9 +106,12 @@ export function PartnerCard({ partner, variant, isExpanded, onToggle }: PartnerC
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </button>
-          <button className="flex-1 lg:flex-none h-10 px-4 bg-[#131d0c] dark:bg-primary text-white dark:text-[#131d0c] rounded-lg text-sm font-bold hover:opacity-90 transition-opacity">
+          <Link
+            href={`/partners/${partner.id}/edit`}
+            className="flex-1 lg:flex-none h-10 px-4 bg-[#131d0c] dark:bg-primary text-white dark:text-[#131d0c] rounded-lg text-sm font-bold hover:opacity-90 transition-opacity flex items-center justify-center"
+          >
             View Details
-          </button>
+          </Link>
         </div>
       </div>
     )

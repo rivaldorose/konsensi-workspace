@@ -1,0 +1,535 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter, useParams } from 'next/navigation'
+import { usePartner, useUpdatePartner, useDeletePartner } from '@/hooks/usePartners'
+import type { Partner } from '@/types'
+
+export default function EditPartnerPage() {
+  const router = useRouter()
+  const params = useParams()
+  const partnerId = params.id as string
+  
+  const { data: partner, isLoading } = usePartner(partnerId)
+  const updatePartner = useUpdatePartner()
+  const deletePartner = useDeletePartner()
+  
+  const [activeTab, setActiveTab] = useState('basic')
+  const [formData, setFormData] = useState<Partial<Partner>>({})
+  const [tags, setTags] = useState<string[]>([])
+  const [newTag, setNewTag] = useState('')
+
+  useEffect(() => {
+    if (partner) {
+      setFormData(partner)
+      setTags(partner.tags || [])
+    }
+  }, [partner])
+
+  const handleClose = () => {
+    router.push('/partners')
+  }
+
+  const handleSave = async () => {
+    if (!partnerId) return
+    
+    try {
+      await updatePartner.mutateAsync({
+        id: partnerId,
+        updates: {
+          ...formData,
+          tags
+        }
+      })
+      router.push('/partners')
+    } catch (error) {
+      console.error('Failed to save partner:', error)
+    }
+  }
+
+  const handleSaveAndClose = async () => {
+    await handleSave()
+  }
+
+  const handleDelete = () => {
+    router.push(`/partners/${partnerId}/delete`)
+  }
+
+  const handleAddTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && newTag.trim()) {
+      e.preventDefault()
+      setTags([...tags, newTag.trim()])
+      setNewTag('')
+    }
+  }
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove))
+  }
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-center justify-center">
+        <div className="bg-white dark:bg-[#1a2016] rounded-xl p-8">
+          <div className="animate-pulse">Loading...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!partner) {
+    return (
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-center justify-center">
+        <div className="bg-white dark:bg-[#1a2016] rounded-xl p-8">
+          <p>Partner not found</p>
+          <button onClick={handleClose} className="mt-4 text-primary">Go back</button>
+        </div>
+      </div>
+    )
+  }
+
+  const tabs = [
+    { id: 'basic', label: 'Basic Info' },
+    { id: 'contact', label: 'Contact' },
+    { id: 'status', label: 'Status' },
+    { id: 'documents', label: 'Documents' },
+    { id: 'activity', label: 'Activity' },
+  ]
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
+        onClick={handleClose}
+        aria-hidden="true"
+      />
+
+      {/* Modal Container */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="relative w-full max-w-5xl h-[90vh] bg-[#fafcf8] dark:bg-[#1a2016] rounded-xl shadow-2xl flex flex-col overflow-hidden border border-[#dae7cf] dark:border-[#2a3820]">
+          
+          {/* Header */}
+          <div className="flex items-center justify-between px-8 py-5 border-b border-[#dae7cf] dark:border-[#2a3820] bg-white dark:bg-[#1a2016]">
+            <h2 className="text-[#131b0d] dark:text-white text-[24px] font-bold leading-tight">
+              Edit Partner - {formData.name || partner.name}
+            </h2>
+            <button 
+              onClick={handleClose}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a3820] transition-colors text-gray-500 hover:text-red-500"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="px-8 bg-white dark:bg-[#1a2016] border-b border-[#dae7cf] dark:border-[#2a3820]">
+            <div className="flex gap-8 overflow-x-auto no-scrollbar">
+              {tabs.map(tab => {
+                const isActive = activeTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center justify-center border-b-[3px] pb-[13px] pt-4 px-2 cursor-pointer transition-colors ${
+                      isActive
+                        ? 'border-b-primary text-text-dark dark:text-white'
+                        : 'border-b-transparent hover:border-b-primary/30 text-[#6e9a4c] dark:text-[#8ba675] hover:text-text-dark dark:hover:text-white'
+                    }`}
+                  >
+                    <p className="text-sm font-bold leading-normal tracking-[0.015em]">{tab.label}</p>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Main Content Area (Scrollable) */}
+          <div className="flex-1 overflow-y-auto bg-[#fafcf8] dark:bg-[#131810]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 p-8">
+              
+              {/* Left Column: Forms */}
+              <div className="lg:col-span-2 space-y-8">
+                
+                {/* Basic Info Tab */}
+                {activeTab === 'basic' && (
+                  <>
+                    {/* General Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-bold text-text-dark dark:text-white flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary">domain</span>
+                        General Information
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label className="flex flex-col flex-1">
+                          <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Partner Name*</p>
+                          <input
+                            className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                            value={formData.name || ''}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          />
+                        </label>
+                        <label className="flex flex-col flex-1">
+                          <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Type*</p>
+                          <div className="relative">
+                            <select
+                              className="form-select w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal appearance-none"
+                              value={formData.type || 'client'}
+                              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                            >
+                              <option value="vendor">Vendor</option>
+                              <option value="client">Client</option>
+                              <option value="partner">Strategic Partner</option>
+                            </select>
+                            <span className="material-symbols-outlined absolute right-4 top-3 pointer-events-none text-gray-500">expand_more</span>
+                          </div>
+                        </label>
+                        <label className="flex flex-col flex-1">
+                          <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Sector/Industry</p>
+                          <input
+                            className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                            value={formData.sector || ''}
+                            onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
+                          />
+                        </label>
+                        <label className="flex flex-col flex-1">
+                          <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Owner</p>
+                          <div className="relative">
+                            <select
+                              className="form-select w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal appearance-none"
+                              value={formData.owner_id || ''}
+                              onChange={(e) => setFormData({ ...formData, owner_id: e.target.value })}
+                            >
+                              <option value="mk">Maarten K.</option>
+                              <option value="js">Julia S.</option>
+                              <option value="ab">Alex B.</option>
+                            </select>
+                            <div className="absolute right-4 top-2.5 flex items-center gap-2 pointer-events-none">
+                              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700">JS</div>
+                              <span className="material-symbols-outlined text-gray-500">expand_more</span>
+                            </div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    <hr className="border-[#dae7cf] dark:border-[#2a3820]" />
+
+                    {/* Agreement Details */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-bold text-text-dark dark:text-white flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary">contract</span>
+                        Agreement Details
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label className="flex flex-col flex-1">
+                          <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Partnership Start</p>
+                          <input
+                            className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                            type="date"
+                            value={formData.partnership_start ? formData.partnership_start.split('T')[0] : ''}
+                            onChange={(e) => setFormData({ ...formData, partnership_start: e.target.value })}
+                          />
+                        </label>
+                        <label className="flex flex-col flex-1">
+                          <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Contract End</p>
+                          <input
+                            className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                            type="date"
+                            value={formData.contract_end ? formData.contract_end.split('T')[0] : ''}
+                            onChange={(e) => setFormData({ ...formData, contract_end: e.target.value })}
+                          />
+                        </label>
+                        <label className="flex flex-col flex-1">
+                          <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Annual Value (€)</p>
+                          <input
+                            className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                            type="number"
+                            value={formData.annual_value || ''}
+                            onChange={(e) => setFormData({ ...formData, annual_value: parseFloat(e.target.value) || 0 })}
+                          />
+                        </label>
+                        <label className="flex flex-col flex-1">
+                          <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Tags</p>
+                          <div className="w-full rounded-lg border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] min-h-12 px-2 py-2 flex items-center gap-2 flex-wrap">
+                            {tags.map((tag, index) => (
+                              <span
+                                key={index}
+                                className="bg-primary/20 text-text-dark dark:text-white text-xs px-2 py-1 rounded-full whitespace-nowrap flex items-center gap-1"
+                              >
+                                #{tag}
+                                <button
+                                  onClick={() => handleRemoveTag(tag)}
+                                  className="hover:text-red-500"
+                                >
+                                  <span className="material-symbols-outlined text-sm">close</span>
+                                </button>
+                              </span>
+                            ))}
+                            <input
+                              className="flex-1 min-w-[50px] bg-transparent focus:outline-none text-base text-[#131b0d] dark:text-white placeholder:text-[#6e9a4c]/60"
+                              placeholder="Add tag..."
+                              value={newTag}
+                              onChange={(e) => setNewTag(e.target.value)}
+                              onKeyDown={handleAddTag}
+                            />
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Notes */}
+                    <div className="space-y-4">
+                      <label className="flex flex-col flex-1">
+                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Notes</p>
+                        <textarea
+                          className="form-textarea w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] min-h-[120px] p-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60 resize-none"
+                          value={formData.notes || ''}
+                          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                        />
+                      </label>
+                    </div>
+                  </>
+                )}
+
+                {/* Contact Tab */}
+                {activeTab === 'contact' && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-text-dark dark:text-white flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary">person</span>
+                      Primary Contact
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label className="flex flex-col flex-1">
+                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Contact Name*</p>
+                        <input
+                          className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                          value={formData.contact_name || ''}
+                          onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
+                        />
+                      </label>
+                      <label className="flex flex-col flex-1">
+                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Job Title</p>
+                        <input
+                          className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                          value={formData.contact_email || ''}
+                          onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
+                        />
+                      </label>
+                      <label className="flex flex-col flex-1">
+                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Email*</p>
+                        <div className="relative">
+                          <input
+                            className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 pl-10 pr-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                            type="email"
+                            value={formData.contact_email || ''}
+                            onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
+                          />
+                          <span className="material-symbols-outlined absolute left-3 top-3 text-gray-400">mail</span>
+                        </div>
+                      </label>
+                      <label className="flex flex-col flex-1">
+                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Phone</p>
+                        <div className="relative">
+                          <input
+                            className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 pl-10 pr-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                            type="tel"
+                            value={formData.contact_phone || ''}
+                            onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
+                          />
+                          <span className="material-symbols-outlined absolute left-3 top-3 text-gray-400">call</span>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Status Tab */}
+                {activeTab === 'status' && (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-bold text-text-dark dark:text-white flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary">flag</span>
+                      Status & Tracking
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label className="flex flex-col flex-1">
+                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Status*</p>
+                        <div className="relative">
+                          <select
+                            className="form-select w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal appearance-none"
+                            value={formData.status || 'active'}
+                            onChange={(e) => setFormData({ ...formData, status: e.target.value as Partner['status'] })}
+                          >
+                            <option value="to_contact">To Contact</option>
+                            <option value="in_gesprek">In Gesprek</option>
+                            <option value="active">Active</option>
+                            <option value="paused">Paused</option>
+                          </select>
+                          <span className="material-symbols-outlined absolute right-4 top-3 pointer-events-none text-gray-500">expand_more</span>
+                        </div>
+                      </label>
+                      <label className="flex flex-col flex-1">
+                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Next Action</p>
+                        <input
+                          className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                          value={formData.next_action || ''}
+                          onChange={(e) => setFormData({ ...formData, next_action: e.target.value })}
+                        />
+                      </label>
+                      <label className="flex flex-col flex-1">
+                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Due Date</p>
+                        <input
+                          className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
+                          type="date"
+                          value={formData.next_action_date ? formData.next_action_date.split('T')[0] : ''}
+                          onChange={(e) => setFormData({ ...formData, next_action_date: e.target.value })}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                )}
+
+                {/* Documents & Activity tabs - placeholder */}
+                {(activeTab === 'documents' || activeTab === 'activity') && (
+                  <div className="text-center py-12 text-gray-500">
+                    <p>{activeTab === 'documents' ? 'Documents' : 'Activity'} section coming soon</p>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Right Column: Status & Activity */}
+              <div className="space-y-8">
+                
+                {/* Status Management Card */}
+                <div className="bg-white dark:bg-[#1a2016] rounded-xl border border-[#dae7cf] dark:border-[#2a3820] p-5 shadow-sm">
+                  <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Status & Tracking</h4>
+                  <div className="space-y-5">
+                    <div>
+                      <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-3">Current Status</p>
+                      <div className="flex gap-3">
+                        {['active', 'in_gesprek', 'paused'].map((status) => {
+                          const isSelected = formData.status === status
+                          return (
+                            <label key={status} className="cursor-pointer">
+                              <input
+                                className="peer sr-only"
+                                name="status"
+                                type="radio"
+                                checked={isSelected}
+                                onChange={() => setFormData({ ...formData, status: status as Partner['status'] })}
+                              />
+                              <div className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${
+                                isSelected
+                                  ? status === 'active'
+                                    ? 'bg-primary/20 border-primary text-text-dark'
+                                    : status === 'in_gesprek'
+                                    ? 'bg-yellow-100 border-yellow-400 text-yellow-900 dark:bg-yellow-900/20 dark:border-yellow-400 dark:text-yellow-300'
+                                    : 'bg-gray-200 border-gray-400 text-gray-900 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-300'
+                                  : 'border-[#dae7cf] dark:border-[#2a3820] bg-gray-50 text-gray-600 dark:text-gray-400'
+                              }`}>
+                                {status === 'active' ? 'Active' : status === 'in_gesprek' ? 'In Gesprek' : 'Paused'}
+                              </div>
+                            </label>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4">
+                      <label className="flex flex-col flex-1">
+                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Next Action</p>
+                        <input
+                          className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-10 px-3 text-sm font-normal leading-normal"
+                          value={formData.next_action || ''}
+                          onChange={(e) => setFormData({ ...formData, next_action: e.target.value })}
+                        />
+                      </label>
+                      <label className="flex flex-col flex-1">
+                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Due Date</p>
+                        <input
+                          className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-10 px-3 text-sm font-normal leading-normal"
+                          type="date"
+                          value={formData.next_action_date ? formData.next_action_date.split('T')[0] : ''}
+                          onChange={(e) => setFormData({ ...formData, next_action_date: e.target.value })}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Activity History Card */}
+                <div className="bg-white dark:bg-[#1a2016] rounded-xl border border-[#dae7cf] dark:border-[#2a3820] p-5 shadow-sm flex flex-col h-fit">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Activity History</h4>
+                    <button className="text-xs font-bold text-primary hover:text-green-600 dark:hover:text-green-400">View Full</button>
+                  </div>
+                  <div className="relative pl-2 border-l border-gray-200 dark:border-gray-700 space-y-6">
+                    <div className="relative pl-4">
+                      <div className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-primary border-2 border-white dark:border-[#1a2016]"></div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-gray-400 mb-0.5">Today, 10:23 AM</span>
+                        <p className="text-sm text-text-dark dark:text-white font-medium">Updated Contract Value</p>
+                        <span className="text-xs text-gray-500">Changed from €42k to €45k</span>
+                      </div>
+                    </div>
+                    <div className="relative pl-4">
+                      <div className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-gray-300 dark:bg-gray-600 border-2 border-white dark:border-[#1a2016]"></div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-gray-400 mb-0.5">Oct 24, 2023</span>
+                        <p className="text-sm text-text-dark dark:text-white font-medium">Email Sent: Q4 Strategy</p>
+                        <span className="text-xs text-gray-500">Sent by Julia S.</span>
+                      </div>
+                    </div>
+                    <div className="relative pl-4">
+                      <div className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-gray-300 dark:bg-gray-600 border-2 border-white dark:border-[#1a2016]"></div>
+                      <div className="flex flex-col">
+                        <span className="text-xs text-gray-400 mb-0.5">Oct 15, 2023</span>
+                        <p className="text-sm text-text-dark dark:text-white font-medium">Meeting: Renewal Discussion</p>
+                        <span className="text-xs text-gray-500">Logged via Calendar</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          {/* Footer / Action Bar */}
+          <div className="flex items-center justify-between px-8 py-5 border-t border-[#dae7cf] dark:border-[#2a3820] bg-white dark:bg-[#1a2016]">
+            <button
+              onClick={handleDelete}
+              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-bold flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-[18px]">delete</span>
+              Delete Partner
+            </button>
+            <div className="flex gap-4">
+              <button
+                onClick={handleClose}
+                className="h-10 px-6 rounded-lg border border-transparent hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 text-sm font-bold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="h-10 px-6 rounded-lg border border-[#dae7cf] dark:border-[#3a4d2c] hover:border-primary text-text-dark dark:text-white text-sm font-bold transition-colors"
+              >
+                Save Changes
+              </button>
+              <button
+                onClick={handleSaveAndClose}
+                className="h-10 px-6 rounded-lg bg-primary hover:bg-[#64d60f] text-[#131b0d] text-sm font-bold shadow-sm transition-colors flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[18px]">check</span>
+                Save & Close
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </>
+  )
+}
+

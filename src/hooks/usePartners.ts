@@ -9,7 +9,7 @@ export function usePartners() {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('partners')
-        .select('*, owner:users(*)')
+        .select('*')
         .order('status', { ascending: false })
         .order('updated_at', { ascending: false })
       
@@ -35,6 +35,24 @@ export function usePartnerStats(partners?: Partner[]) {
     toContact: partners.filter(p => p.status === 'to_contact').length,
     total: partners.length
   }
+}
+
+export function usePartner(id: string) {
+  return useQuery({
+    queryKey: ['partner', id],
+    queryFn: async () => {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*')
+        .eq('id', id)
+        .single()
+      
+      if (error) throw error
+      return data as Partner
+    },
+    enabled: !!id
+  })
 }
 
 export function useCreatePartner() {
@@ -79,9 +97,28 @@ export function useUpdatePartner() {
       if (error) throw error
       return data
     },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['partners'] })
+      queryClient.invalidateQueries({ queryKey: ['partner', variables.id] })
+    }
+  })
+}
+
+export function useDeletePartner() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('partners')
+        .delete()
+        .eq('id', id)
+      
+      if (error) throw error
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['partners'] })
     }
   })
 }
-
