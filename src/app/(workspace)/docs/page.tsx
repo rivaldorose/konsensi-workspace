@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useDocuments } from '@/hooks/useDocuments'
 import type { Document } from '@/types/document'
 import DocumentCard from '@/components/documents/DocumentCard'
+import { DocsSidebar } from '@/components/documents/DocsSidebar'
 import { format, isToday, isYesterday, isThisWeek, parseISO } from 'date-fns'
 
 export default function DocumentsPage() {
@@ -98,97 +99,11 @@ export default function DocumentsPage() {
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden" style={{ marginTop: '-4rem' }}>
       {/* Sidebar */}
-      <aside className="w-[240px] flex-shrink-0 bg-white border-r border-[#ecf3e7] flex flex-col h-full hidden md:flex overflow-y-auto">
-        <div className="flex-1 px-3 py-6 space-y-8">
-          {/* Favorites */}
-          <div>
-            <div className="px-3 mb-2 flex items-center justify-between group cursor-pointer">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Favorites</span>
-            </div>
-            <div className="space-y-1">
-              <a
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-[#131b0d] hover:bg-[#f7f8f6] group transition-colors cursor-pointer"
-                onClick={() => router.push('/roadmap')}
-              >
-                <span className="material-symbols-outlined text-[20px] text-yellow-400 fill-1">star</span>
-                <span className="text-sm font-medium">Roadmap</span>
-              </a>
-              <a
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-[#131b0d] hover:bg-[#f7f8f6] group transition-colors cursor-pointer"
-                onClick={() => router.push('/roadmap')}
-              >
-                <span className="material-symbols-outlined text-[20px] text-yellow-400 fill-1">star</span>
-                <span className="text-sm font-medium">Goals</span>
-              </a>
-            </div>
-          </div>
-
-          {/* Recent */}
-          <div>
-            <div className="px-3 mb-2 flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Recent</span>
-            </div>
-            <div className="space-y-1">
-              {documents.slice(0, 3).map((doc) => (
-                <a
-                  key={doc.id}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-[#131b0d] hover:bg-[#f7f8f6] group transition-colors cursor-pointer"
-                  onClick={() => handleOpen(doc.id)}
-                >
-                  <span className="material-symbols-outlined text-[20px] text-gray-400 group-hover:text-primary">description</span>
-                  <span className="text-sm font-medium truncate">{doc.title}</span>
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Folders */}
-        <div>
-            <div className="px-3 mb-2 flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Folders</span>
-            </div>
-            <div className="space-y-1">
-              <a
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
-                  selectedFolder === 'all' 
-                    ? 'bg-primary/10 text-[#131b0d] border border-primary/20 font-medium' 
-                    : 'text-[#131b0d] hover:bg-[#f7f8f6]'
-                } transition-colors cursor-pointer`}
-                onClick={() => setSelectedFolder('all')}
-              >
-                <span className={`material-symbols-outlined text-[20px] ${
-                  selectedFolder === 'all' ? 'text-green-700' : 'text-gray-400'
-                }`}>
-                  {selectedFolder === 'all' ? 'folder_open' : 'folder'}
-                </span>
-                <span className="text-sm">All Docs</span>
-              </a>
-              {['Business Plans', 'Marketing Briefs', 'Projects', 'Research', 'Contracts'].map((folder) => (
-                <a
-                  key={folder}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-[#131b0d] hover:bg-[#f7f8f6] group transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[20px] text-gray-400 group-hover:text-primary">folder</span>
-                  <span className="text-sm font-medium">{folder}</span>
-                </a>
-              ))}
-              <button className="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 hover:text-primary hover:bg-[#f7f8f6] w-full text-left mt-2 group transition-colors">
-                <div className="size-5 rounded border border-dashed border-gray-400 group-hover:border-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[16px]">add</span>
-                </div>
-                <span className="text-sm font-medium">New Folder</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 border-t border-[#ecf3e7] mt-auto">
-          <button className="flex items-center gap-3 w-full text-left hover:bg-[#f7f8f6] p-2 rounded-lg transition-colors">
-            <span className="material-symbols-outlined text-gray-500">settings</span>
-            <span className="text-sm font-medium text-gray-600">Settings</span>
-          </button>
-        </div>
-      </aside>
+      <DocsSidebar
+        recentDocs={documents}
+        selectedFolder={selectedFolder}
+        onSelectFolder={setSelectedFolder}
+      />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col bg-[#f7f8f6] relative h-full w-full min-w-0 overflow-hidden">
@@ -198,7 +113,9 @@ export default function DocumentsPage() {
             <div className="flex items-center gap-4">
               <div className="relative group w-64 md:w-80">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="material-symbols-outlined text-gray-400">search</span>
+                  <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" />
+                  </svg>
                 </div>
                 <input
                   className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm transition-all shadow-sm"
@@ -212,13 +129,15 @@ export default function DocumentsPage() {
                 onClick={handleNewDoc}
                 className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary text-[#131b0d] hover:bg-[#63d80e] transition-colors text-sm font-bold shadow-sm shadow-primary/20"
               >
-                <span className="material-symbols-outlined text-[20px]">add</span>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+                </svg>
                 <span>New Doc</span>
               </button>
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveFilter('all')}
@@ -267,27 +186,41 @@ export default function DocumentsPage() {
                 <span className="text-sm text-gray-500">Sort by:</span>
                 <button className="flex items-center gap-1.5 text-sm font-medium text-[#131b0d] hover:bg-gray-200/50 px-2 py-1 rounded transition-colors">
                   Modified
-                  <span className="material-symbols-outlined text-[18px]">expand_more</span>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                  </svg>
                 </button>
               </div>
               <div className="h-4 w-px bg-gray-300"></div>
               <div className="flex bg-white rounded-lg border border-gray-200 p-0.5 shadow-sm">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-1 rounded ${viewMode === 'grid' ? 'text-[#131b0d] bg-gray-100' : 'text-gray-400 hover:text-[#131b0d] hover:bg-gray-50'}`}
+                  className={`p-1 rounded transition-colors ${
+                    viewMode === 'grid' 
+                      ? 'text-[#131b0d] bg-gray-100' 
+                      : 'text-gray-400 hover:text-[#131b0d] hover:bg-gray-50'
+                  }`}
                 >
-                  <span className="material-symbols-outlined text-[20px] block">grid_view</span>
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-1 rounded ${viewMode === 'list' ? 'text-[#131b0d] bg-gray-100' : 'text-gray-400 hover:text-[#131b0d] hover:bg-gray-50'}`}
+                  className={`p-1 rounded transition-colors ${
+                    viewMode === 'list' 
+                      ? 'text-[#131b0d] bg-gray-100' 
+                      : 'text-gray-400 hover:text-[#131b0d] hover:bg-gray-50'
+                  }`}
                 >
-                  <span className="material-symbols-outlined text-[20px] block">view_list</span>
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" />
+                  </svg>
                 </button>
               </div>
             </div>
           </div>
-      </div>
+        </div>
 
         <div className="flex-1 overflow-y-auto px-8 pb-10">
           {/* Today */}
@@ -350,14 +283,15 @@ export default function DocumentsPage() {
                   />
                 ))}
               </div>
-            </div>
+      </div>
           )}
 
           {/* Empty State */}
           {filteredDocuments.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20">
-              <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">description</span>
-              <p className="text-gray-500 text-lg font-medium mb-2">No documents found</p>
+              <h3 className="text-2xl font-bold text-gray-300 mb-2">
+                No documents found
+              </h3>
               <p className="text-gray-400 text-sm mb-6">
                 {searchQuery ? 'Try adjusting your search' : 'Create your first document to get started'}
               </p>
@@ -366,7 +300,9 @@ export default function DocumentsPage() {
                   onClick={handleNewDoc}
                   className="flex items-center gap-2 rounded-lg h-10 px-5 bg-primary text-[#131b0d] hover:bg-[#63d80e] transition-colors text-sm font-bold shadow-sm"
                 >
-                  <span className="material-symbols-outlined text-[20px]">add</span>
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+                  </svg>
                   <span>New Doc</span>
                 </button>
               )}
