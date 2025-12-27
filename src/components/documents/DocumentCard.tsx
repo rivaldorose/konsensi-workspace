@@ -173,13 +173,13 @@ export default function DocumentCard({ document: doc, onOpen, onShare, onFavorit
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={() => onOpen?.(document.id)}
+            onClick={() => onOpen?.(doc.id)}
             className="text-xs font-bold bg-primary/10 text-green-800 px-3 py-1.5 rounded-md hover:bg-primary/20 transition-colors"
           >
             Open
           </button>
           <button
-            onClick={() => onShare?.(document.id)}
+            onClick={() => onShare?.(doc.id)}
             className="p-1.5 text-gray-400 hover:text-gray-700 rounded-md hover:bg-gray-100 transition-colors"
           >
             <span className="material-symbols-outlined text-[18px]">share</span>
