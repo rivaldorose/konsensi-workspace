@@ -501,9 +501,116 @@ export default function EditAppPage({ params }: { params: { id: string } }) {
               </div>
             )}
 
-            {(activeTab === 'team' || activeTab === 'metrics' || activeTab === 'notes') && (
-              <div className="text-center py-12 text-gray-400">
-                <p>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} tab coming soon...</p>
+            {activeTab === 'team' && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-[#131b0d] dark:text-white">Team</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#6e9a4c] dark:text-[#a3c988] uppercase mb-2">Product Owner</label>
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-white dark:bg-[#2a381e] border border-[#dae7cf] dark:border-[#3a4d2a]">
+                      <div className="w-8 h-8 rounded-full bg-cover bg-center" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuD6udaZYXCqaj230lhsG-R1AnBZZcW5blsFsSffiqXMjKrAyJieeOKg4f-gExYxf2hUKnOuUbsVs8s_qWoZBe7SwPd7dQ_jLvCyKvUChp9DtUnFsuFXYI-MyCx0YASOKxifiWotBy_m8Nk3LZWcnEWwhWFJ5TqSCXOJefS2_XuY90C8YyIyPhqz97z_mjqZpOM_bp73EzNvIB8FT1d4uBZZW1dth23Ng8SEb8GUJJu_RkW3HKp8jibMZ8r6vodVQpGn2UXA3uTc_iFt")' }}></div>
+                      <span className="text-sm font-medium text-[#131b0d] dark:text-white">Sarah Jenkins</span>
+                      <svg className="ml-auto w-5 h-5 text-[#6e9a4c] cursor-pointer" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-[#6e9a4c] dark:text-[#a3c988] uppercase mb-2">Dev Team</label>
+                    <div className="flex flex-wrap gap-2">
+                      <div className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white dark:bg-[#2a381e] border border-[#dae7cf] dark:border-[#3a4d2a]">
+                        <div className="w-6 h-6 rounded-full bg-cover bg-center" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDp8EpHbvM8e-zpbdcq36uQV3a6fRrh4t-cM5IvuYiDIrfAINHEMzY_pYBLtmET0b2_eRz0AQEni8Hf2QAnPBZxGU8DFArQQIZBuNHqUoh-6sNJJjP6eUxOXXjXg-YylFQWOKUZstvhBgYDfQ01pv2iI3PzNy5yluu4q7YFD2xd_3mWNjbVMmPOkKnqunXyXjULp6dzOG12CM3UUAvXYTWCZVVaAKRAWhbI7FxrDCrliDC72lHGOrrykbXat5_hkgSRhOUhDWMs5i2e")' }}></div>
+                        <span className="text-xs font-medium text-[#131b0d] dark:text-white">Mark</span>
+                        <svg className="w-3 h-3 text-[#6e9a4c] cursor-pointer" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
+                        </svg>
+                      </div>
+                      <div className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-white dark:bg-[#2a381e] border border-[#dae7cf] dark:border-[#3a4d2a]">
+                        <div className="w-6 h-6 rounded-full bg-cover bg-center" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuCOUMn4B6f_DdEjuP_ak8etcJQRehu0UI6EPP0SeUQD8nJPolG6EjsoUcYqnBuPX6QgYJVbiuIhYULXVVW5DMNGhqZ9gtRZAD0EN9U2LQSShE7Xn-Lg8PpQZrMQp-uTkSxl_UPjiv__vGdeRsmC1gsrBsKso0CLMxButpiNIiU0YPkyPEqRR6viG4TvP_-VtvCjTDtrZIY4pbqcBZn1RfN_XEKCi2vP42AQf6nz2evEDzn8g2u_jTLv5TGbTugtcOUBQ57Bas0ZhdAM")' }}></div>
+                        <span className="text-xs font-medium text-[#131b0d] dark:text-white">Elena</span>
+                        <svg className="w-3 h-3 text-[#6e9a4c] cursor-pointer" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" />
+                        </svg>
+                      </div>
+                      <button className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/20 hover:bg-primary/30 text-primary-dark transition-colors border border-dashed border-primary">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'metrics' && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-bold text-[#131b0d] dark:text-white">Current Metrics</h3>
+                  <span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded">Live Data</span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div className="p-4 rounded-lg bg-white dark:bg-[#2a381e] border border-[#dae7cf] dark:border-[#3a4d2a]">
+                    <p className="text-xs text-[#6e9a4c] dark:text-[#a3c988] font-semibold mb-1">Active Users</p>
+                    <p className="text-xl font-bold text-[#131b0d] dark:text-white">{formData.metrics.active_users || 0}</p>
+                    <div className="flex items-center mt-2 text-primary text-xs font-bold">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                      </svg>
+                      <span>+12%</span>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-white dark:bg-[#2a381e] border border-[#dae7cf] dark:border-[#3a4d2a]">
+                    <p className="text-xs text-[#6e9a4c] dark:text-[#a3c988] font-semibold mb-1">Growth</p>
+                    <p className="text-xl font-bold text-[#131b0d] dark:text-white">8.5%</p>
+                    <div className="flex items-center mt-2 text-primary text-xs font-bold">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                      </svg>
+                      <span>MoM</span>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-white dark:bg-[#2a381e] border border-[#dae7cf] dark:border-[#3a4d2a]">
+                    <p className="text-xs text-[#6e9a4c] dark:text-[#a3c988] font-semibold mb-1">Satisfaction</p>
+                    <p className="text-xl font-bold text-[#131b0d] dark:text-white">{formData.metrics.satisfaction || 0}%</p>
+                    <div className="flex items-center mt-2 text-[#6e9a4c] dark:text-[#a3c988] text-xs font-bold">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <span>CSAT</span>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-white dark:bg-[#2a381e] border border-[#dae7cf] dark:border-[#3a4d2a]">
+                    <p className="text-xs text-[#6e9a4c] dark:text-[#a3c988] font-semibold mb-1">Feedback</p>
+                    <p className="text-xl font-bold text-[#131b0d] dark:text-white">{formData.metrics.feedback_count || 0}</p>
+                    <div className="flex items-center mt-2 text-[#6e9a4c] dark:text-[#a3c988] text-xs font-bold">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" />
+                      </svg>
+                      <span>Pending</span>
+                    </div>
+                  </div>
+                  <div className="p-4 rounded-lg bg-white dark:bg-[#2a381e] border border-[#dae7cf] dark:border-[#3a4d2a]">
+                    <p className="text-xs text-[#6e9a4c] dark:text-[#a3c988] font-semibold mb-1">Avg Rating</p>
+                    <p className="text-xl font-bold text-[#131b0d] dark:text-white">4.8</p>
+                    <div className="flex items-center mt-2 text-yellow-500 text-xs font-bold">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <span>Stars</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'notes' && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-[#131b0d] dark:text-white">Notes</h3>
+                <textarea
+                  className="w-full h-48 px-4 py-3 rounded-lg bg-white dark:bg-[#2a381e] border border-[#dae7cf] dark:border-[#3a4d2a] text-[#131b0d] dark:text-white focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-[#6e9a4c]/50 resize-none"
+                  placeholder="Add notes about this app..."
+                />
               </div>
             )}
           </form>
