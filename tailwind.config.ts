@@ -11,15 +11,28 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#B2FF78',
+          DEFAULT: '#b4ff7a',
+          dark: '#8bc34a',
           50: '#F5FFF0',
-          500: '#B2FF78',
+          500: '#b4ff7a',
           900: '#669944',
         },
         secondary: {
-          DEFAULT: '#2D5F4F',
-          500: '#2D5F4F',
+          DEFAULT: '#1A3D32',
+          light: '#2D5F4F',
+          500: '#1A3D32',
           900: '#09130F',
+        },
+        background: {
+          light: '#F8F9FA',
+          dark: '#18230f',
+        },
+        card: {
+          light: '#FFFFFF',
+        },
+        text: {
+          main: '#131d0c',
+          muted: '#6b7280',
         },
         grey: {
           50: '#F9FAFB',
@@ -34,6 +47,7 @@ const config: Config = {
         info: '#3B82F6',
       },
       fontFamily: {
+        display: ['Manrope', 'sans-serif'],
         montserrat: ['Montserrat', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
       },
@@ -48,4 +62,3 @@ const config: Config = {
 }
 
 export default config
-
