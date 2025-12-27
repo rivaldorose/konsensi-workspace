@@ -79,9 +79,9 @@ const formatTimeAgo = (dateString: string) => {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export default function DocumentCard({ document, onOpen, onShare, onFavorite }: DocumentCardProps) {
+export default function DocumentCard({ document: doc, onOpen, onShare, onFavorite }: DocumentCardProps) {
   const [showMenu, setShowMenu] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(document.status === 'favorite')
+  const [isFavorite, setIsFavorite] = useState(doc.status === 'favorite')
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -92,21 +92,21 @@ export default function DocumentCard({ document, onOpen, onShare, onFavorite }: 
     }
 
     if (showMenu) {
-      window.document.addEventListener('mousedown', handleClickOutside)
-      return () => window.document.removeEventListener('mousedown', handleClickOutside)
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [showMenu])
 
   const handleFavorite = () => {
     setIsFavorite(!isFavorite)
-    if (onFavorite) onFavorite(document.id)
+    if (onFavorite) onFavorite(doc.id)
   }
 
   return (
     <div className="group bg-white rounded-xl border border-[#ecf3e7] p-4 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative flex flex-col h-[200px]">
-      <div className="flex justify-between items-start mb-3">
-        <div className={`size-10 rounded-lg ${getIconColor(document.type)} flex items-center justify-center`}>
-          <span className="material-symbols-outlined">{getIconType(document.type)}</span>
+        <div className="flex justify-between items-start mb-3">
+        <div className={`size-10 rounded-lg ${getIconColor(doc.type)} flex items-center justify-center`}>
+          <span className="material-symbols-outlined">{getIconType(doc.type)}</span>
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -125,23 +125,23 @@ export default function DocumentCard({ document, onOpen, onShare, onFavorite }: 
       </div>
 
       <h4 className="font-bold text-[#131b0d] text-lg leading-tight mb-1 truncate">
-        {document.title}
+        {doc.title}
       </h4>
 
       <div className="flex items-center gap-2 mb-3">
-        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wide ${getFolderColor(document.folder)}`}>
-          {document.folder}
+        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wide ${getFolderColor(doc.folder)}`}>
+          {doc.folder}
         </span>
         <span className="text-xs text-gray-400 truncate">
-          Edited {formatTimeAgo(document.last_edited)}
+          Edited {formatTimeAgo(doc.last_edited)}
         </span>
       </div>
 
       <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-50">
         <div className="flex items-center gap-2">
-          {document.collaborators && document.collaborators.length > 0 && (
+          {doc.collaborators && doc.collaborators.length > 0 && (
             <div className="flex -space-x-2">
-              {document.collaborators.slice(0, 2).map((collab, idx) => (
+              {doc.collaborators.slice(0, 2).map((collab, idx) => (
                 <div
                   key={collab.id || idx}
                   className="size-6 rounded-full ring-2 ring-white bg-cover bg-center bg-gray-200"
@@ -158,13 +158,13 @@ export default function DocumentCard({ document, onOpen, onShare, onFavorite }: 
               ))}
             </div>
           )}
-          {document.comment_count !== undefined && document.comment_count > 0 && (
+          {doc.comment_count !== undefined && doc.comment_count > 0 && (
             <div className="flex items-center text-gray-400 text-xs gap-0.5">
               <span className="material-symbols-outlined text-[14px]">chat_bubble</span>
-              <span>{document.comment_count}</span>
+              <span>{doc.comment_count}</span>
             </div>
           )}
-          {document.view_count !== undefined && (
+          {doc.view_count !== undefined && (
             <div className="flex items-center text-gray-400 text-xs gap-0.5">
               <span className="material-symbols-outlined text-[14px]">visibility</span>
             </div>
