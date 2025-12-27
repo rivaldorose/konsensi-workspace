@@ -88,7 +88,7 @@ export default function DocumentsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] overflow-hidden" style={{ marginTop: '-4rem' }}>
+      <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
         <div className="flex-1 flex items-center justify-center">
           <div className="animate-pulse text-gray-400">Loading documents...</div>
         </div>
@@ -97,7 +97,7 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden" style={{ marginTop: '-4rem' }}>
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       {/* Sidebar */}
       <DocsSidebar
         recentDocs={documents}
