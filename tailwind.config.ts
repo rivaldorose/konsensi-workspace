@@ -11,10 +11,10 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#5abd0f',
-          dark: '#8bc34a',
+          DEFAULT: '#65da0b',
+          dark: '#4da808',
           50: '#F5FFF0',
-          500: '#5abd0f',
+          500: '#65da0b',
           900: '#669944',
         },
         secondary: {
@@ -24,7 +24,7 @@ const config: Config = {
           900: '#09130F',
         },
         background: {
-          light: '#f7f8f6',
+          light: '#f7f8f5',
           dark: '#182210',
         },
         dark: {
@@ -32,6 +32,9 @@ const config: Config = {
         },
         nav: {
           bg: '#18230f',
+        },
+        konsensi: {
+          dark: '#131c0d',
         },
         surface: {
           light: '#ffffff',
@@ -46,7 +49,8 @@ const config: Config = {
           dark: '#3a4d2e',
         },
         card: {
-          light: '#FFFFFF',
+          light: '#ffffff',
+          dark: '#1f2b18',
         },
         grey: {
           50: '#F9FAFB',
@@ -66,7 +70,7 @@ const config: Config = {
         montserrat: ['Montserrat', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
       },
-            borderRadius: {
+      borderRadius: {
         lg: '12px',
         md: '8px',
         sm: '4px',
