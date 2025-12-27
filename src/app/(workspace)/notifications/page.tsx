@@ -1,6 +1,5 @@
 'use client'
 
-import { NotificationsNav } from '@/components/layout/NotificationsNav'
 import { useState } from 'react'
 
 const notifications = {
@@ -100,9 +99,7 @@ export default function NotificationsPage() {
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   return (
-    <div className="bg-background-light dark:bg-background-dark text-konsensi-dark dark:text-gray-100 font-display min-h-screen flex flex-col relative overflow-x-hidden">
-      <NotificationsNav />
-      <main className="flex-grow w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full max-w-5xl mx-auto flex flex-col gap-8 px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
@@ -298,7 +295,6 @@ export default function NotificationsPage() {
             </button>
           </div>
         </div>
-      </main>
 
       {/* Settings Modal */}
       {settingsOpen && (
