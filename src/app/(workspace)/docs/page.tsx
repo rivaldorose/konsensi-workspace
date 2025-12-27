@@ -84,7 +84,7 @@ export default function DocumentsPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] overflow-hidden -mt-16">
+    <div className="flex h-[calc(100vh-4rem)] overflow-hidden" style={{ marginTop: '-4rem' }}>
       {/* Sidebar */}
       <aside className="w-[240px] flex-shrink-0 bg-white border-r border-[#ecf3e7] flex flex-col h-full hidden md:flex overflow-y-auto">
         <div className="flex-1 px-3 py-6 space-y-8">
