@@ -1,6 +1,5 @@
 'use client'
 
-import { PartnersNav } from '@/components/layout/PartnersNav'
 import Link from 'next/link'
 
 const activePartners = [
@@ -118,9 +117,7 @@ const toContact = [
 
 export default function PartnersPage() {
   return (
-    <div className="bg-background-light dark:bg-background-dark text-[#131d0c] dark:text-white font-display antialiased flex flex-col min-h-screen overflow-x-hidden">
-      <PartnersNav />
-      <main className="flex-1 flex flex-col w-full max-w-[1400px] mx-auto px-4 md:px-8 py-8">
+    <div className="w-full max-w-[1400px] mx-auto flex flex-col gap-8 px-4 md:px-8 py-8">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
           <div className="flex flex-col gap-1">
@@ -396,8 +393,7 @@ export default function PartnersPage() {
               ))}
             </div>
           </div>
-        </div>
-      </main>
+      </div>
     </div>
   )
 }

@@ -1,6 +1,5 @@
 'use client'
 
-import { ContractsNav } from '@/components/layout/ContractsNav'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -92,10 +91,7 @@ export default function ContractsPage() {
   }
 
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display antialiased text-[#131b0d] dark:text-gray-100 min-h-screen flex flex-col">
-      <ContractsNav />
-      <main className="flex-1 flex justify-center w-full px-4 sm:px-6 lg:px-8 py-8">
-        <div className="w-full max-w-7xl flex flex-col gap-6">
+    <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 px-4 sm:px-6 lg:px-8 py-8">
           {/* Page Heading */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -357,8 +353,6 @@ export default function ContractsPage() {
               </div>
             </div>
           </div>
-        </div>
-      </main>
     </div>
   )
 }

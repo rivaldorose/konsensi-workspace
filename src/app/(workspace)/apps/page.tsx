@@ -1,6 +1,5 @@
 'use client'
 
-import { AppsNav } from '@/components/layout/AppsNav'
 import Link from 'next/link'
 
 const apps = [
@@ -94,10 +93,7 @@ const apps = [
 
 export default function AppsPage() {
   return (
-    <div className="bg-background-light dark:bg-background-dark min-h-screen">
-      <AppsNav />
-      <main className="flex-1 w-full flex justify-center py-8 px-4 md:px-10">
-        <div className="flex flex-col max-w-7xl flex-1 w-full gap-8">
+    <div className="w-full max-w-7xl mx-auto flex flex-col gap-8 py-8 px-4 md:px-10">
           {/* Page Header */}
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -313,8 +309,6 @@ export default function AppsPage() {
               </button>
             </div>
           </div>
-        </div>
-      </main>
     </div>
   )
 }

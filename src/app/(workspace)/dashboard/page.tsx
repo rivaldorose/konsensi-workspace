@@ -1,9 +1,8 @@
-import { DashboardLayout } from '@/components/layout/DashboardLayout'
 import { Card } from '@/components/ui/card'
 
 export default function DashboardPage() {
   return (
-    <DashboardLayout>
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-8">
       {/* Welcome Section */}
       <section className="flex flex-wrap items-center justify-between gap-4 mb-8">
         <div>
@@ -338,6 +337,6 @@ export default function DashboardPage() {
           </div>
         </section>
       </div>
-    </DashboardLayout>
+    </div>
   )
 }
