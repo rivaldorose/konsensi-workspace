@@ -97,3 +97,5 @@ export interface Goal {
   updated_at: string
 }
 
+export * from './marketing'
+
