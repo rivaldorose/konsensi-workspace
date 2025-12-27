@@ -30,6 +30,9 @@ const config: Config = {
         dark: {
           nav: '#131d0c',
         },
+        nav: {
+          bg: '#18230f',
+        },
         surface: {
           light: '#ffffff',
           dark: '#222f18',
@@ -59,16 +62,22 @@ const config: Config = {
       },
       fontFamily: {
         display: ['Manrope', 'sans-serif'],
+        body: ['Noto Sans', 'sans-serif'],
         montserrat: ['Montserrat', 'sans-serif'],
         lato: ['Lato', 'sans-serif'],
       },
-      borderRadius: {
+            borderRadius: {
         lg: '12px',
         md: '8px',
         sm: '4px',
         DEFAULT: '0.25rem',
         xl: '0.75rem',
+        '2xl': '1rem',
         full: '9999px',
+      },
+      boxShadow: {
+        card: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+        'card-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
       },
     },
   },
