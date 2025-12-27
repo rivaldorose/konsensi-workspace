@@ -14,6 +14,7 @@ export default function DocumentsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<'all' | 'recent' | 'shared' | 'favorites'>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [selectedFolder, setSelectedFolder] = useState('all')
 
   // Filter documents
   const filteredDocuments = useMemo(() => {
@@ -26,9 +27,19 @@ export default function DocumentsPage() {
       )
     }
 
-    // Filter by status
-    if (activeFilter !== 'all') {
-      filtered = filtered.filter(doc => doc.status === activeFilter)
+    // Filter by tab
+    if (activeFilter === 'favorites') {
+      filtered = filtered.filter(doc => doc.status === 'favorite')
+    } else if (activeFilter === 'recent') {
+      // Show recent documents (last 7 days)
+      filtered = filtered.filter(doc => {
+        const docDate = parseISO(doc.last_edited)
+        const now = new Date()
+        const diffDays = Math.floor((now.getTime() - docDate.getTime()) / (1000 * 60 * 60 * 24))
+        return diffDays <= 7
+      })
+    } else if (activeFilter === 'shared') {
+      filtered = filtered.filter(doc => doc.status === 'shared' || (doc.collaborators && doc.collaborators.length > 0))
     }
 
     return filtered
@@ -76,9 +87,11 @@ export default function DocumentsPage() {
 
   if (isLoading) {
     return (
-      <main className="flex-1 flex flex-col w-full max-w-[1400px] mx-auto px-4 md:px-8 py-8">
-        <div className="animate-pulse">Loading...</div>
-      </main>
+      <div className="flex h-[calc(100vh-4rem)] overflow-hidden" style={{ marginTop: '-4rem' }}>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-pulse text-gray-400">Loading documents...</div>
+        </div>
+      </div>
     )
   }
 
@@ -116,13 +129,13 @@ export default function DocumentsPage() {
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Recent</span>
             </div>
             <div className="space-y-1">
-              {filteredDocuments.slice(0, 3).map((doc) => (
+              {documents.slice(0, 3).map((doc) => (
                 <a
                   key={doc.id}
                   className="flex items-center gap-3 rounded-lg px-3 py-2 text-[#131b0d] hover:bg-[#f7f8f6] group transition-colors cursor-pointer"
                   onClick={() => handleOpen(doc.id)}
                 >
-                  <span className="material-symbols-outlined text-[20px] text-gray-400 group-hover:text-primary">schedule</span>
+                  <span className="material-symbols-outlined text-[20px] text-gray-400 group-hover:text-primary">description</span>
                   <span className="text-sm font-medium truncate">{doc.title}</span>
                 </a>
               ))}
@@ -136,11 +149,17 @@ export default function DocumentsPage() {
             </div>
             <div className="space-y-1">
               <a
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${activeFilter === 'all' ? 'bg-primary/10 text-[#131b0d] border border-primary/20 font-medium' : 'text-[#131b0d] hover:bg-[#f7f8f6]'} transition-colors cursor-pointer`}
-                onClick={() => setActiveFilter('all')}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
+                  selectedFolder === 'all' 
+                    ? 'bg-primary/10 text-[#131b0d] border border-primary/20 font-medium' 
+                    : 'text-[#131b0d] hover:bg-[#f7f8f6]'
+                } transition-colors cursor-pointer`}
+                onClick={() => setSelectedFolder('all')}
               >
-                <span className={`material-symbols-outlined text-[20px] ${activeFilter === 'all' ? 'text-green-700' : 'text-gray-400'}`}>
-                  {activeFilter === 'all' ? 'folder_open' : 'folder'}
+                <span className={`material-symbols-outlined text-[20px] ${
+                  selectedFolder === 'all' ? 'text-green-700' : 'text-gray-400'
+                }`}>
+                  {selectedFolder === 'all' ? 'folder_open' : 'folder'}
                 </span>
                 <span className="text-sm">All Docs</span>
               </a>
@@ -248,7 +267,7 @@ export default function DocumentsPage() {
                 <span className="text-sm text-gray-500">Sort by:</span>
                 <button className="flex items-center gap-1.5 text-sm font-medium text-[#131b0d] hover:bg-gray-200/50 px-2 py-1 rounded transition-colors">
                   Modified
-                  <span className="material-symbols-outlined text-[18px]">keyboard_arrow_down</span>
+                  <span className="material-symbols-outlined text-[18px]">expand_more</span>
                 </button>
               </div>
               <div className="h-4 w-px bg-gray-300"></div>
