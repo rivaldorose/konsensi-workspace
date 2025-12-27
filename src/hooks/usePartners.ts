@@ -1,0 +1,87 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { createClient } from '@/lib/supabase/client'
+import type { Partner } from '@/types'
+
+export function usePartners() {
+  return useQuery({
+    queryKey: ['partners'],
+    queryFn: async () => {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('partners')
+        .select('*, owner:users(*)')
+        .order('status', { ascending: false })
+        .order('updated_at', { ascending: false })
+      
+      if (error) throw error
+      return (data || []) as Partner[]
+    }
+  })
+}
+
+export function usePartnerStats(partners?: Partner[]) {
+  if (!partners) {
+    return {
+      active: 0,
+      inGesprek: 0,
+      toContact: 0,
+      total: 0
+    }
+  }
+  
+  return {
+    active: partners.filter(p => p.status === 'active').length,
+    inGesprek: partners.filter(p => p.status === 'in_gesprek').length,
+    toContact: partners.filter(p => p.status === 'to_contact').length,
+    total: partners.length
+  }
+}
+
+export function useCreatePartner() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async (partner: Partial<Partner>) => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      const { data, error } = await supabase
+        .from('partners')
+        .insert({
+          ...partner,
+          owner_id: user?.id
+        })
+        .select('*')
+        .single()
+      
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['partners'] })
+    }
+  })
+}
+
+export function useUpdatePartner() {
+  const queryClient = useQueryClient()
+  
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Partner> }) => {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('partners')
+        .update(updates)
+        .eq('id', id)
+        .select('*')
+        .single()
+      
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['partners'] })
+    }
+  })
+}
+
