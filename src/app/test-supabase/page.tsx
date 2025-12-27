@@ -6,31 +6,39 @@ import { createClient } from '@/lib/supabase/client'
 export default function TestSupabasePage() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
+  const [connectionInfo, setConnectionInfo] = useState<{
+    url: string
+    keyConfigured: boolean
+  } | null>(null)
 
   useEffect(() => {
     async function testConnection() {
       try {
         const supabase = createClient()
         
-        // Test de verbinding door een simpele query te doen
-        const { data, error } = await supabase.from('_prisma_migrations').select('*').limit(1)
+        // Test de verbinding door de auth status op te halen
+        const { data: { session }, error: authError } = await supabase.auth.getSession()
         
-        if (error) {
-          // Dit is normaal als de tabel niet bestaat, maar het betekent wel dat we verbonden zijn
-          if (error.code === 'PGRST116' || error.message.includes('does not exist')) {
-            setStatus('success')
-            setMessage('✅ Supabase verbinding werkt! (Tabel bestaat niet, maar connectie is OK)')
-          } else {
-            setStatus('error')
-            setMessage(`❌ Error: ${error.message}`)
-          }
+        if (authError) {
+          setStatus('error')
+          setMessage(`❌ Authenticatie Error: ${authError.message}`)
         } else {
           setStatus('success')
-          setMessage('✅ Supabase verbinding werkt perfect!')
+          setMessage('✅ Supabase verbinding werkt perfect! Client is geconfigureerd en verbonden.')
         }
+
+        // Toon configuratie info
+        setConnectionInfo({
+          url: process.env.NEXT_PUBLIC_SUPABASE_URL || 'Niet geconfigureerd',
+          keyConfigured: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        })
       } catch (err) {
         setStatus('error')
         setMessage(`❌ Fout: ${err instanceof Error ? err.message : 'Onbekende fout'}`)
+        setConnectionInfo({
+          url: 'Error',
+          keyConfigured: false
+        })
       }
     }
 
@@ -58,23 +66,40 @@ export default function TestSupabasePage() {
             </div>
           </div>
 
-          <div>
-            <p className="text-sm text-grey-600 mb-2">Configuratie:</p>
-            <div className="text-xs bg-grey-100 p-3 rounded-md font-mono">
-              <p>URL: {process.env.NEXT_PUBLIC_SUPABASE_URL ? '✅ Geconfigureerd' : '❌ Niet geconfigureerd'}</p>
-              <p>Key: {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '✅ Geconfigureerd' : '❌ Niet geconfigureerd'}</p>
+          {connectionInfo && (
+            <div>
+              <p className="text-sm text-grey-600 mb-2">Configuratie:</p>
+              <div className="text-xs bg-grey-100 p-3 rounded-md space-y-1">
+                <p>
+                  <span className="font-semibold">URL:</span>{' '}
+                  {connectionInfo.url !== 'Error' ? (
+                    <span className="text-success">✅ {connectionInfo.url.substring(0, 30)}...</span>
+                  ) : (
+                    <span className="text-error">❌ Niet geconfigureerd</span>
+                  )}
+                </p>
+                <p>
+                  <span className="font-semibold">API Key:</span>{' '}
+                  {connectionInfo.keyConfigured ? (
+                    <span className="text-success">✅ Geconfigureerd</span>
+                  ) : (
+                    <span className="text-error">❌ Niet geconfigureerd</span>
+                  )}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
 
-          <a 
-            href="/" 
-            className="block text-center text-primary-500 hover:text-primary-900 underline"
-          >
-            Terug naar Home
-          </a>
+          <div className="pt-4 border-t border-grey-200">
+            <a 
+              href="/" 
+              className="block text-center text-primary-500 hover:text-primary-900 underline"
+            >
+              Terug naar Home
+            </a>
+          </div>
         </div>
       </div>
     </div>
   )
 }
-
