@@ -62,8 +62,7 @@ export default function DocumentsPage() {
   }
 
   const handleShare = (id: string) => {
-    // TODO: Implement share functionality
-    console.log('Share document:', id)
+    router.push(`/docs/${id}/share`)
   }
 
   const handleFavorite = (id: string) => {
