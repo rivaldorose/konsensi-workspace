@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useMarketingPosts } from '@/hooks/useMarketing'
 import type { MarketingPost } from '@/types/marketing'
 import MarketingCalendar from '@/components/marketing/MarketingCalendar'
@@ -8,6 +9,7 @@ import PostPreviewPanel from '@/components/marketing/PostPreviewPanel'
 import { format, startOfMonth } from 'date-fns'
 
 export default function MarketingPage() {
+  const router = useRouter()
   const { data: posts = [], isLoading } = useMarketingPosts()
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [currentMonth, setCurrentMonth] = useState(startOfMonth(new Date()))
@@ -44,10 +46,6 @@ export default function MarketingPage() {
     console.log('Delete post:', id)
   }
 
-  const handleCreatePost = () => {
-    // TODO: Navigate to create post page
-    console.log('Create post')
-  }
 
   const handlePrevMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))
@@ -100,7 +98,7 @@ export default function MarketingPage() {
                 <span>Filter</span>
               </button>
               <button
-                onClick={handleCreatePost}
+                onClick={() => router.push('/marketing/new')}
                 className="flex items-center justify-center gap-2 h-10 px-5 rounded-lg bg-primary text-[#101b0d] text-sm font-bold shadow-sm shadow-primary/30 hover:bg-[#2bc40e] transition-colors"
               >
                 <span className="material-symbols-outlined text-[20px]">add</span>
