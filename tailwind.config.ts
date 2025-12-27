@@ -24,15 +24,26 @@ const config: Config = {
           900: '#09130F',
         },
         background: {
-          light: '#F8F9FA',
+          light: '#f7f8f5',
           dark: '#18230f',
         },
-        card: {
-          light: '#FFFFFF',
+        dark: {
+          nav: '#131d0c',
+        },
+        surface: {
+          light: '#ffffff',
+          dark: '#222f18',
         },
         text: {
           main: '#131d0c',
-          muted: '#6b7280',
+          subtle: '#5c6b53',
+        },
+        border: {
+          color: '#ecf4e6',
+          dark: '#3a4d2e',
+        },
+        card: {
+          light: '#FFFFFF',
         },
         grey: {
           50: '#F9FAFB',
@@ -55,6 +66,9 @@ const config: Config = {
         lg: '12px',
         md: '8px',
         sm: '4px',
+        DEFAULT: '0.25rem',
+        xl: '0.75rem',
+        full: '9999px',
       },
     },
   },
