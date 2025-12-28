@@ -68,7 +68,7 @@
   
   /* Custom scrollbar for modals */
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -76,11 +76,19 @@
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #d9e9ce;
-    border-radius: 20px;
+    background-color: #dae7cf;
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #71ec13;
   }
   
   .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #4b5563;
+    background-color: #3f5232;
+  }
+  
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #71ec13;
   }
 }
