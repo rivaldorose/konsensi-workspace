@@ -1,15 +1,73 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
 export function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [moreOpen, setMoreOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [user, setUser] = useState<{ email?: string; full_name?: string; avatar_url?: string } | null>(null)
+  const profileRef = useRef<HTMLDivElement>(null)
 
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/')
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUser = async () => {
+      const supabase = createClient()
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      
+      if (authUser) {
+        // Fetch user profile
+        const { data: profile } = await supabase
+          .from('users')
+          .select('full_name, avatar_url, email')
+          .eq('id', authUser.id)
+          .single()
+        
+        if (profile) {
+          setUser({
+            email: profile.email || authUser.email,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url,
+          })
+        } else {
+          setUser({
+            email: authUser.email,
+          })
+        }
+      }
+    }
+    
+    fetchUser()
+  }, [])
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false)
+      }
+    }
+
+    if (profileOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [profileOpen])
+
+  const handleLogout = async () => {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+    router.refresh()
+  }
 
   const mainNavItems = [
     { label: 'Dashboard', href: '/dashboard' },
@@ -25,6 +83,20 @@ export function Navbar() {
     { label: 'Marketing', href: '/marketing' },
     { label: 'Contracts', href: '/contracts' },
   ]
+
+  const getInitials = () => {
+    if (user?.full_name) {
+      const names = user.full_name.split(' ')
+      if (names.length >= 2) {
+        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase()
+      }
+      return user.full_name.substring(0, 2).toUpperCase()
+    }
+    if (user?.email) {
+      return user.email.substring(0, 2).toUpperCase()
+    }
+    return 'U'
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#2D5F4F] border-b border-[#3a5f4f]">
@@ -136,15 +208,82 @@ export function Navbar() {
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </Link>
 
-          {/* Profile */}
-          <Link 
-            href="/settings"
-            className="flex items-center gap-2 text-white hover:text-primary transition-colors"
-          >
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-[#131d0c] font-bold text-sm">
-              A
-            </div>
-          </Link>
+          {/* Profile Dropdown */}
+          <div className="relative" ref={profileRef}>
+            <button
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="flex items-center gap-2 text-white hover:text-primary transition-colors"
+            >
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-[#131d0c] font-bold text-sm">
+                {user?.avatar_url ? (
+                  <img 
+                    src={user.avatar_url} 
+                    alt={user.full_name || 'User'} 
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  getInitials()
+                )}
+              </div>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+
+            {profileOpen && (
+              <div className="absolute top-full right-0 mt-2 w-56 bg-white dark:bg-[#1f2b15] rounded-lg shadow-lg border border-gray-200 dark:border-white/10 py-2 z-20">
+                {/* User Info */}
+                {user && (
+                  <div className="px-4 py-3 border-b border-gray-200 dark:border-white/10">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {user.full_name || 'User'}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                      {user.email}
+                    </p>
+                  </div>
+                )}
+
+                {/* Menu Items */}
+                <div className="py-1">
+                  <Link
+                    href="/settings"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Settings
+                  </Link>
+                  <Link
+                    href="/settings/profile"
+                    onClick={() => setProfileOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Profile
+                  </Link>
+                </div>
+
+                {/* Logout */}
+                <div className="border-t border-gray-200 dark:border-white/10 pt-1 mt-1">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Sign out
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -166,6 +305,18 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
+            {/* Mobile Logout */}
+            <div className="pt-3 border-t border-[#3a5f4f] mt-2">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-sm font-medium text-red-400 hover:text-red-300 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Sign out
+              </button>
+            </div>
           </nav>
         </div>
       )}

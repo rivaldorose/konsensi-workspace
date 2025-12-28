@@ -1,13 +1,48 @@
--- Konsensi Workspace Database Schema
+-- Konsensi Workspace Database Schema (Idempotent Version)
+-- This migration can be run multiple times safely
 -- Run this in your Supabase SQL Editor
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- ============================================
+-- Helper function to safely drop policies
+-- ============================================
+CREATE OR REPLACE FUNCTION drop_policy_if_exists(full_table_name text, policy_name text)
+RETURNS void AS $$
+DECLARE
+  schema_part text;
+  table_part text;
+BEGIN
+  -- Parse schema.table into parts
+  IF position('.' in full_table_name) > 0 THEN
+    schema_part := split_part(full_table_name, '.', 1);
+    table_part := split_part(full_table_name, '.', 2);
+  ELSE
+    schema_part := 'public';
+    table_part := full_table_name;
+  END IF;
+  
+  -- Only drop policy if table exists
+  IF EXISTS (
+    SELECT 1 
+    FROM pg_tables 
+    WHERE schemaname = schema_part 
+    AND tablename = table_part
+  ) THEN
+    BEGIN
+      EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I', policy_name, schema_part, table_part);
+    EXCEPTION
+      WHEN OTHERS THEN NULL;
+    END;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================
 -- USERS TABLE (extends Supabase auth.users)
 -- ============================================
-CREATE TABLE public.users (
+CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT UNIQUE NOT NULL,
   full_name TEXT NOT NULL,
@@ -19,6 +54,11 @@ CREATE TABLE public.users (
 
 -- Enable Row Level Security
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+SELECT drop_policy_if_exists('public.users', 'Users can view all team members');
+SELECT drop_policy_if_exists('public.users', 'Users can update own profile');
+SELECT drop_policy_if_exists('public.users', 'Only admins can insert users');
 
 -- Users policies
 CREATE POLICY "Users can view all team members"
@@ -41,7 +81,7 @@ CREATE POLICY "Only admins can insert users"
 -- ============================================
 -- APPS TABLE
 -- ============================================
-CREATE TABLE public.apps (
+CREATE TABLE IF NOT EXISTS public.apps (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   description TEXT,
@@ -62,6 +102,12 @@ CREATE TABLE public.apps (
 
 -- Enable Row Level Security
 ALTER TABLE public.apps ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+SELECT drop_policy_if_exists('public.apps', 'Team members can view all apps');
+SELECT drop_policy_if_exists('public.apps', 'Team members can create apps');
+SELECT drop_policy_if_exists('public.apps', 'Owners and team members can update apps');
+SELECT drop_policy_if_exists('public.apps', 'Owners and admins can delete apps');
 
 -- Apps policies
 CREATE POLICY "Team members can view all apps"
@@ -90,7 +136,7 @@ CREATE POLICY "Owners and admins can delete apps"
 -- ============================================
 -- PARTNERS TABLE
 -- ============================================
-CREATE TABLE public.partners (
+CREATE TABLE IF NOT EXISTS public.partners (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   type TEXT NOT NULL,
@@ -113,6 +159,12 @@ CREATE TABLE public.partners (
 
 -- Enable Row Level Security
 ALTER TABLE public.partners ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+SELECT drop_policy_if_exists('public.partners', 'Team members can view all partners');
+SELECT drop_policy_if_exists('public.partners', 'Team members can create partners');
+SELECT drop_policy_if_exists('public.partners', 'Owners and team members can update partners');
+SELECT drop_policy_if_exists('public.partners', 'Owners and admins can delete partners');
 
 -- Partners policies
 CREATE POLICY "Team members can view all partners"
@@ -140,7 +192,7 @@ CREATE POLICY "Owners and admins can delete partners"
 -- ============================================
 -- EVENTS TABLE
 -- ============================================
-CREATE TABLE public.events (
+CREATE TABLE IF NOT EXISTS public.events (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   description TEXT,
@@ -162,6 +214,12 @@ CREATE TABLE public.events (
 
 -- Enable Row Level Security
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+SELECT drop_policy_if_exists('public.events', 'Team members can view all events');
+SELECT drop_policy_if_exists('public.events', 'Team members can create events');
+SELECT drop_policy_if_exists('public.events', 'Owners and team members can update events');
+SELECT drop_policy_if_exists('public.events', 'Owners and admins can delete events');
 
 -- Events policies
 CREATE POLICY "Team members can view all events"
@@ -190,7 +248,7 @@ CREATE POLICY "Owners and admins can delete events"
 -- ============================================
 -- GOALS TABLE
 -- ============================================
-CREATE TABLE public.goals (
+CREATE TABLE IF NOT EXISTS public.goals (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   objective TEXT NOT NULL,
@@ -209,6 +267,12 @@ CREATE TABLE public.goals (
 
 -- Enable Row Level Security
 ALTER TABLE public.goals ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+SELECT drop_policy_if_exists('public.goals', 'Team members can view all goals');
+SELECT drop_policy_if_exists('public.goals', 'Team members can create goals');
+SELECT drop_policy_if_exists('public.goals', 'Owners and team members can update goals');
+SELECT drop_policy_if_exists('public.goals', 'Owners and admins can delete goals');
 
 -- Goals policies
 CREATE POLICY "Team members can view all goals"
@@ -236,17 +300,17 @@ CREATE POLICY "Owners and admins can delete goals"
 -- ============================================
 -- INDEXES for better performance
 -- ============================================
-CREATE INDEX idx_apps_owner_id ON public.apps(owner_id);
-CREATE INDEX idx_apps_status ON public.apps(status);
-CREATE INDEX idx_partners_owner_id ON public.partners(owner_id);
-CREATE INDEX idx_partners_status ON public.partners(status);
-CREATE INDEX idx_events_owner_id ON public.events(owner_id);
-CREATE INDEX idx_events_status ON public.events(status);
-CREATE INDEX idx_events_start_date ON public.events(start_date);
-CREATE INDEX idx_goals_owner_id ON public.goals(owner_id);
-CREATE INDEX idx_goals_status ON public.goals(status);
-CREATE INDEX idx_goals_event_id ON public.goals(event_id);
-CREATE INDEX idx_goals_quarter ON public.goals(quarter);
+CREATE INDEX IF NOT EXISTS idx_apps_owner_id ON public.apps(owner_id);
+CREATE INDEX IF NOT EXISTS idx_apps_status ON public.apps(status);
+CREATE INDEX IF NOT EXISTS idx_partners_owner_id ON public.partners(owner_id);
+CREATE INDEX IF NOT EXISTS idx_partners_status ON public.partners(status);
+CREATE INDEX IF NOT EXISTS idx_events_owner_id ON public.events(owner_id);
+CREATE INDEX IF NOT EXISTS idx_events_status ON public.events(status);
+CREATE INDEX IF NOT EXISTS idx_events_start_date ON public.events(start_date);
+CREATE INDEX IF NOT EXISTS idx_goals_owner_id ON public.goals(owner_id);
+CREATE INDEX IF NOT EXISTS idx_goals_status ON public.goals(status);
+CREATE INDEX IF NOT EXISTS idx_goals_event_id ON public.goals(event_id);
+CREATE INDEX IF NOT EXISTS idx_goals_quarter ON public.goals(quarter);
 
 -- ============================================
 -- FUNCTION to update updated_at timestamp
@@ -262,6 +326,12 @@ $$ LANGUAGE plpgsql;
 -- ============================================
 -- TRIGGERS to auto-update updated_at
 -- ============================================
+DROP TRIGGER IF EXISTS update_users_updated_at ON public.users;
+DROP TRIGGER IF EXISTS update_apps_updated_at ON public.apps;
+DROP TRIGGER IF EXISTS update_partners_updated_at ON public.partners;
+DROP TRIGGER IF EXISTS update_events_updated_at ON public.events;
+DROP TRIGGER IF EXISTS update_goals_updated_at ON public.goals;
+
 CREATE TRIGGER update_users_updated_at
   BEFORE UPDATE ON public.users
   FOR EACH ROW
@@ -299,7 +369,8 @@ BEGIN
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
     'member'
-  );
+  )
+  ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -307,6 +378,8 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ============================================
 -- TRIGGER to create user profile
 -- ============================================
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
@@ -315,6 +388,9 @@ CREATE TRIGGER on_auth_user_created
 -- ============================================
 -- VIEWS for easier queries
 -- ============================================
+DROP VIEW IF EXISTS apps_with_owner;
+DROP VIEW IF EXISTS events_with_owner;
+DROP VIEW IF EXISTS goals_with_details;
 
 -- View for apps with owner info
 CREATE VIEW apps_with_owner AS
@@ -352,3 +428,5 @@ ALTER VIEW apps_with_owner SET (security_invoker = true);
 ALTER VIEW events_with_owner SET (security_invoker = true);
 ALTER VIEW goals_with_details SET (security_invoker = true);
 
+-- Cleanup helper function (optional, can be dropped after migration)
+DROP FUNCTION IF EXISTS drop_policy_if_exists(text, text);

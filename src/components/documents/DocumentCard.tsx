@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useDownloadDocument } from '@/hooks/useDocuments'
 import type { Document } from '@/types/document'
 
 interface DocumentCardProps {
@@ -10,38 +11,81 @@ interface DocumentCardProps {
   onFavorite?: (id: string) => void
 }
 
-const getDocumentIcon = (type: Document['type']) => {
+// Get file icon based on file type (for file documents)
+const getFileIcon = (fileType?: string, documentMode?: string) => {
+  if (documentMode === 'file' && fileType) {
+    if (fileType.includes('pdf')) {
+      return (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+        </svg>
+      )
+    }
+    if (fileType.includes('word') || fileType.includes('document')) {
+      return (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+        </svg>
+      )
+    }
+    if (fileType.includes('sheet') || fileType.includes('excel')) {
+      return (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+        </svg>
+      )
+    }
+    if (fileType.includes('presentation') || fileType.includes('powerpoint')) {
+      return (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+        </svg>
+      )
+    }
+    if (fileType.includes('image')) {
+      return (
+        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" />
+        </svg>
+      )
+    }
+  }
+  
+  // Default document icon
+  return (
+    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+      <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+    </svg>
+  )
+}
+
+const getDocumentIcon = (type: Document['type'], documentMode?: string, fileType?: string) => {
+  // For file documents, use file-specific icon
+  if (documentMode === 'file') {
+    return getFileIcon(fileType, documentMode)
+  }
+  
+  // For text documents, use type-specific icon
   switch (type) {
-    case 'article':
+    case 'pdf':
       return (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
         </svg>
       )
-    case 'description':
+    case 'sheet':
       return (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
         </svg>
       )
-    case 'slideshow':
-      return (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM9 10l2 2 4-4" />
-        </svg>
-      )
-    case 'text_snippet':
+    case 'slide':
       return (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
         </svg>
       )
-    case 'gavel':
-      return (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
-        </svg>
-      )
+    case 'doc':
     default:
       return (
         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -51,24 +95,36 @@ const getDocumentIcon = (type: Document['type']) => {
   }
 }
 
-const getIconColor = (type: Document['type']) => {
+const getIconColor = (type: Document['type'], documentMode?: string) => {
+  if (documentMode === 'file') {
+    if (type === 'pdf') return 'bg-red-50 text-red-600'
+    if (type === 'sheet') return 'bg-green-50 text-green-600'
+    if (type === 'slide') return 'bg-orange-50 text-orange-600'
+    return 'bg-blue-50 text-blue-600'
+  }
+  
   switch (type) {
-    case 'article':
-      return 'bg-blue-50 text-blue-600'
-    case 'description':
-      return 'bg-purple-50 text-purple-600'
-    case 'slideshow':
+    case 'pdf':
+      return 'bg-red-50 text-red-600'
+    case 'sheet':
+      return 'bg-green-50 text-green-600'
+    case 'slide':
       return 'bg-orange-50 text-orange-600'
-    case 'text_snippet':
-      return 'bg-pink-50 text-pink-600'
-    case 'gavel':
-      return 'bg-indigo-50 text-indigo-600'
+    case 'doc':
     default:
-      return 'bg-gray-50 text-gray-600'
+      return 'bg-blue-50 text-blue-600'
   }
 }
 
-const getFolderColor = (folder: string) => {
+const formatFileSize = (bytes?: number) => {
+  if (!bytes) return ''
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+}
+
+const getFolderColor = (folder?: string | null) => {
+  if (!folder) return 'bg-gray-100 text-gray-600 border-gray-200'
   switch (folder.toLowerCase()) {
     case 'marketing briefs':
       return 'bg-green-50 text-green-700 border-green-100'
@@ -105,8 +161,9 @@ const formatTimeAgo = (dateString: string) => {
 
 export default function DocumentCard({ document: doc, onOpen, onShare, onFavorite }: DocumentCardProps) {
   const [showMenu, setShowMenu] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(doc.status === 'favorite')
+  const [isFavorite, setIsFavorite] = useState(doc.is_favorite || doc.status === 'favorite')
   const menuRef = useRef<HTMLDivElement>(null)
+  const downloadMutation = useDownloadDocument()
   
   // Update favorite state when doc.status changes
   useEffect(() => {
@@ -134,8 +191,8 @@ export default function DocumentCard({ document: doc, onOpen, onShare, onFavorit
   return (
     <div className="group bg-white rounded-xl border border-[#ecf3e7] p-4 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative flex flex-col h-[200px]">
       <div className="flex justify-between items-start mb-3">
-        <div className={`size-10 rounded-lg ${getIconColor(doc.type)} flex items-center justify-center`}>
-          {getDocumentIcon(doc.type)}
+        <div className={`size-10 rounded-lg ${getIconColor(doc.type, doc.document_mode)} flex items-center justify-center`}>
+          {getDocumentIcon(doc.type, doc.document_mode, doc.file_type)}
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -156,13 +213,23 @@ export default function DocumentCard({ document: doc, onOpen, onShare, onFavorit
       <h4 className="font-bold text-[#131b0d] text-lg leading-tight mb-1 truncate">
         {doc.title}
       </h4>
+      
+      {/* File info for file documents */}
+      {doc.document_mode === 'file' && (
+        <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+          {doc.file_name && <div className="truncate">{doc.file_name}</div>}
+          {doc.file_size && <div>{formatFileSize(doc.file_size)}</div>}
+        </div>
+      )}
 
       <div className="flex items-center gap-2 mb-3">
-        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wide ${getFolderColor(doc.folder)}`}>
-          {doc.folder}
-        </span>
+        {doc.folder && (
+          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wide ${getFolderColor(doc.folder)}`}>
+            {doc.folder}
+          </span>
+        )}
         <span className="text-xs text-gray-400 truncate">
-          Edited {formatTimeAgo(doc.last_edited)}
+          {doc.updated_at ? `Updated ${formatTimeAgo(doc.updated_at)}` : doc.created_at ? `Created ${formatTimeAgo(doc.created_at)}` : ''}
         </span>
       </div>
 
@@ -206,11 +273,28 @@ export default function DocumentCard({ document: doc, onOpen, onShare, onFavorit
         </div>
 
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Download button for file documents */}
+          {doc.document_mode === 'file' && doc.file_url && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                downloadMutation.mutate(doc)
+              }}
+              disabled={downloadMutation.isPending}
+              className="text-xs font-bold bg-blue-50 text-blue-700 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors disabled:opacity-50"
+              title="Download"
+            >
+              <svg className="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              {downloadMutation.isPending ? '...' : 'Download'}
+            </button>
+          )}
           <button
             onClick={() => onOpen?.(doc.id)}
             className="text-xs font-bold bg-primary/10 text-green-800 px-3 py-1.5 rounded-md hover:bg-primary/20 transition-colors"
           >
-            Open
+            {doc.document_mode === 'file' ? 'View' : 'Open'}
           </button>
           <button
             onClick={() => onShare?.(doc.id)}
@@ -286,12 +370,24 @@ export default function DocumentCard({ document: doc, onOpen, onShare, onFavorit
                     Duplicate
                   </button>
                   <div className="h-px bg-gray-100 my-1 mx-2"></div>
-                  <button className="w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded flex items-center gap-2">
-                    <svg className="w-4.5 h-4.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" />
-                    </svg>
-                    Download as PDF
-                  </button>
+                  {doc.document_mode === 'file' && doc.file_url ? (
+                    <button 
+                      onClick={() => downloadMutation.mutate(doc)}
+                      className="w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded flex items-center gap-2"
+                    >
+                      <svg className="w-4.5 h-4.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" />
+                      </svg>
+                      Download
+                    </button>
+                  ) : (
+                    <button className="w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded flex items-center gap-2">
+                      <svg className="w-4.5 h-4.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" />
+                      </svg>
+                      Download as PDF
+                    </button>
+                  )}
                   <button className="w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 rounded flex items-center gap-2">
                     <svg className="w-4.5 h-4.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
@@ -314,3 +410,4 @@ export default function DocumentCard({ document: doc, onOpen, onShare, onFavorit
     </div>
   )
 }
+

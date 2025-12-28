@@ -6,6 +6,7 @@ import { useDocuments } from '@/hooks/useDocuments'
 import type { Document } from '@/types/document'
 import DocumentCard from '@/components/documents/DocumentCard'
 import { DocsSidebar } from '@/components/documents/DocsSidebar'
+import { UploadDocumentModal } from '@/components/documents/UploadDocumentModal'
 import { format } from 'date-fns'
 
 export default function DocumentsPage() {
@@ -16,6 +17,7 @@ export default function DocumentsPage() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'recent' | 'shared' | 'favorites'>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedFolder, setSelectedFolder] = useState('all')
+  const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
   // Filter documents
   const filteredDocuments = useMemo(() => {
@@ -33,12 +35,12 @@ export default function DocumentsPage() {
 
     // Filter by tab
     if (activeFilter === 'favorites') {
-      filtered = filtered.filter(doc => doc.status === 'favorite')
+      filtered = filtered.filter(doc => doc.is_favorite || doc.status === 'favorite')
     } else if (activeFilter === 'recent') {
       // Show recent documents (last 7 days)
       const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000)
       filtered = filtered.filter(doc => {
-        const docDate = new Date(doc.last_edited).getTime()
+        const docDate = new Date(doc.updated_at || doc.created_at).getTime()
         return docDate >= sevenDaysAgo
       })
     } else if (activeFilter === 'shared') {
@@ -63,7 +65,7 @@ export default function DocumentsPage() {
     weekStart.setDate(weekStart.getDate() - 7)
 
     filteredDocuments.forEach(doc => {
-      const docDate = new Date(doc.last_edited)
+      const docDate = new Date(doc.updated_at || doc.created_at)
       if (docDate >= todayStart) {
         today.push(doc)
       } else if (docDate >= yesterdayStart) {
@@ -134,6 +136,15 @@ export default function DocumentsPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
+              <button
+                onClick={() => setUploadModalOpen(true)}
+                className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-bold shadow-sm"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <span>Upload Files</span>
+              </button>
               <button
                 onClick={handleNewDoc}
                 className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-primary text-[#131b0d] hover:bg-[#63d80e] transition-colors text-sm font-bold shadow-sm shadow-primary/20"
@@ -319,6 +330,14 @@ export default function DocumentsPage() {
           )}
         </div>
       </main>
+
+      {/* Upload Modal */}
+      {uploadModalOpen && (
+        <UploadDocumentModal
+          folders={[]}
+          onClose={() => setUploadModalOpen(false)}
+        />
+      )}
     </div>
   )
 }

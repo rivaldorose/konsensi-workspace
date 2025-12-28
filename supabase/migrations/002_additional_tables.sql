@@ -1,7 +1,45 @@
+-- Konsensi Workspace Additional Tables (Idempotent Version)
+-- This migration can be run multiple times safely
+-- Run this AFTER 001_initial_schema.sql
+
+-- ============================================
+-- Helper function to safely drop policies
+-- ============================================
+CREATE OR REPLACE FUNCTION drop_policy_if_exists(full_table_name text, policy_name text)
+RETURNS void AS $$
+DECLARE
+  schema_part text;
+  table_part text;
+BEGIN
+  -- Parse schema.table into parts
+  IF position('.' in full_table_name) > 0 THEN
+    schema_part := split_part(full_table_name, '.', 1);
+    table_part := split_part(full_table_name, '.', 2);
+  ELSE
+    schema_part := 'public';
+    table_part := full_table_name;
+  END IF;
+  
+  -- Only drop policy if table exists
+  IF EXISTS (
+    SELECT 1 
+    FROM pg_tables 
+    WHERE schemaname = schema_part 
+    AND tablename = table_part
+  ) THEN
+    BEGIN
+      EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I', policy_name, schema_part, table_part);
+    EXCEPTION
+      WHEN OTHERS THEN NULL;
+    END;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
 -- ============================================
 -- MARKETING POSTS TABLE
 -- ============================================
-CREATE TABLE public.marketing_posts (
+CREATE TABLE IF NOT EXISTS public.marketing_posts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   caption TEXT,
@@ -22,6 +60,12 @@ CREATE TABLE public.marketing_posts (
 
 -- Enable Row Level Security
 ALTER TABLE public.marketing_posts ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+SELECT drop_policy_if_exists('public.marketing_posts', 'Team members can view all marketing posts');
+SELECT drop_policy_if_exists('public.marketing_posts', 'Team members can create marketing posts');
+SELECT drop_policy_if_exists('public.marketing_posts', 'Authors and managers can update marketing posts');
+SELECT drop_policy_if_exists('public.marketing_posts', 'Authors and admins can delete marketing posts');
 
 -- Marketing posts policies
 CREATE POLICY "Team members can view all marketing posts"
@@ -47,9 +91,12 @@ CREATE POLICY "Authors and admins can delete marketing posts"
   );
 
 -- Indexes for marketing_posts
-CREATE INDEX idx_marketing_posts_author_id ON public.marketing_posts(author_id);
-CREATE INDEX idx_marketing_posts_status ON public.marketing_posts(status);
-CREATE INDEX idx_marketing_posts_scheduled_date ON public.marketing_posts(scheduled_date);
+CREATE INDEX IF NOT EXISTS idx_marketing_posts_author_id ON public.marketing_posts(author_id);
+CREATE INDEX IF NOT EXISTS idx_marketing_posts_status ON public.marketing_posts(status);
+CREATE INDEX IF NOT EXISTS idx_marketing_posts_scheduled_date ON public.marketing_posts(scheduled_date);
+
+-- Drop existing trigger
+DROP TRIGGER IF EXISTS update_marketing_posts_updated_at ON public.marketing_posts;
 
 -- Trigger for marketing_posts
 CREATE TRIGGER update_marketing_posts_updated_at
@@ -60,7 +107,7 @@ CREATE TRIGGER update_marketing_posts_updated_at
 -- ============================================
 -- DOCUMENTS TABLE
 -- ============================================
-CREATE TABLE public.documents (
+CREATE TABLE IF NOT EXISTS public.documents (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   content TEXT DEFAULT '',
@@ -75,7 +122,7 @@ CREATE TABLE public.documents (
 );
 
 -- Document collaborators (many-to-many)
-CREATE TABLE public.document_collaborators (
+CREATE TABLE IF NOT EXISTS public.document_collaborators (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   document_id UUID NOT NULL REFERENCES public.documents(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
@@ -87,6 +134,14 @@ CREATE TABLE public.document_collaborators (
 -- Enable Row Level Security
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.document_collaborators ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+SELECT drop_policy_if_exists('public.documents', 'Users can view accessible documents');
+SELECT drop_policy_if_exists('public.documents', 'Users can create documents');
+SELECT drop_policy_if_exists('public.documents', 'Owners and collaborators can update documents');
+SELECT drop_policy_if_exists('public.documents', 'Owners and admins can delete documents');
+SELECT drop_policy_if_exists('public.document_collaborators', 'Users can view document collaborators');
+SELECT drop_policy_if_exists('public.document_collaborators', 'Document owners can manage collaborators');
 
 -- Documents policies
 CREATE POLICY "Users can view accessible documents"
@@ -145,12 +200,15 @@ CREATE POLICY "Document owners can manage collaborators"
   );
 
 -- Indexes for documents
-CREATE INDEX idx_documents_owner_id ON public.documents(owner_id);
-CREATE INDEX idx_documents_last_edited_by_id ON public.documents(last_edited_by_id);
-CREATE INDEX idx_documents_status ON public.documents(status);
-CREATE INDEX idx_documents_folder ON public.documents(folder);
-CREATE INDEX idx_document_collaborators_document_id ON public.document_collaborators(document_id);
-CREATE INDEX idx_document_collaborators_user_id ON public.document_collaborators(user_id);
+CREATE INDEX IF NOT EXISTS idx_documents_owner_id ON public.documents(owner_id);
+CREATE INDEX IF NOT EXISTS idx_documents_last_edited_by_id ON public.documents(last_edited_by_id);
+CREATE INDEX IF NOT EXISTS idx_documents_status ON public.documents(status);
+CREATE INDEX IF NOT EXISTS idx_documents_folder ON public.documents(folder);
+CREATE INDEX IF NOT EXISTS idx_document_collaborators_document_id ON public.document_collaborators(document_id);
+CREATE INDEX IF NOT EXISTS idx_document_collaborators_user_id ON public.document_collaborators(user_id);
+
+-- Drop existing trigger
+DROP TRIGGER IF EXISTS update_documents_updated_at ON public.documents;
 
 -- Triggers for documents
 CREATE TRIGGER update_documents_updated_at
@@ -161,7 +219,7 @@ CREATE TRIGGER update_documents_updated_at
 -- ============================================
 -- CONTRACTS TABLE
 -- ============================================
-CREATE TABLE public.contracts (
+CREATE TABLE IF NOT EXISTS public.contracts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   contract_id TEXT UNIQUE,
@@ -182,7 +240,7 @@ CREATE TABLE public.contracts (
 );
 
 -- Contract parties (many-to-many)
-CREATE TABLE public.contract_parties (
+CREATE TABLE IF NOT EXISTS public.contract_parties (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   contract_id UUID NOT NULL REFERENCES public.contracts(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -195,6 +253,14 @@ CREATE TABLE public.contract_parties (
 -- Enable Row Level Security
 ALTER TABLE public.contracts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contract_parties ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+SELECT drop_policy_if_exists('public.contracts', 'Team members can view all contracts');
+SELECT drop_policy_if_exists('public.contracts', 'Team members can create contracts');
+SELECT drop_policy_if_exists('public.contracts', 'Owners and managers can update contracts');
+SELECT drop_policy_if_exists('public.contracts', 'Owners and admins can delete contracts');
+SELECT drop_policy_if_exists('public.contract_parties', 'Users can view contract parties');
+SELECT drop_policy_if_exists('public.contract_parties', 'Contract owners can manage parties');
 
 -- Contracts policies
 CREATE POLICY "Team members can view all contracts"
@@ -239,11 +305,14 @@ CREATE POLICY "Contract owners can manage parties"
   );
 
 -- Indexes for contracts
-CREATE INDEX idx_contracts_owner_id ON public.contracts(owner_id);
-CREATE INDEX idx_contracts_status ON public.contracts(status);
-CREATE INDEX idx_contracts_type ON public.contracts(type);
-CREATE INDEX idx_contracts_end_date ON public.contracts(end_date);
-CREATE INDEX idx_contract_parties_contract_id ON public.contract_parties(contract_id);
+CREATE INDEX IF NOT EXISTS idx_contracts_owner_id ON public.contracts(owner_id);
+CREATE INDEX IF NOT EXISTS idx_contracts_status ON public.contracts(status);
+CREATE INDEX IF NOT EXISTS idx_contracts_type ON public.contracts(type);
+CREATE INDEX IF NOT EXISTS idx_contracts_end_date ON public.contracts(end_date);
+CREATE INDEX IF NOT EXISTS idx_contract_parties_contract_id ON public.contract_parties(contract_id);
+
+-- Drop existing trigger
+DROP TRIGGER IF EXISTS update_contracts_updated_at ON public.contracts;
 
 -- Triggers for contracts
 CREATE TRIGGER update_contracts_updated_at
@@ -254,7 +323,7 @@ CREATE TRIGGER update_contracts_updated_at
 -- ============================================
 -- CHAT CHANNELS TABLE
 -- ============================================
-CREATE TABLE public.chat_channels (
+CREATE TABLE IF NOT EXISTS public.chat_channels (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   description TEXT,
@@ -266,7 +335,7 @@ CREATE TABLE public.chat_channels (
 );
 
 -- Chat channel members (many-to-many)
-CREATE TABLE public.chat_channel_members (
+CREATE TABLE IF NOT EXISTS public.chat_channel_members (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   channel_id UUID NOT NULL REFERENCES public.chat_channels(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
@@ -275,7 +344,7 @@ CREATE TABLE public.chat_channel_members (
 );
 
 -- Chat messages
-CREATE TABLE public.chat_messages (
+CREATE TABLE IF NOT EXISTS public.chat_messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   channel_id UUID NOT NULL REFERENCES public.chat_channels(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
@@ -288,6 +357,18 @@ CREATE TABLE public.chat_messages (
 ALTER TABLE public.chat_channels ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_channel_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies
+SELECT drop_policy_if_exists('public.chat_channels', 'Members can view channels they belong to');
+SELECT drop_policy_if_exists('public.chat_channels', 'Users can create channels');
+SELECT drop_policy_if_exists('public.chat_channels', 'Channel creators and admins can update channels');
+SELECT drop_policy_if_exists('public.chat_channels', 'Channel creators and admins can delete channels');
+SELECT drop_policy_if_exists('public.chat_channel_members', 'Channel members can view members');
+SELECT drop_policy_if_exists('public.chat_channel_members', 'Channel creators and admins can manage members');
+SELECT drop_policy_if_exists('public.chat_messages', 'Channel members can view messages');
+SELECT drop_policy_if_exists('public.chat_messages', 'Channel members can send messages');
+SELECT drop_policy_if_exists('public.chat_messages', 'Message authors can update their messages');
+SELECT drop_policy_if_exists('public.chat_messages', 'Message authors and admins can delete messages');
 
 -- Chat channels policies
 CREATE POLICY "Members can view channels they belong to"
@@ -376,12 +457,16 @@ CREATE POLICY "Message authors and admins can delete messages"
   );
 
 -- Indexes for chat
-CREATE INDEX idx_chat_channels_created_by ON public.chat_channels(created_by);
-CREATE INDEX idx_chat_channel_members_channel_id ON public.chat_channel_members(channel_id);
-CREATE INDEX idx_chat_channel_members_user_id ON public.chat_channel_members(user_id);
-CREATE INDEX idx_chat_messages_channel_id ON public.chat_messages(channel_id);
-CREATE INDEX idx_chat_messages_user_id ON public.chat_messages(user_id);
-CREATE INDEX idx_chat_messages_created_at ON public.chat_messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_chat_channels_created_by ON public.chat_channels(created_by);
+CREATE INDEX IF NOT EXISTS idx_chat_channel_members_channel_id ON public.chat_channel_members(channel_id);
+CREATE INDEX IF NOT EXISTS idx_chat_channel_members_user_id ON public.chat_channel_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_channel_id ON public.chat_messages(channel_id);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id ON public.chat_messages(user_id);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_created_at ON public.chat_messages(created_at DESC);
+
+-- Drop existing triggers
+DROP TRIGGER IF EXISTS update_chat_channels_updated_at ON public.chat_channels;
+DROP TRIGGER IF EXISTS update_chat_messages_updated_at ON public.chat_messages;
 
 -- Triggers for chat
 CREATE TRIGGER update_chat_channels_updated_at
@@ -394,3 +479,5 @@ CREATE TRIGGER update_chat_messages_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+-- Cleanup helper function (optional, can be dropped after migration)
+DROP FUNCTION IF EXISTS drop_policy_if_exists(text, text);
