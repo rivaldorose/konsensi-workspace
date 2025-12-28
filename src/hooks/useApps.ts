@@ -158,5 +158,3 @@ export function useAppTeam(appId: string) {
     enabled: !!appId
   })
 }
-
-// Ensure useAppTeam is exported
