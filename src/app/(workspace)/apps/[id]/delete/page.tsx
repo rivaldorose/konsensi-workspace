@@ -183,16 +183,18 @@ export default function DeleteAppPage({ params }: { params: { id: string } }) {
                   ? 'border-primary bg-primary/5 hover:bg-primary/10' 
                   : 'border-[#dae7cf] dark:border-gray-700 bg-white dark:bg-white/5 hover:border-gray-400 dark:hover:border-gray-600'
               }`}>
-                <div className="flex items-center h-5 relative">
+                <div className="flex items-center h-5 relative flex-shrink-0">
                   <input
                     checked={deleteAction === 'permanent'}
                     onChange={() => setDeleteAction('permanent')}
-                    className="h-5 w-5 border-2 border-[#dae7cf] bg-transparent text-transparent focus:ring-0 focus:ring-offset-0 checked:border-primary checked:bg-transparent cursor-pointer appearance-none"
+                    className={`h-5 w-5 border-2 bg-transparent text-transparent focus:ring-0 focus:ring-offset-0 cursor-pointer appearance-none rounded-full ${
+                      deleteAction === 'permanent' ? 'border-primary' : 'border-[#dae7cf]'
+                    }`}
                     name="delete_action"
                     type="radio"
                   />
                   {deleteAction === 'permanent' && (
-                    <div className="absolute left-0 h-5 w-5 flex items-center justify-center pointer-events-none border-2 border-primary rounded-full">
+                    <div className="absolute left-0 top-0 h-5 w-5 flex items-center justify-center pointer-events-none border-2 border-primary rounded-full">
                       <div className="h-2.5 w-2.5 rounded-full bg-primary"></div>
                     </div>
                   )}
