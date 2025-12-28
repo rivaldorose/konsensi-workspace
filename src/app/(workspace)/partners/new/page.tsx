@@ -1,13 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCreatePartner } from '@/hooks/usePartners'
+import { useUsers, useCurrentUser } from '@/hooks/useUsers'
 import type { Partner } from '@/types'
 
 export default function AddPartnerPage() {
   const router = useRouter()
   const createPartner = useCreatePartner()
+  const { data: users = [] } = useUsers()
+  const { data: currentUser } = useCurrentUser()
   
   const [formData, setFormData] = useState<Partial<Partner>>({
     status: 'in_gesprek',
@@ -17,6 +20,13 @@ export default function AddPartnerPage() {
   const [tags, setTags] = useState<string[]>([])
   const [newTag, setNewTag] = useState('')
   const [opportunity, setOpportunity] = useState('')
+
+  // Set default owner to current user
+  useEffect(() => {
+    if (currentUser && !formData.owner_id) {
+      setFormData(prev => ({ ...prev, owner_id: currentUser.id }))
+    }
+  }, [currentUser])
 
   const handleClose = () => {
     router.push('/partners')
@@ -293,12 +303,14 @@ export default function AddPartnerPage() {
                     <div className="relative">
                       <select
                         className="form-select flex w-full appearance-none rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4b30] bg-[#fafcf8] dark:bg-[#151c10] h-12 px-4 text-base font-normal transition-all cursor-pointer"
-                        value={formData.owner_id || 'me'}
+                        value={formData.owner_id || currentUser?.id || ''}
                         onChange={(e) => setFormData({ ...formData, owner_id: e.target.value })}
                       >
-                        <option value="me">Me</option>
-                        <option value="sarah">Sarah Jansen</option>
-                        <option value="mark">Mark de Vries</option>
+                        {users.map((user) => (
+                          <option key={user.id} value={user.id}>
+                            {user.id === currentUser?.id ? `${user.full_name || user.email} (Me)` : user.full_name || user.email}
+                          </option>
+                        ))}
                       </select>
                       <svg className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#6e9a4c] w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

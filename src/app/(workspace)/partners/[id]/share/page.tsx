@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { usePartner } from '@/hooks/usePartners'
+import { useUsers, useCurrentUser } from '@/hooks/useUsers'
 
 interface TeamMember {
   id: string
@@ -18,6 +19,8 @@ export default function SharePartnerPage() {
   const partnerId = params.id as string
   
   const { data: partner, isLoading } = usePartner(partnerId)
+  const { data: users = [] } = useUsers()
+  const { data: currentUser } = useCurrentUser()
   
   // Mock team members - in real app, this would come from the database
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
@@ -50,26 +53,20 @@ export default function SharePartnerPage() {
   const handleAddMember = () => {
     if (!selectedUser) return
     
-    // Mock: Get user details from selectedUser
-    const userMap: Record<string, { name: string; email: string }> = {
-      sarah: { name: 'Sarah Jenkins', email: 'sarah@konsensi.com' },
-      mike: { name: 'Mike Ross', email: 'mike@konsensi.com' },
-      jessica: { name: 'Jessica Pearson', email: 'jessica@konsensi.com' }
-    }
-    
-    const user = userMap[selectedUser]
+    const user = users.find(u => u.id === selectedUser)
     if (!user) return
     
     // Check if user already exists
-    if (teamMembers.some(m => m.email === user.email)) {
+    if (teamMembers.some(m => m.id === user.id)) {
       alert('This user is already added')
       return
     }
     
     setTeamMembers([...teamMembers, {
-      id: Date.now().toString(),
-      name: user.name,
+      id: user.id,
+      name: user.full_name || user.email,
       email: user.email,
+      avatar: user.avatar_url,
       permission: newPermission
     }])
     
@@ -160,13 +157,17 @@ export default function SharePartnerPage() {
                     onChange={(e) => setSelectedUser(e.target.value)}
                   >
                     <option disabled value="">Select a name...</option>
-                    <option value="sarah">Sarah Jenkins</option>
-                    <option value="mike">Mike Ross</option>
-                    <option value="jessica">Jessica Pearson</option>
+                    {users
+                      .filter(user => !teamMembers.find(m => m.id === user.id))
+                      .map((user) => (
+                        <option key={user.id} value={user.id}>
+                          {user.full_name || user.email}
+                        </option>
+                      ))}
                   </select>
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-primary">
-                    <span className="material-symbols-outlined text-xl">expand_more</span>
-                  </span>
+                  <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-primary w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </div>
 
                 {/* Permissions & Add Button Row */}

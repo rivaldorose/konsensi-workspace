@@ -1,13 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCreateApp } from '@/hooks/useApps'
+import { useUsers, useCurrentUser } from '@/hooks/useUsers'
 import type { App } from '@/types'
 
 export default function NewAppPage() {
   const router = useRouter()
   const createApp = useCreateApp()
+  const { data: users = [] } = useUsers()
+  const { data: currentUser } = useCurrentUser()
   
   const [formData, setFormData] = useState({
     name: '',
@@ -36,6 +39,13 @@ export default function NewAppPage() {
   const [teamMembers, setTeamMembers] = useState<string[]>([])
   const [newMember, setNewMember] = useState('')
   const [productOwner, setProductOwner] = useState('')
+
+  // Set default owner to current user
+  useEffect(() => {
+    if (currentUser && !productOwner) {
+      setProductOwner(currentUser.id)
+    }
+  }, [currentUser])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -316,9 +326,11 @@ export default function NewAppPage() {
                       required
                     >
                       <option value="">Select owner...</option>
-                      <option value="alex">Alex M. (You)</option>
-                      <option value="sarah">Sarah K.</option>
-                      <option value="john">John D.</option>
+                      {users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                          {user.id === currentUser?.id ? `${user.full_name || user.email} (You)` : user.full_name || user.email}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </label>
