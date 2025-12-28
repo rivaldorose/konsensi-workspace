@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import React from 'react'
+import { useNotifications } from '@/hooks/useNotifications'
+import { format, isToday, isYesterday, startOfWeek, isWithinInterval } from 'date-fns'
 
 // Icon component helper
 const getIconSVG = (iconName: string, className: string = 'w-5 h-5'): React.ReactElement => {
@@ -87,101 +89,34 @@ const getIconSVG = (iconName: string, className: string = 'w-5 h-5'): React.Reac
   return iconMap[iconName] || <div className={className} />
 }
 
-const notifications = {
-  today: [
-    {
-      id: 1,
-      type: 'mention',
-      icon: 'alternate_email',
-      iconColor: 'bg-blue-50 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400',
-      borderColor: 'border-l-blue-500',
-      title: 'Sarah mentioned you in',
-      titleSub: 'Q3 Financial Report',
-      badge: 'Mention',
-      badgeColor: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10',
-      message: 'Hey, can you take a quick look at the attached spreadsheet specifically regarding the marketing budget allocation?',
-      time: '10:30 AM',
-      actions: [
-        { label: 'Reply', icon: 'reply', color: 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300' },
-        { label: 'View Context', icon: 'visibility', color: 'bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-300' },
-      ],
-    },
-    {
-      id: 2,
-      type: 'approval',
-      icon: 'fact_check',
-      iconColor: 'bg-yellow-50 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400',
-      borderColor: 'border-l-yellow-500',
-      title: 'Leave Request:',
-      titleSub: 'John Doe (Oct 12-14)',
-      badge: 'Approval Required',
-      badgeColor: 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10',
-      message: 'John has requested 3 days of personal leave. No conflicts with current project deadlines found.',
-      time: '9:15 AM',
-      actions: [
-        { label: 'Approve', icon: 'check', color: 'bg-primary text-[#131c0d] hover:bg-primary-dark hover:text-white' },
-        { label: 'Reject', icon: 'close', color: 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300' },
-      ],
-    },
-  ],
-  yesterday: [
-    {
-      id: 3,
-      type: 'update',
-      icon: 'handshake',
-      iconColor: 'bg-[#ecf4e7] dark:bg-primary/20 text-primary-dark dark:text-primary',
-      borderColor: 'border-l-primary',
-      title: 'New Contract Signed:',
-      titleSub: 'Acme Corp',
-      badge: 'Partner Update',
-      badgeColor: 'text-primary-dark dark:text-primary bg-[#ecf4e7] dark:bg-primary/10',
-      message: 'The annual service agreement has been finalized and signed by the client. Onboarding starts next week.',
-      time: '4:45 PM',
-      actions: [
-        { label: 'View Contract', icon: 'description', color: 'bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-300' },
-      ],
-    },
-  ],
-  thisWeek: [
-    {
-      id: 4,
-      type: 'system',
-      icon: 'security_update_warning',
-      iconColor: 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400',
-      borderColor: 'border-l-gray-400',
-      title: 'Security Alert:',
-      titleSub: 'Password Expiring Soon',
-      badge: 'System',
-      badgeColor: 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5',
-      message: 'Your workspace password will expire in 3 days. Please update it to maintain access.',
-      time: 'Mon',
-      opacity: true,
-      actions: [
-        { label: 'Update Now', icon: 'lock_reset', color: 'bg-gray-800 text-white hover:bg-black' },
-        { label: 'Snooze', icon: '', color: 'bg-white dark:bg-transparent border border-gray-200 dark:border-white/20 text-gray-600 dark:text-gray-400' },
-      ],
-    },
-    {
-      id: 5,
-      type: 'comment',
-      icon: 'comment',
-      iconColor: 'bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400',
-      borderColor: 'border-l-gray-400',
-      title: 'New comment on',
-      titleSub: 'Marketing Assets - Fall 2024',
-      badge: 'Comment',
-      badgeColor: 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-white/5',
-      message: 'Mike added: "This looks great, but let\'s swap the hero image for the secondary option we discussed."',
-      time: 'Mon',
-      actions: [
-        { label: 'View Thread', icon: 'forum', color: 'bg-gray-50 dark:bg-white/5 text-gray-700 dark:text-gray-300' },
-      ],
-    },
-  ],
-}
-
 export default function NotificationsPage() {
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const { data: notifications = [], isLoading } = useNotifications()
+
+  // Group notifications by date
+  const groupedNotifications = useMemo(() => {
+    const today: typeof notifications = []
+    const yesterday: typeof notifications = []
+    const thisWeek: typeof notifications = []
+
+    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
+
+    notifications.forEach((notification) => {
+      const notificationDate = new Date(notification.created_at)
+      
+      if (isToday(notificationDate)) {
+        today.push(notification)
+      } else if (isYesterday(notificationDate)) {
+        yesterday.push(notification)
+      } else if (isWithinInterval(notificationDate, { start: weekStart, end: new Date() })) {
+        thisWeek.push(notification)
+      }
+    })
+
+    return { today, yesterday, thisWeek }
+  }, [notifications])
+
+  const unreadCount = notifications.filter(n => !n.is_read).length
 
   return (
     <div className="w-full max-w-5xl mx-auto flex flex-col gap-8 px-4 sm:px-6 lg:px-8 py-8">
@@ -189,7 +124,11 @@ export default function NotificationsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
             <h2 className="text-3xl font-black tracking-tight text-[#131c0d] dark:text-white">Notifications</h2>
-            <span className="bg-primary/20 text-primary-dark dark:text-primary text-xs font-bold px-2 py-0.5 rounded-full">12 New</span>
+            {unreadCount > 0 && (
+              <span className="bg-primary/20 text-primary-dark dark:text-primary text-xs font-bold px-2 py-0.5 rounded-full">
+                {unreadCount} New
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <button 
@@ -224,11 +163,27 @@ export default function NotificationsPage() {
         </div>
 
         {/* Content List */}
-        <div className="space-y-8">
-          {/* Today */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-[#131c0d] dark:text-gray-200 px-1">Today</h3>
-                  {notifications.today.map((notification) => (
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-pulse text-gray-400">Loading notifications...</div>
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="size-16 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </div>
+            <p className="text-gray-500 dark:text-gray-400 mb-2 font-medium">No notifications yet</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">You'll see notifications here when you receive them</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {/* Today */}
+            {groupedNotifications.today.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-[#131c0d] dark:text-gray-200 px-1">Today</h3>
+                {groupedNotifications.today.map((notification) => (
               <div 
                 key={notification.id}
                 className={`group bg-white dark:bg-card-dark rounded-xl p-4 shadow-sm border border-l-[6px] border-gray-100 dark:border-white/5 ${notification.borderColor} hover:shadow-md transition-all ${'opacity' in notification && notification.opacity ? 'opacity-80 hover:opacity-100' : ''}`}
@@ -271,13 +226,15 @@ export default function NotificationsPage() {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+                ))}
+              </div>
+            )}
 
-          {/* Yesterday */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-[#131c0d] dark:text-gray-200 px-1">Yesterday</h3>
-            {notifications.yesterday.map((notification) => (
+            {/* Yesterday */}
+            {groupedNotifications.yesterday.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-[#131c0d] dark:text-gray-200 px-1">Yesterday</h3>
+                {groupedNotifications.yesterday.map((notification) => (
               <div 
                 key={notification.id}
                 className={`group bg-white dark:bg-card-dark rounded-xl p-4 shadow-sm border border-l-[6px] border-gray-100 dark:border-white/5 ${notification.borderColor} hover:shadow-md transition-all ${'opacity' in notification && notification.opacity ? 'opacity-80 hover:opacity-100' : ''}`}
@@ -320,13 +277,15 @@ export default function NotificationsPage() {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+                ))}
+              </div>
+            )}
 
-          {/* This Week */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-bold text-[#131c0d] dark:text-gray-200 px-1">This Week</h3>
-            {notifications.thisWeek.map((notification) => (
+            {/* This Week */}
+            {groupedNotifications.thisWeek.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-[#131c0d] dark:text-gray-200 px-1">This Week</h3>
+                {groupedNotifications.thisWeek.map((notification) => (
               <div 
                 key={notification.id}
                 className={`group bg-white dark:bg-card-dark rounded-xl p-4 shadow-sm border border-l-[6px] border-gray-100 dark:border-white/5 ${notification.borderColor} hover:shadow-md transition-all ${'opacity' in notification && notification.opacity ? 'opacity-80 hover:opacity-100' : ''}`}
@@ -369,19 +328,11 @@ export default function NotificationsPage() {
                   </div>
                 </div>
               </div>
-            ))}
+                ))}
+              </div>
+            )}
           </div>
-
-          {/* Load More */}
-          <div className="flex justify-center pt-4 pb-12">
-            <button className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-2">
-              <svg className="w-[18px] h-[18px] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ animationDuration: '2s' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Load More...
-            </button>
-          </div>
-        </div>
+        )}
 
       {/* Settings Modal */}
       {settingsOpen && (
