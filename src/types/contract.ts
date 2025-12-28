@@ -10,7 +10,7 @@ export interface Contract {
   id: string
   name: string
   type: 'partnership' | 'service' | 'employment' | 'nda' | 'other'
-  status: 'draft' | 'active' | 'expired' | 'terminated'
+  status: 'draft' | 'active' | 'expired' | 'terminated' | 'archived'
   start_date: string
   end_date?: string
   value?: number

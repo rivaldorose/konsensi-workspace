@@ -106,3 +106,24 @@ export function useDeleteContract() {
   })
 }
 
+export function useArchiveContract() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('contracts')
+        .update({ status: 'archived' as Contract['status'] })
+        .eq('id', id)
+
+      if (error) throw error
+      return id
+    },
+    onSuccess: (id) => {
+      queryClient.invalidateQueries({ queryKey: ['contracts'] })
+      queryClient.invalidateQueries({ queryKey: ['contract', id] })
+    },
+  })
+}
+
