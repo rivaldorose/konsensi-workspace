@@ -2,14 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useCurrentUser, useUsers } from '@/hooks/useUsers'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 
 export default function SettingsPage() {
-  const pathname = usePathname()
   const { data: currentUser } = useCurrentUser()
   const { data: allUsers } = useUsers()
 
+  const [activeTab, setActiveTab] = useState('profile')
   const [profileData, setProfileData] = useState({
     full_name: currentUser?.full_name || '',
     email: currentUser?.email || '',
@@ -34,6 +32,51 @@ export default function SettingsPage() {
     }
   }, [currentUser])
 
+  const tabs = [
+    { id: 'profile', label: 'Profile' },
+    { id: 'team', label: 'Team' },
+    { id: 'integrations', label: 'Integrations' },
+    { id: 'appearance', label: 'Appearance' },
+  ]
+
+  const scrollToSection = (sectionId: string) => {
+    setActiveTab(sectionId)
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
+  }
+
+  // Scroll spy to update active tab based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = tabs.map(tab => ({
+        id: tab.id,
+        element: document.getElementById(tab.id)
+      }))
+
+      const scrollPosition = window.scrollY + 200 // offset for navbar + tabs
+
+      for (const section of sections) {
+        if (section.element) {
+          const offsetTop = section.element.offsetTop
+          const offsetBottom = offsetTop + section.element.offsetHeight
+
+          if (scrollPosition >= offsetTop && scrollPosition < offsetBottom) {
+            setActiveTab(section.id)
+            break
+          }
+        }
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const handleProfileChange = (field: string, value: string) => {
     setProfileData((prev) => ({ ...prev, [field]: value }))
   }
@@ -43,86 +86,42 @@ export default function SettingsPage() {
     console.log('Saving profile:', profileData)
   }
 
-  const settingsSections = [
-    { id: 'profile', label: 'Profile', icon: 'person', href: '/settings' },
-    { id: 'notifications', label: 'Notifications', icon: 'notifications', href: '/settings/notifications' },
-    { id: 'team', label: 'Team', icon: 'group', href: '/settings/team' },
-    { id: 'integrations', label: 'Integrations', icon: 'extension', href: '/settings/integrations' },
-    { id: 'appearance', label: 'Appearance', icon: 'palette', href: '/settings/appearance' },
-    { id: 'security', label: 'Security', icon: 'shield', href: '/settings/security' },
-    { id: 'usage', label: 'Usage', icon: 'bar_chart', href: '/settings/usage' },
-    { id: 'billing', label: 'Billing', icon: 'credit_card', href: '/settings/billing' },
-  ]
-
-  const activeSection = pathname.split('/').pop() || 'profile'
-
   return (
-    <div className="flex flex-1 overflow-hidden">
-      {/* Sidebar Navigation */}
-      <aside className="w-[240px] flex-none flex flex-col bg-background-light dark:bg-surface-dark border-r border-[#ecf4e7] dark:border-[#2a3820] overflow-y-auto hidden md:flex">
-        <div className="p-6">
-          <div className="mb-6">
-            <h1 className="text-[#131c0d] dark:text-white text-lg font-bold">Settings</h1>
-            <p className="text-[#6d9c49] text-xs">Manage workspace preferences</p>
-          </div>
-          <nav className="flex flex-col gap-1">
-            {settingsSections.map((section) => {
-              const isActive = pathname === section.href || (section.id === 'profile' && pathname === '/settings')
-              return (
-                <Link
-                  key={section.id}
-                  href={section.href}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors border-l-4 ${
-                    isActive
-                      ? 'bg-primary/15 text-[#131c0d] dark:text-white border-primary'
-                      : 'hover:bg-black/5 dark:hover:bg-white/5 text-[#131c0d]/70 dark:text-white/70 border-transparent'
-                  }`}
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    {section.icon === 'person' && (
-                      <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                    )}
-                    {section.icon === 'notifications' && (
-                      <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                    )}
-                    {section.icon === 'group' && (
-                      <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                    )}
-                    {section.icon === 'extension' && (
-                      <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                    )}
-                    {section.icon === 'palette' && (
-                      <path
-                        fillRule="evenodd"
-                        d="M4 2a2 2 0 00-2 2v11a3 3 0 106 0V4a2 2 0 00-2-2H4zM3 10a1 1 0 011-1h3a1 1 0 110 2H4a1 1 0 01-1-1zm9-1a1 1 0 100 2h.01a1 1 0 100-2H12zm2 4a1 1 0 011 1v3a2 2 0 01-2 2h-2a2 2 0 01-2-2v-3a1 1 0 011-1h4zm-6 0a1 1 0 00-1 1v3a2 2 0 002 2h.01a2 2 0 002-2v-3a1 1 0 00-1-1h-4z"
-                      />
-                    )}
-                    {section.icon === 'shield' && (
-                      <path
-                        fillRule="evenodd"
-                        d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      />
-                    )}
-                    {section.icon === 'bar_chart' && (
-                      <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-                    )}
-                    {section.icon === 'credit_card' && (
-                      <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" />
-                    )}
-                  </svg>
-                  <span className={`text-sm ${isActive ? 'font-semibold' : 'font-medium'}`}>{section.label}</span>
-                </Link>
-              )
-            })}
-          </nav>
-        </div>
-      </aside>
+    <div className="flex-1 pt-16">
+      {/* Settings Header */}
+      <div className="bg-white dark:bg-[#1f2b15] border-b border-gray-200 dark:border-white/5 px-8 py-6">
+        <h1 className="text-3xl font-bold text-[#131d0c] dark:text-white">
+          Settings
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">
+          Manage your workspace preferences and settings
+        </p>
+      </div>
 
-      {/* Main Content Scroll Area */}
-      <main className="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark p-6 md:p-10 scroll-smooth custom-scrollbar">
-        <div className="max-w-[800px] mx-auto space-y-16 pb-20">
-          {/* Profile Section */}
-          <section className="flex flex-col gap-6" id="profile">
+      {/* Sticky Tabs Navigation */}
+      <div className="sticky top-16 z-40 bg-white dark:bg-[#1f2b15] border-b border-gray-200 dark:border-white/5 px-8">
+        <nav className="flex gap-6 overflow-x-auto no-scrollbar">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => scrollToSection(tab.id)}
+              className={`py-4 px-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-[#131d0c] dark:hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Scrollable Content */}
+      <div className="px-8 py-8 space-y-12 scroll-smooth">
+        {/* Profile Section */}
+        <section id="profile" className="scroll-mt-32">
+          <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-1">
               <h2 className="text-3xl font-bold text-[#131c0d] dark:text-white">Profile Settings</h2>
               <p className="text-[#6d9c49]">Manage your personal details and account preferences.</p>
@@ -267,12 +266,12 @@ export default function SettingsPage() {
                 Save Changes
               </button>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <hr className="border-[#ecf4e7] dark:border-[#2a3820]" />
-
-          {/* Team Section */}
-          <section className="flex flex-col gap-6" id="team">
+        {/* Team Section */}
+        <section id="team" className="scroll-mt-32">
+          <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-1">
               <div className="flex justify-between items-start">
                 <h2 className="text-2xl font-bold text-[#131c0d] dark:text-white">Team Management</h2>
@@ -378,12 +377,12 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <hr className="border-[#ecf4e7] dark:border-[#2a3820]" />
-
-          {/* Integrations Section */}
-          <section className="flex flex-col gap-6" id="integrations">
+        {/* Integrations Section */}
+        <section id="integrations" className="scroll-mt-32">
+          <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-1">
               <h2 className="text-2xl font-bold text-[#131c0d] dark:text-white">Integrations</h2>
               <p className="text-[#6d9c49]">Connect your favorite tools to Konsensi.</p>
@@ -484,18 +483,18 @@ export default function SettingsPage() {
                     Add
                   </button>
                 </div>
-      <div>
+                <div>
                   <h4 className="text-sm font-bold text-[#131c0d] dark:text-white">Trello</h4>
                   <p className="text-xs text-[#6d9c49] mt-1 line-clamp-2">Import cards and sync boards two-way.</p>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <hr className="border-[#ecf4e7] dark:border-[#2a3820]" />
-
-          {/* Appearance Section */}
-          <section className="flex flex-col gap-6" id="appearance">
+        {/* Appearance Section */}
+        <section id="appearance" className="scroll-mt-32">
+          <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-1">
               <div className="flex justify-between">
                 <h2 className="text-2xl font-bold text-[#131c0d] dark:text-white">Appearance</h2>
@@ -504,7 +503,7 @@ export default function SettingsPage() {
                 </button>
               </div>
               <p className="text-[#6d9c49]">Customize your interface experience.</p>
-      </div>
+            </div>
 
             {/* Theme Selection */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -610,12 +609,12 @@ export default function SettingsPage() {
                   >
                     {d}
                   </button>
-        ))}
-      </div>
+                ))}
+              </div>
             </div>
-          </section>
-        </div>
-      </main>
+          </div>
+        </section>
+      </div>
     </div>
   )
 }
