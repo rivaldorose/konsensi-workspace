@@ -294,13 +294,13 @@ export function useUploadDocument() {
 
 export function useDownloadDocument() {
   return useMutation({
-    mutationFn: async (document: Document) => {
-      if (!document.file_url) {
+    mutationFn: async (doc: Document) => {
+      if (!doc.file_url) {
         throw new Error('No file URL available')
       }
       
       // Fetch file
-      const response = await fetch(document.file_url)
+      const response = await fetch(doc.file_url)
       if (!response.ok) {
         throw new Error('Failed to download file')
       }
@@ -309,13 +309,13 @@ export function useDownloadDocument() {
       
       // Create download link
       const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
+      const a = window.document.createElement('a')
       a.href = url
-      a.download = document.file_name || document.title
-      document.body.appendChild(a)
+      a.download = doc.file_name || doc.title
+      window.document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      window.document.body.removeChild(a)
     }
   })
 }

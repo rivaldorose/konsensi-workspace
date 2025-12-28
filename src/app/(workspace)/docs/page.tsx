@@ -35,7 +35,7 @@ export default function DocumentsPage() {
 
     // Filter by tab
     if (activeFilter === 'favorites') {
-      filtered = filtered.filter(doc => doc.is_favorite || doc.status === 'favorite')
+      filtered = filtered.filter(doc => doc.is_favorite === true)
     } else if (activeFilter === 'recent') {
       // Show recent documents (last 7 days)
       const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000)
@@ -44,7 +44,7 @@ export default function DocumentsPage() {
         return docDate >= sevenDaysAgo
       })
     } else if (activeFilter === 'shared') {
-      filtered = filtered.filter(doc => doc.status === 'shared' || (doc.collaborators && doc.collaborators.length > 0))
+      filtered = filtered.filter(doc => doc.collaborators && doc.collaborators.length > 0)
     }
 
     return filtered

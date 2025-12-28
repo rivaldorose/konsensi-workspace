@@ -42,10 +42,12 @@ export default function CreateDocumentPage() {
     try {
       const newDocument = await createDocument.mutateAsync({
         title: documentName,
-        type: template === 'blank' ? 'article' : 'article',
+        type: 'doc',
+        document_mode: 'text',
         folder: location,
-        status: 'all',
-        last_edited: new Date().toISOString()
+        folder_id: location !== 'general-root' ? location : null,
+        status: 'draft',
+        is_favorite: false
       })
       
       router.push(`/docs/${newDocument.id}`)

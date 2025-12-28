@@ -161,14 +161,14 @@ const formatTimeAgo = (dateString: string) => {
 
 export default function DocumentCard({ document: doc, onOpen, onShare, onFavorite }: DocumentCardProps) {
   const [showMenu, setShowMenu] = useState(false)
-  const [isFavorite, setIsFavorite] = useState(doc.is_favorite || doc.status === 'favorite')
+  const [isFavorite, setIsFavorite] = useState(doc.is_favorite || false)
   const menuRef = useRef<HTMLDivElement>(null)
   const downloadMutation = useDownloadDocument()
   
-  // Update favorite state when doc.status changes
+  // Update favorite state when doc.is_favorite changes
   useEffect(() => {
-    setIsFavorite(doc.status === 'favorite')
-  }, [doc.status])
+    setIsFavorite(doc.is_favorite || false)
+  }, [doc.is_favorite])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
