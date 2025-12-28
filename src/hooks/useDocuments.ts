@@ -18,16 +18,11 @@ export function useDocuments() {
       const transformed: Document[] = (data || []).map((doc: any): Document => {
         const owner = Array.isArray(doc.owner) ? (doc.owner[0] || null) : (doc.owner || null)
         const lastEditedBy = Array.isArray(doc.last_edited_by) ? (doc.last_edited_by[0] || null) : (doc.last_edited_by || null)
-        const collaborators = (doc.collaborators || []).map((collab: any) => ({
-          ...collab,
-          user: Array.isArray(collab.user) ? (collab.user[0] || null) : (collab.user || null),
-        }))
         
         return {
           ...doc,
           owner: owner || undefined,
           last_edited_by: lastEditedBy || undefined,
-          collaborators: collaborators.length > 0 ? collaborators : undefined,
         }
       })
       return transformed
