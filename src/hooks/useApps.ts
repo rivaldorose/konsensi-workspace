@@ -113,25 +113,47 @@ export function useAppTeam(appId: string) {
     queryKey: ['app-team', appId],
     queryFn: async () => {
       const supabase = createClient()
-      const { data, error } = await supabase
-        .from('app_team_members')
-        .select('*, user:users(*)')
-        .eq('app_id', appId)
       
-      if (error) throw error
-      return (data || []) as Array<{
-        id: string
-        app_id: string
-        user_id: string
-        role: 'owner' | 'admin' | 'member'
-        created_at: string
-        user?: {
-          id: string
-          full_name: string
-          email: string
-          avatar_url?: string
-        }
-      }>
+      // First get the app to get team_members array
+      const { data: app, error: appError } = await supabase
+        .from('apps')
+        .select('team_members, owner_id')
+        .eq('id', appId)
+        .single()
+      
+      if (appError) throw appError
+      if (!app) return []
+      
+      // Get all team member IDs (owner + team_members array)
+      const teamMemberIds = [
+        app.owner_id,
+        ...(app.team_members || [])
+      ].filter((id, index, self) => id && self.indexOf(id) === index) // Remove duplicates
+      
+      if (teamMemberIds.length === 0) return []
+      
+      // Fetch users for all team members
+      const { data: users, error: usersError } = await supabase
+        .from('users')
+        .select('id, full_name, email, avatar_url')
+        .in('id', teamMemberIds)
+      
+      if (usersError) throw usersError
+      
+      // Map to team member format with role
+      return (users || []).map((user) => ({
+        id: user.id,
+        user_id: user.id,
+        app_id: appId,
+        role: (user.id === app.owner_id ? 'owner' : 'member') as 'owner' | 'admin' | 'member',
+        user: {
+          id: user.id,
+          full_name: user.full_name || '',
+          email: user.email || '',
+          avatar_url: user.avatar_url
+        },
+        created_at: new Date().toISOString() // This is just for compatibility
+      }))
     },
     enabled: !!appId
   })
