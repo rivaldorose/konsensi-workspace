@@ -107,6 +107,11 @@ export default function DocumentCard({ document: doc, onOpen, onShare, onFavorit
   const [showMenu, setShowMenu] = useState(false)
   const [isFavorite, setIsFavorite] = useState(doc.status === 'favorite')
   const menuRef = useRef<HTMLDivElement>(null)
+  
+  // Update favorite state when doc.status changes
+  useEffect(() => {
+    setIsFavorite(doc.status === 'favorite')
+  }, [doc.status])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

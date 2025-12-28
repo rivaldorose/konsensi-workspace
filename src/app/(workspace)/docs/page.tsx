@@ -6,7 +6,7 @@ import { useDocuments } from '@/hooks/useDocuments'
 import type { Document } from '@/types/document'
 import DocumentCard from '@/components/documents/DocumentCard'
 import { DocsSidebar } from '@/components/documents/DocsSidebar'
-import { format, isToday, isYesterday, isThisWeek, parseISO } from 'date-fns'
+import { format } from 'date-fns'
 
 export default function DocumentsPage() {
   const router = useRouter()
@@ -19,12 +19,15 @@ export default function DocumentsPage() {
 
   // Filter documents
   const filteredDocuments = useMemo(() => {
+    if (!documents || documents.length === 0) return []
+    
     let filtered = documents
 
     // Filter by search query
     if (searchQuery) {
+      const queryLower = searchQuery.toLowerCase()
       filtered = filtered.filter(doc =>
-        doc.title.toLowerCase().includes(searchQuery.toLowerCase())
+        doc.title.toLowerCase().includes(queryLower)
       )
     }
 
@@ -33,11 +36,10 @@ export default function DocumentsPage() {
       filtered = filtered.filter(doc => doc.status === 'favorite')
     } else if (activeFilter === 'recent') {
       // Show recent documents (last 7 days)
+      const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000)
       filtered = filtered.filter(doc => {
-        const docDate = parseISO(doc.last_edited)
-        const now = new Date()
-        const diffDays = Math.floor((now.getTime() - docDate.getTime()) / (1000 * 60 * 60 * 24))
-        return diffDays <= 7
+        const docDate = new Date(doc.last_edited).getTime()
+        return docDate >= sevenDaysAgo
       })
     } else if (activeFilter === 'shared') {
       filtered = filtered.filter(doc => doc.status === 'shared' || (doc.collaborators && doc.collaborators.length > 0))
@@ -46,20 +48,27 @@ export default function DocumentsPage() {
     return filtered
   }, [documents, searchQuery, activeFilter])
 
-  // Group documents by date
+  // Group documents by date (optimized)
   const groupedDocuments = useMemo(() => {
     const today: Document[] = []
     const yesterday: Document[] = []
     const thisWeek: Document[] = []
     const older: Document[] = []
 
+    const now = new Date()
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const yesterdayStart = new Date(todayStart)
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1)
+    const weekStart = new Date(todayStart)
+    weekStart.setDate(weekStart.getDate() - 7)
+
     filteredDocuments.forEach(doc => {
-      const docDate = parseISO(doc.last_edited)
-      if (isToday(docDate)) {
+      const docDate = new Date(doc.last_edited)
+      if (docDate >= todayStart) {
         today.push(doc)
-      } else if (isYesterday(docDate)) {
+      } else if (docDate >= yesterdayStart) {
         yesterday.push(doc)
-      } else if (isThisWeek(docDate)) {
+      } else if (docDate >= weekStart) {
         thisWeek.push(doc)
       } else {
         older.push(doc)
@@ -100,7 +109,7 @@ export default function DocumentsPage() {
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       {/* Sidebar */}
       <DocsSidebar
-        recentDocs={documents}
+        recentDocs={documents.slice(0, 5)}
         selectedFolder={selectedFolder}
         onSelectFolder={setSelectedFolder}
       />
