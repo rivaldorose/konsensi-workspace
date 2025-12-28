@@ -95,7 +95,9 @@ export default function AddPartnerPage() {
               onClick={handleClose}
               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-[#2d3b24] text-[#131b0d] dark:text-white transition-colors"
             >
-              <span className="material-symbols-outlined">close</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
 
@@ -106,7 +108,9 @@ export default function AddPartnerPage() {
               {/* Section: Partner Information */}
               <section>
                 <h3 className="text-[#131b0d] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-4 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">domain</span>
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
                   Partner Information
                 </h3>
                 <div className="grid grid-cols-1 gap-5">
@@ -138,7 +142,9 @@ export default function AddPartnerPage() {
                           <option value="strategic">Strategic Partner</option>
                           <option value="client">Client</option>
                         </select>
-                        <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#6e9a4c]">expand_more</span>
+                        <svg className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#6e9a4c] w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
                       </div>
                     </div>
                     {/* Sector/Industry */}
@@ -159,7 +165,9 @@ export default function AddPartnerPage() {
               {/* Section: Contact Information */}
               <section>
                 <h3 className="text-[#131b0d] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-4 border-t border-[#dae7cf] dark:border-[#2d3b24] pt-6 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">person</span>
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
                   Contact Information
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -190,7 +198,9 @@ export default function AddPartnerPage() {
                   <div className="flex flex-col gap-2">
                     <label className="text-[#131b0d] dark:text-[#e0e0e0] text-sm font-medium leading-normal">Email*</label>
                     <div className="relative">
-                      <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#6e9a4c] text-[20px]">mail</span>
+                      <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6e9a4c] w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
                       <input
                         className="form-input flex w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4b30] bg-[#fafcf8] dark:bg-[#151c10] h-12 placeholder:text-[#6e9a4c]/70 pl-11 pr-4 text-base font-normal transition-all"
                         placeholder="email@company.com"
@@ -205,7 +215,9 @@ export default function AddPartnerPage() {
                   <div className="flex flex-col gap-2">
                     <label className="text-[#131b0d] dark:text-[#e0e0e0] text-sm font-medium leading-normal">Phone</label>
                     <div className="relative">
-                      <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[#6e9a4c] text-[20px]">call</span>
+                      <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6e9a4c] w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
                       <input
                         className="form-input flex w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4b30] bg-[#fafcf8] dark:bg-[#151c10] h-12 placeholder:text-[#6e9a4c]/70 pl-11 pr-4 text-base font-normal transition-all"
                         placeholder="+31 6 12345678"
@@ -221,7 +233,9 @@ export default function AddPartnerPage() {
               {/* Section: Partnership Details */}
               <section>
                 <h3 className="text-[#131b0d] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-4 border-t border-[#dae7cf] dark:border-[#2d3b24] pt-6 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">handshake</span>
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                  </svg>
                   Partnership Details
                 </h3>
                 {/* Current Status */}
@@ -331,7 +345,9 @@ export default function AddPartnerPage() {
               {/* Section: Additional Details */}
               <section>
                 <h3 className="text-[#131b0d] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pb-4 border-t border-[#dae7cf] dark:border-[#2d3b24] pt-6 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">feed</span>
+                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
                   Additional Details
                 </h3>
                 {/* Tags */}
@@ -349,7 +365,9 @@ export default function AddPartnerPage() {
                           onClick={() => handleRemoveTag(tag)}
                           className="hover:text-white dark:hover:text-white transition-colors"
                         >
-                          <span className="material-symbols-outlined text-[16px]">close</span>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
                         </button>
                       </div>
                     ))}
@@ -378,7 +396,9 @@ export default function AddPartnerPage() {
                   <label className="text-[#131b0d] dark:text-[#e0e0e0] text-sm font-medium leading-normal">Upload Documents</label>
                   <div className="group border-2 border-dashed border-[#dae7cf] dark:border-[#3a4b30] bg-[#fafcf8] dark:bg-[#151c10] rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 dark:hover:bg-[#1e2a16] transition-all">
                     <div className="w-12 h-12 rounded-full bg-[#dae7cf]/30 dark:bg-[#2d3b24] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                      <span className="material-symbols-outlined text-[#6e9a4c] dark:text-primary text-[24px]">cloud_upload</span>
+                      <svg className="w-6 h-6 text-[#6e9a4c] dark:text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
                     </div>
                     <p className="text-[#131b0d] dark:text-white font-medium text-sm">Click to upload or drag and drop</p>
                     <p className="text-gray-500 text-xs mt-1">PDF, Word, or Excel (max 10MB)</p>
@@ -412,7 +432,9 @@ export default function AddPartnerPage() {
                 disabled={createPartner.isPending}
                 className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-primary hover:bg-[#65d312] text-[#131b0d] font-bold text-sm shadow-sm transition-colors flex items-center justify-center gap-2 focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-[18px] font-bold">check</span>
+                <svg className="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
                 Add Partner
               </button>
             </div>
