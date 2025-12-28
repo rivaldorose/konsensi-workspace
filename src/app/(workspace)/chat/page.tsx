@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useChannels, useMessages } from '@/hooks/useChat'
+import { ChatSidebar } from '@/components/chat/ChatSidebar'
 import { ChatHeader } from '@/components/chat/ChatHeader'
 import { MessageFeed } from '@/components/chat/MessageFeed'
 import { MessageInput } from '@/components/chat/MessageInput'
@@ -33,8 +34,15 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-[calc(100vh-4rem)] bg-white dark:bg-[#1e2a15] overflow-hidden">
+      {/* Sidebar */}
+      <ChatSidebar
+        channels={channels}
+        selectedChannelId={selectedChannelId}
+        onSelectChannel={setSelectedChannelId}
+      />
+
       {/* Main Chat */}
-      <div className="flex-1 flex flex-col min-w-0 w-full">
+      <div className="flex-1 flex flex-col min-w-0">
         {selectedChannel ? (
           <>
             <ChatHeader
@@ -55,7 +63,7 @@ export default function ChatPage() {
             <div className="text-center">
               <p className="text-lg mb-2">Select a channel to start messaging</p>
               <p className="text-sm text-gray-400">
-                {channels.length === 0 ? 'No channels available' : 'Please select a channel'}
+                {channels.length === 0 ? 'No channels available' : 'Choose a channel from the sidebar'}
               </p>
             </div>
           </div>
