@@ -78,17 +78,12 @@ export default function EditMarketingPostPage() {
     setIsSubmitting(true)
 
     try {
-      const scheduledTimeStr = scheduledTime || '10:00'
-      const dateTime = scheduledDate && scheduledTime ? `${scheduledDate}T${scheduledTime}` : undefined
-      
-      const [date, time] = dateTime ? dateTime.split('T') : [undefined, undefined]
-
       await updatePost.mutateAsync({
         id: post.id,
         platforms,
         caption,
-        scheduled_date: date || undefined,
-        scheduled_time: time || undefined,
+        scheduled_date: scheduledDate || undefined,
+        scheduled_time: scheduledTime || undefined,
         approved_by: reviewerId || undefined,
         // media_url would be handled via file upload in production
       })
@@ -329,14 +324,16 @@ export default function EditMarketingPostPage() {
               </p>
               <div className="relative">
                 <input
-                  type="datetime-local"
-                  value={scheduledDate && scheduledTime ? `${scheduledDate}T${scheduledTime}` : ''}
-                  onChange={(e) => {
-                    const [date, time] = e.target.value.split('T')
-                    setScheduledDate(date || '')
-                    setScheduledTime(time || '')
-                  }}
+                  type="date"
+                  value={scheduledDate || ''}
+                  onChange={(e) => setScheduledDate(e.target.value)}
                   className="w-full h-11 rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-black/20 text-[#131b0d] dark:text-white px-4 focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
+                />
+                <input
+                  type="time"
+                  value={scheduledTime || ''}
+                  onChange={(e) => setScheduledTime(e.target.value)}
+                  className="w-full h-11 rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-black/20 text-[#131b0d] dark:text-white px-4 focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark] mt-2"
                 />
               </div>
               {scheduledDate && (
