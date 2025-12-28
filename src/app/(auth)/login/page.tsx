@@ -130,8 +130,8 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Remember me & Forgot password */}
-            <div className="flex items-center justify-between">
+            {/* Remember me */}
+            <div className="flex items-center">
               <label className="flex items-center">
                 <input
                   type="checkbox"
@@ -139,12 +139,6 @@ export default function LoginPage() {
                 />
                 <span className="ml-2 text-sm text-gray-600">Remember me</span>
               </label>
-              <Link
-                href="/auth/forgot-password"
-                className="text-sm text-primary hover:text-[#4da30c] font-medium"
-              >
-                Forgot password?
-              </Link>
             </div>
 
             {/* Submit Button */}
