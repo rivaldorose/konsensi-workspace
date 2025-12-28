@@ -98,6 +98,29 @@ export function useCreateGoal() {
   })
 }
 
+export function useGoal(id: string | undefined) {
+  return useQuery({
+    queryKey: ['goals', id],
+    queryFn: async () => {
+      if (!id) return null
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('goals')
+        .select(`
+          *,
+          owner:users!goals_owner_id_fkey(id, full_name, email, avatar_url),
+          event:events!goals_event_id_fkey(id, name)
+        `)
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+      return data as Goal
+    },
+    enabled: !!id,
+  })
+}
+
 export function useUpdateGoal() {
   const queryClient = useQueryClient()
 
@@ -113,6 +136,23 @@ export function useUpdateGoal() {
 
       if (error) throw error
       return data as Goal
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goals'] })
+      queryClient.invalidateQueries({ queryKey: ['goals', 'stats'] })
+    },
+  })
+}
+
+export function useDeleteGoal() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const supabase = createClient()
+      const { error } = await supabase.from('goals').delete().eq('id', id)
+
+      if (error) throw error
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals'] })
