@@ -11,27 +11,53 @@ export interface User {
 export interface App {
   id: string
   name: string
-  description: string
-  icon: string
+  description?: string
+  icon?: string
   status: 'idea' | 'development' | 'beta' | 'live' | 'paused' | 'archived'
   category: string
   launch_date?: string
+  
+  // URLs
   production_url?: string
   staging_url?: string
+  development_url?: string
   github_url?: string
+  docs_url?: string
+  
+  // Owner
   owner_id: string
   owner?: User
-  team_members: string[]
+  team_members?: string[]
+  
+  // Tech Stack
   tech_stack?: {
     frontend?: string[]
     backend?: string[]
+    hosting?: string[]
+    integrations?: string[]
     ai?: string[]
   }
+  
+  // Metrics (optional, can be calculated)
   metrics?: {
     active_users?: number
+    user_growth_percentage?: number
+    monthly_cost?: number
+    cost_change_percentage?: number
+    uptime_percentage?: number
+    uptime_change_percentage?: number
+    open_issues?: number
     satisfaction?: number
     feedback_count?: number
   }
+  
+  // Version & Deployment
+  version?: string
+  last_deploy?: string
+  
+  // Key Features
+  key_features?: string[]
+  
   created_at: string
   updated_at: string
 }
