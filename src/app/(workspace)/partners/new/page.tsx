@@ -183,17 +183,7 @@ export default function AddPartnerPage() {
                       onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
                     />
                   </div>
-                  {/* Job Title */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[#131b0d] dark:text-[#e0e0e0] text-sm font-medium leading-normal">Job Title</label>
-                    <input
-                      className="form-input flex w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4b30] bg-[#fafcf8] dark:bg-[#151c10] h-12 placeholder:text-[#6e9a4c]/70 px-4 text-base font-normal transition-all"
-                      placeholder="e.g. Head of Operations"
-                      type="text"
-                      value={formData.contact_email || ''}
-                      onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
-                    />
-                  </div>
+                  {/* Job Title - Removed as it's not in the Partner type */}
                   {/* Email */}
                   <div className="flex flex-col gap-2">
                     <label className="text-[#131b0d] dark:text-[#e0e0e0] text-sm font-medium leading-normal">Email*</label>
