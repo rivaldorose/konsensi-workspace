@@ -1,26 +1,14 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
-import type { User } from '@/types'
-
-interface TeamMember {
-  id: string
-  user_id: string
-  user?: User
-  role: 'owner' | 'admin' | 'member'
-}
+import { useAppTeam } from '@/hooks/useApps'
+import type { AppTeamMember } from '@/types/app'
 
 interface TeamTabProps {
   appId: string
 }
 
-// Mock team data for now - can be replaced with real query later
-const mockTeamMembers: TeamMember[] = []
-
 export function TeamTab({ appId }: TeamTabProps) {
-  // For now, use empty array. Later can implement useAppTeam hook
-  const teamMembers = mockTeamMembers
+  const { data: teamMembers = [], isLoading } = useAppTeam(appId)
 
   const getRoleConfig = (role: string) => {
     switch (role) {
@@ -56,7 +44,11 @@ export function TeamTab({ appId }: TeamTabProps) {
           </button>
         </div>
 
-        {teamMembers.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-12">
+            <div className="animate-pulse text-gray-400">Loading team members...</div>
+          </div>
+        ) : teamMembers.length === 0 ? (
           <div className="text-center py-12">
             <div className="size-16 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -68,7 +60,7 @@ export function TeamTab({ appId }: TeamTabProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {teamMembers.map((member) => {
+            {teamMembers.map((member: AppTeamMember) => {
               const roleConfig = getRoleConfig(member.role)
               const user = member.user
               
