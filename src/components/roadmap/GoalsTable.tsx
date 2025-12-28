@@ -57,7 +57,9 @@ export function GoalsTable() {
     <div className="bg-surface-light dark:bg-surface-dark rounded-xl border border-[#dae8ce] dark:border-[#334025] overflow-hidden shadow-sm">
       <div className="p-5 border-b border-[#dae8ce] dark:border-[#334025] flex justify-between items-center bg-[#fcfdfa] dark:bg-[#1f2a16]">
         <h3 className="text-lg font-bold text-[#131c0d] dark:text-white flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary">track_changes</span>
+          <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" />
+          </svg>
           Key Goals &amp; OKRs
         </h3>
         <Link href="/roadmap?tab=goals" className="text-sm font-bold text-primary hover:text-primary-dark">
@@ -145,4 +147,3 @@ export function GoalsTable() {
     </div>
   )
 }
-

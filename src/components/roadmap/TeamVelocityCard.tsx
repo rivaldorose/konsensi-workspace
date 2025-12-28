@@ -12,7 +12,9 @@ export function TeamVelocityCard() {
       <div className="flex justify-between items-center mb-2">
         <h3 className="font-bold text-[#131c0d] dark:text-white text-sm">Team Velocity</h3>
         <div className="bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 text-xs font-bold px-2 py-0.5 rounded flex items-center gap-1">
-          <span className="material-symbols-outlined text-[14px]">trending_up</span>
+          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" />
+          </svg>
           {trend}
         </div>
       </div>
@@ -40,4 +42,3 @@ export function TeamVelocityCard() {
     </div>
   )
 }
-

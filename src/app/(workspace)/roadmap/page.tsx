@@ -50,7 +50,9 @@ export default function RoadmapPage() {
             href="/roadmap/new"
             className="flex items-center gap-2 h-11 px-5 bg-primary hover:bg-primary-dark text-[#131c0d] text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary/20"
           >
-            <span className="material-symbols-outlined text-[20px]">add</span>
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+            </svg>
             <span>Add Item</span>
           </Link>
         </div>
