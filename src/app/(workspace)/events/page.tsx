@@ -11,10 +11,35 @@ export default function EventsPage() {
   const { data: events, isLoading } = useEvents()
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Calculate stats
-  const activeEvents = events?.filter(e => e.status === 'active') || []
-  const upcomingEvents = events?.filter(e => e.status === 'planning') || []
-  const completedEvents = events?.filter(e => e.status === 'completed') || []
+  // Helper function to determine event status based on dates
+  const getEventStatus = (event: any) => {
+    // If status is explicitly set to completed, keep it
+    if (event.status === 'completed' || event.status === 'on_hold') {
+      return event.status
+    }
+    
+    const now = new Date()
+    const startDate = new Date(event.start_date)
+    const endDate = new Date(event.end_date)
+    
+    // If end date has passed, it's completed
+    if (endDate < now) {
+      return 'completed'
+    }
+    
+    // If start date has passed but end date hasn't, it's active
+    if (startDate <= now && endDate >= now) {
+      return 'active'
+    }
+    
+    // If start date is in the future, it's planning/upcoming
+    return 'planning'
+  }
+
+  // Calculate stats with date-based status
+  const activeEvents = events?.filter(e => getEventStatus(e) === 'active') || []
+  const upcomingEvents = events?.filter(e => getEventStatus(e) === 'planning') || []
+  const completedEvents = events?.filter(e => getEventStatus(e) === 'completed') || []
   const totalEvents = events?.length || 0
 
   // Filter events based on search
@@ -370,12 +395,16 @@ function EventCard({ event }: { event: any }) {
 
 // Upcoming Event Item Component
 function UpcomingEventItem({ event }: { event: any }) {
+  const router = useRouter()
   const startDate = new Date(event.start_date)
   const month = format(startDate, 'MMM')
   const day = format(startDate, 'dd')
 
   return (
-    <div className="p-4 flex items-center justify-between hover:bg-background-light transition-colors cursor-pointer group">
+    <div 
+      className="p-4 flex items-center justify-between hover:bg-background-light transition-colors cursor-pointer group"
+      onClick={() => router.push(`/events/${event.id}`)}
+    >
       <div className="flex items-center gap-4">
         <div className="bg-gray-100 rounded-lg p-2 text-center min-w-[50px]">
           <span className="block text-xs font-bold text-gray-500 uppercase">{month}</span>
@@ -395,10 +424,14 @@ function UpcomingEventItem({ event }: { event: any }) {
 
 // Completed Event Row Component
 function CompletedEventRow({ event }: { event: any }) {
-  const completedDate = new Date(event.updated_at || event.created_at)
+  const router = useRouter()
+  const completedDate = new Date(event.end_date || event.updated_at || event.created_at)
 
   return (
-    <tr className="group hover:bg-background-light transition-colors border-b border-[#ecf3e7] last:border-0">
+    <tr 
+      className="group hover:bg-background-light transition-colors border-b border-[#ecf3e7] last:border-0 cursor-pointer"
+      onClick={() => router.push(`/events/${event.id}`)}
+    >
       <td className="p-4">
         <div className="flex items-center gap-3">
           <div className="bg-green-100 text-green-700 rounded-full p-1">
