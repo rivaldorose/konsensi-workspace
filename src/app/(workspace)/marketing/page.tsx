@@ -82,7 +82,9 @@ export default function MarketingPage() {
             <div className="flex min-w-72 flex-col gap-1">
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
                 <span>Workspace</span>
-                <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
                 <span>Marketing</span>
               </div>
               <h1 className="text-[#101b0d] text-3xl font-black leading-tight tracking-[-0.033em]">
@@ -94,14 +96,18 @@ export default function MarketingPage() {
             </div>
             <div className="flex gap-3">
               <button className="flex items-center justify-center gap-2 h-10 px-4 rounded-lg bg-white border border-[#d3e7cf] text-[#101b0d] text-sm font-bold hover:bg-[#f6f8f6] transition-colors">
-                <span className="material-symbols-outlined text-[20px]">tune</span>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
+                </svg>
                 <span>Filter</span>
               </button>
               <button
                 onClick={() => router.push('/marketing/new')}
                 className="flex items-center justify-center gap-2 h-10 px-5 rounded-lg bg-primary text-[#101b0d] text-sm font-bold shadow-sm shadow-primary/30 hover:bg-[#2bc40e] transition-colors"
               >
-                <span className="material-symbols-outlined text-[20px]">add</span>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
                 <span>Create Post</span>
               </button>
             </div>
@@ -117,9 +123,9 @@ export default function MarketingPage() {
                   : 'border-transparent text-gray-500 hover:text-[#599a4c] font-medium'
               }`}
             >
-              <span className={`material-symbols-outlined text-[20px] ${activeTab === 'calendar' ? 'filled' : ''}`}>
-                calendar_month
-              </span>
+              <svg className="w-5 h-5" fill={activeTab === 'calendar' ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={activeTab === 'calendar' ? 2.5 : 2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
               Calendar
             </button>
             <button
@@ -130,7 +136,9 @@ export default function MarketingPage() {
                   : 'border-transparent text-gray-500 hover:text-[#599a4c] font-medium'
               }`}
             >
-              <span className="material-symbols-outlined text-[20px]">list</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
               Queue
               {queueCount > 0 && (
                 <span className="bg-[#e9f3e7] text-[#599a4c] text-xs px-1.5 py-0.5 rounded-full">
@@ -146,7 +154,9 @@ export default function MarketingPage() {
                   : 'border-transparent text-gray-500 hover:text-[#599a4c] font-medium'
               }`}
             >
-              <span className="material-symbols-outlined text-[20px]">check_circle</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               Published
             </button>
             <button
@@ -157,7 +167,9 @@ export default function MarketingPage() {
                   : 'border-transparent text-gray-500 hover:text-[#599a4c] font-medium'
               }`}
             >
-              <span className="material-symbols-outlined text-[20px]">bar_chart</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
               Analytics
             </button>
           </div>
@@ -171,7 +183,9 @@ export default function MarketingPage() {
                 onClick={handlePrevMonth}
                 className="p-1 hover:bg-[#e9f3e7] rounded transition-colors"
               >
-                <span className="material-symbols-outlined text-[#101b0d]">chevron_left</span>
+                <svg className="w-5 h-5 text-[#101b0d]" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
               </button>
               <span className="px-3 text-sm font-bold text-[#101b0d] min-w-[120px] text-center">
                 {format(currentMonth, 'MMMM yyyy')}
@@ -180,7 +194,9 @@ export default function MarketingPage() {
                 onClick={handleNextMonth}
                 className="p-1 hover:bg-[#e9f3e7] rounded transition-colors"
               >
-                <span className="material-symbols-outlined text-[#101b0d]">chevron_right</span>
+                <svg className="w-5 h-5 text-[#101b0d]" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
               </button>
             </div>
             <div className="flex items-center bg-[#e9f3e7] rounded-lg p-1">
@@ -215,9 +231,13 @@ export default function MarketingPage() {
                   : 'bg-white border-[#d3e7cf] hover:bg-[#f0fdf4]'
               }`}
             >
-              <span className="material-symbols-outlined text-[#101b0d] text-[18px]">filter_list</span>
+              <svg className="w-[18px] h-[18px] text-[#101b0d]" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
+              </svg>
               <p className="text-[#101b0d] text-xs font-bold">All Platforms</p>
-              <span className="material-symbols-outlined text-[#101b0d] text-[18px]">arrow_drop_down</span>
+              <svg className="w-[18px] h-[18px] text-[#101b0d]" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
             </button>
             <button
               onClick={() => setSelectedStatus('draft')}
