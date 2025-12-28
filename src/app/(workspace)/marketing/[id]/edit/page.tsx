@@ -17,8 +17,7 @@ export default function EditMarketingPostPage() {
 
   const [platforms, setPlatforms] = useState<string[]>([])
   const [caption, setCaption] = useState('')
-  const [scheduledDate, setScheduledDate] = useState('')
-  const [scheduledTime, setScheduledTime] = useState('')
+  const [scheduledDateTime, setScheduledDateTime] = useState('')
   const [reviewerId, setReviewerId] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [mediaFile, setMediaFile] = useState<File | null>(null)
@@ -28,11 +27,10 @@ export default function EditMarketingPostPage() {
     if (post) {
       setPlatforms(post.platforms || [])
       setCaption(post.caption || '')
-      if (post.scheduled_date) {
-        setScheduledDate(post.scheduled_date)
-      }
-      if (post.scheduled_time) {
-        setScheduledTime(post.scheduled_time)
+      if (post.scheduled_date && post.scheduled_time) {
+        setScheduledDateTime(`${post.scheduled_date}T${post.scheduled_time}`)
+      } else if (post.scheduled_date) {
+        setScheduledDateTime(`${post.scheduled_date}T10:00`)
       }
       setReviewerId(post.approved_by || '')
       if (post.media_url) {
@@ -78,12 +76,14 @@ export default function EditMarketingPostPage() {
     setIsSubmitting(true)
 
     try {
+      const [date, time] = scheduledDateTime ? scheduledDateTime.split('T') : [undefined, undefined]
+      
       await updatePost.mutateAsync({
         id: post.id,
         platforms,
         caption,
-        scheduled_date: scheduledDate || undefined,
-        scheduled_time: scheduledTime || undefined,
+        scheduled_date: date || undefined,
+        scheduled_time: time || undefined,
         approved_by: reviewerId || undefined,
         // media_url would be handled via file upload in production
       })
@@ -324,19 +324,13 @@ export default function EditMarketingPostPage() {
               </p>
               <div className="relative">
                 <input
-                  type="date"
-                  value={scheduledDate || ''}
-                  onChange={(e) => setScheduledDate(e.target.value)}
+                  type="datetime-local"
+                  value={scheduledDateTime || ''}
+                  onChange={(e) => setScheduledDateTime(e.target.value)}
                   className="w-full h-11 rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-black/20 text-[#131b0d] dark:text-white px-4 focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark]"
                 />
-                <input
-                  type="time"
-                  value={scheduledTime || ''}
-                  onChange={(e) => setScheduledTime(e.target.value)}
-                  className="w-full h-11 rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-black/20 text-[#131b0d] dark:text-white px-4 focus:ring-2 focus:ring-primary focus:border-transparent dark:[color-scheme:dark] mt-2"
-                />
               </div>
-              {scheduledDate && (
+              {scheduledDateTime && (
                 <p className="text-xs text-orange-600 dark:text-orange-400 flex items-center gap-1 mt-1">
                   <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                     <path
@@ -344,7 +338,7 @@ export default function EditMarketingPostPage() {
                       d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
                     />
                   </svg>
-                  Scheduled for {new Date(scheduledDate).toLocaleDateString()}
+                  Scheduled for {new Date(scheduledDateTime).toLocaleDateString()}
                 </p>
               )}
             </div>
