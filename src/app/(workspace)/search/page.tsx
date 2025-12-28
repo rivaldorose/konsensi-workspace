@@ -38,25 +38,8 @@ function SearchPageContent() {
     app.name.toLowerCase().includes(query.toLowerCase())
   ) || []
 
-  // Mock chat messages (would need actual chat messages hook)
-  const mockChatMessages = [
-    {
-      id: '1',
-      user: { full_name: 'Alex Morgan', avatar_url: '' },
-      channel: 'marketing-general',
-      message: `Hey team, did anyone see the updated folder for ${query} assets? I can't find the logos.`,
-      time: '10:42 AM',
-      online: true,
-    },
-    {
-      id: '2',
-      user: { full_name: 'Emily Chen', avatar_url: '' },
-      channel: 'announcements',
-      message: `Just a reminder that the ${query} kickoff meeting is happening tomorrow at 2 PM.`,
-      time: 'Yesterday',
-      online: false,
-    },
-  ]
+  // Chat messages - empty for now (can be implemented with useMessages hook if needed)
+  const chatMessages: any[] = []
 
   const filters: { id: FilterType; label: string }[] = [
     { id: 'all', label: 'All' },
@@ -91,7 +74,7 @@ function SearchPageContent() {
             Search results for '<span className="text-primary">{query || '...'}</span>'
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm">
-            Found {filteredDocuments.length + filteredGoals.length + mockChatMessages.length + filteredPartners.length + filteredApps.length} results in 0.42 seconds
+            Found {filteredDocuments.length + filteredGoals.length + chatMessages.length + filteredPartners.length + filteredApps.length} results
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -293,7 +276,7 @@ function SearchPageContent() {
         )}
 
         {/* Section: Chat Messages */}
-        {(activeFilter === 'all' || activeFilter === 'chats') && mockChatMessages.length > 0 && (
+        {(activeFilter === 'all' || activeFilter === 'chats') && chatMessages.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -303,7 +286,7 @@ function SearchPageContent() {
                     d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
                   />
                 </svg>
-                Chat Messages ({mockChatMessages.length})
+                Chat Messages ({chatMessages.length})
               </h3>
               <Link
                 href="/chat"
@@ -313,7 +296,7 @@ function SearchPageContent() {
               </Link>
             </div>
             <div className="bg-surface-light dark:bg-surface-dark border border-gray-100 dark:border-[#2a3620] rounded-xl divide-y divide-gray-100 dark:divide-[#2a3620]">
-              {mockChatMessages.map((msg) => (
+              {chatMessages.map((msg) => (
                 <div
                   key={msg.id}
                   className="p-4 hover:bg-surface-hover-light dark:hover:bg-surface-hover-dark transition-colors flex gap-4"
