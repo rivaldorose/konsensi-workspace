@@ -159,3 +159,4 @@ export function useAppTeam(appId: string) {
   })
 }
 
+// Ensure useAppTeam is exported
