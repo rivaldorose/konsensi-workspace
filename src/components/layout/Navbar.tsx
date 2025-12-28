@@ -1,312 +1,174 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const mainNavItems = [
-  { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Apps', href: '/apps' },
-  { label: 'Partners', href: '/partners' },
-  { label: 'Events', href: '/events' },
-  { label: 'Docs', href: '/docs' },
-  { label: 'Roadmap', href: '/roadmap' },
-]
-
-const moreNavItems = [
-  { label: 'Chat', href: '/chat' },
-  { label: 'Marketing', href: '/marketing' },
-  { label: 'Contracts', href: '/contracts' },
-]
-
 export function Navbar() {
   const pathname = usePathname()
+  const [moreOpen, setMoreOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false)
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
-  const [searchOpen, setSearchOpen] = useState(false)
 
-  const unreadNotifications = 2 // TODO: Get from state/API
-  const user = { full_name: 'Alex', email: 'alex@konsensi.com' } // TODO: Get from auth
+  const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/')
 
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = () => {
-      setMoreDropdownOpen(false)
-      setProfileDropdownOpen(false)
-    }
+  const mainNavItems = [
+    { label: 'Dashboard', href: '/dashboard' },
+    { label: 'Apps', href: '/apps' },
+    { label: 'Partners', href: '/partners' },
+    { label: 'Events', href: '/events' },
+    { label: 'Docs', href: '/docs' },
+    { label: 'Roadmap', href: '/roadmap' },
+  ]
 
-    if (moreDropdownOpen || profileDropdownOpen) {
-      document.addEventListener('click', handleClickOutside)
-      return () => document.removeEventListener('click', handleClickOutside)
-    }
-  }, [moreDropdownOpen, profileDropdownOpen])
-
-  // Close mobile menu when route changes
-  useEffect(() => {
-    setMobileMenuOpen(false)
-  }, [pathname])
-
-  // Handle keyboard shortcuts (Cmd+K for search)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        setSearchOpen(true)
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  const moreNavItems = [
+    { label: 'Chat', href: '/chat' },
+    { label: 'Marketing', href: '/marketing' },
+    { label: 'Contracts', href: '/contracts' },
+  ]
 
   return (
-    <>
-      <nav className="fixed top-0 left-0 right-0 h-16 bg-secondary-500 shadow-sm z-50">
-        <div className="h-full px-4 md:px-6 flex items-center justify-between max-w-[1920px] mx-auto">
-          
-          {/* LEFT: Logo */}
-          <div className="flex items-center gap-4">
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-white/70 hover:text-white transition-colors"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? (
-                <span className="material-symbols-outlined text-[24px]">close</span>
-              ) : (
-                <span className="material-symbols-outlined text-[24px]">menu</span>
-              )}
-            </button>
-
+    <header className="fixed top-0 left-0 right-0 z-50 h-16 bg-[#2D5F4F] border-b border-[#3a5f4f]">
+      <div className="h-full px-6 flex items-center justify-between">
+        {/* Left: Logo + Brand */}
+        <div className="flex items-center gap-8">
+          <Link href="/dashboard" className="flex items-center gap-3">
             {/* Logo */}
-            <Link href="/dashboard" className="flex items-center" style={{ gap: '12px' }}>
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#B2FF78' }}>
-                <span className="material-symbols-outlined text-secondary-900 text-xl">grid_view</span>
-              </div>
-              <span className="font-montserrat font-bold text-white text-lg hidden sm:block">
-                Konsensi Workspace
-              </span>
-              <span className="font-montserrat font-bold text-white text-lg sm:hidden">
-                Konsensi
-              </span>
-            </Link>
-          </div>
+            <div className="w-8 h-8 text-primary">
+              <svg className="w-full h-full" fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <path clipRule="evenodd" d="M39.475 21.6262C40.358 21.4363 40.6863 21.5589 40.7581 21.5934C40.7876 21.655 40.8547 21.857 40.8082 22.3336C40.7408 23.0255 40.4502 24.0046 39.8572 25.2301C38.6799 27.6631 36.5085 30.6631 33.5858 33.5858C30.6631 36.5085 27.6632 38.6799 25.2301 39.8572C24.0046 40.4502 23.0255 40.7407 22.3336 40.8082C21.8571 40.8547 21.6551 40.7875 21.5934 40.7581C21.5589 40.6863 21.4363 40.358 21.6262 39.475C21.8562 38.4054 22.4689 36.9657 23.5038 35.2817C24.7575 33.2417 26.5497 30.9744 28.7621 28.762C30.9744 26.5497 33.2417 24.7574 35.2817 23.5037C36.9657 22.4689 38.4054 21.8562 39.475 21.6262ZM4.41189 29.2403L18.7597 43.5881C19.8813 44.7097 21.4027 44.9179 22.7217 44.7893C24.0585 44.659 25.5148 44.1631 26.9723 43.4579C29.9052 42.0387 33.2618 39.5667 36.4142 36.4142C39.5667 33.2618 42.0387 29.9052 43.4579 26.9723C44.1631 25.5148 44.659 24.0585 44.7893 22.7217C44.9179 21.4027 44.7097 19.8813 43.5881 18.7597L29.2403 4.41187C27.8527 3.02428 25.8765 3.02573 24.2861 3.36776C22.6081 3.72863 20.7334 4.58419 18.8396 5.74801C16.4978 7.18716 13.9881 9.18353 11.5858 11.5858C9.18354 13.988 7.18717 16.4978 5.74802 18.8396C4.58421 20.7334 3.72865 22.6081 3.36778 24.2861C3.02574 25.8765 3.02429 27.8527 4.41189 29.2403Z" fillRule="evenodd"></path>
+              </svg>
+            </div>
+            {/* Brand Name */}
+            <h1 className="text-white text-lg font-bold leading-tight tracking-tight">
+              Konsensi Workspace
+            </h1>
+          </Link>
 
-          {/* CENTER: Desktop Navigation */}
-          <nav className="hidden md:flex items-center" style={{ gap: '32px' }}>
-            {mainNavItems.map((item) => {
-              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`
-                    relative text-sm font-lato transition-all duration-200
-                    ${isActive 
-                      ? 'text-white' 
-                      : 'text-white/70 hover:text-white'
-                    }
-                  `}
-                >
-                  {item.label}
-                  {isActive && (
-                    <div className="absolute -bottom-[24px] left-0 right-0 h-0.5" style={{ backgroundColor: '#B2FF78' }}></div>
-                  )}
-                </Link>
-              )
-            })}
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-6">
+            {mainNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-sm font-medium transition-colors ${
+                  isActive(item.href)
+                    ? 'text-white border-b-2 border-primary py-1'
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
 
-            {/* More dropdown */}
+            {/* More Dropdown */}
             <div className="relative">
               <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setMoreDropdownOpen(!moreDropdownOpen)
-                }}
-                className={`
-                  flex items-center gap-1 text-sm font-lato transition-all duration-200
-                  ${moreDropdownOpen ? 'text-white' : 'text-white/70 hover:text-white'}
-                `}
+                onClick={() => setMoreOpen(!moreOpen)}
+                className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1"
               >
                 More
-                <span className="material-symbols-outlined text-[16px] transition-transform duration-200" style={{ transform: moreDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                  expand_more
-                </span>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
               </button>
 
-              {moreDropdownOpen && (
-                <div 
-                  className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-grey-200 py-2 z-50"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {moreNavItems.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(item.href)
-                    return (
+              {moreOpen && (
+                <>
+                  {/* Backdrop */}
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setMoreOpen(false)}
+                  />
+                  {/* Dropdown */}
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-[#1f2b15] rounded-lg shadow-lg border border-gray-200 dark:border-white/10 py-2 z-20">
+                    {moreNavItems.map((item) => (
                       <Link
                         key={item.href}
                         href={item.href}
-                        onClick={() => setMoreDropdownOpen(false)}
-                        className={`
-                          flex items-center gap-3 px-4 py-2 text-sm transition-colors
-                          ${isActive 
-                            ? 'bg-grey-50 text-secondary-900 font-medium' 
-                            : 'text-grey-700 hover:bg-grey-50'
-                          }
-                        `}
+                        onClick={() => setMoreOpen(false)}
+                        className={`block px-4 py-2 text-sm font-medium transition-colors ${
+                          isActive(item.href)
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'
+                        }`}
                       >
                         {item.label}
                       </Link>
-                    )
-                  })}
-                </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </nav>
 
-          {/* RIGHT: Actions */}
-          <div className="flex items-center" style={{ gap: '16px' }}>
-            {/* Search */}
-            <button 
-              onClick={() => setSearchOpen(true)}
-              className="text-white/70 hover:text-white transition-colors"
-              aria-label="Search"
-            >
-              <span className="material-symbols-outlined text-[20px]">search</span>
-            </button>
-
-            {/* Notifications */}
-            <Link 
-              href="/notifications"
-              className="relative text-white/70 hover:text-white transition-colors"
-              aria-label="Notifications"
-            >
-              <span className="material-symbols-outlined text-[20px]">notifications</span>
-              {unreadNotifications > 0 && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-error rounded-full"></div>
-              )}
-            </Link>
-
-            {/* Profile */}
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setProfileDropdownOpen(!profileDropdownOpen)
-                }}
-                className="w-8 h-8 rounded-full flex items-center justify-center font-montserrat font-bold text-secondary-900 text-sm hover:ring-2 hover:ring-white/20 transition-all"
-                style={{ backgroundColor: '#B2FF78' }}
-                aria-label="Profile menu"
-              >
-                {user?.full_name?.charAt(0).toUpperCase() || 'A'}
-              </button>
-
-              {profileDropdownOpen && (
-                <div 
-                  className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-grey-200 py-2 z-50"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="px-4 py-3 border-b border-grey-200">
-                    <p className="font-semibold text-sm text-grey-900">
-                      {user?.full_name || 'User'}
-                    </p>
-                    <p className="text-xs text-grey-600">
-                      {user?.email || 'user@example.com'}
-                    </p>
-                  </div>
-
-                  <Link
-                    href="/settings/profile"
-                    onClick={() => setProfileDropdownOpen(false)}
-                    className="block px-4 py-2 text-sm text-grey-700 hover:bg-grey-50 transition-colors"
-                  >
-                    Settings
-                  </Link>
-
-                  <button
-                    onClick={() => {
-                      setProfileDropdownOpen(false)
-                      // TODO: Implement signOut
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm text-error hover:bg-grey-50 transition-colors"
-                  >
-                    Log out
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-secondary-500 border-t border-white/10 shadow-lg z-40">
-            <div className="px-4 py-4 space-y-1 max-h-[calc(100vh-4rem)] overflow-y-auto">
-              {[...mainNavItems, ...moreNavItems].map((item) => {
-                const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`
-                      flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                      ${isActive 
-                        ? 'bg-white/10 text-white' 
-                        : 'text-white/70 hover:bg-white/5 hover:text-white'
-                      }
-                    `}
-                  >
-                    <span className="font-lato text-sm">{item.label}</span>
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Search Modal - TODO: Implement full search modal */}
-      {searchOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-[60] flex items-start justify-center pt-[20vh]"
-          onClick={() => setSearchOpen(false)}
-        >
-          <div 
-            className="bg-white rounded-lg shadow-xl w-full max-w-2xl mx-4 p-4"
-            onClick={(e) => e.stopPropagation()}
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden text-white p-2"
           >
-            <div className="flex items-center gap-3 mb-4">
-              <span className="material-symbols-outlined text-grey-500">search</span>
-              <input
-                type="text"
-                placeholder="Search workspace..."
-                className="flex-1 border-none outline-none text-lg"
-                autoFocus
-              />
-              <button
-                onClick={() => setSearchOpen(false)}
-                className="text-grey-500 hover:text-grey-700"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Right: Search, Notifications, Profile */}
+        <div className="hidden md:flex items-center gap-6">
+          {/* Search */}
+          <Link 
+            href="/search"
+            className="text-white hover:text-primary transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </Link>
+
+          {/* Notifications */}
+          <Link 
+            href="/notifications"
+            className="text-white hover:text-primary transition-colors relative"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            {/* Badge for unread */}
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          </Link>
+
+          {/* Profile */}
+          <Link 
+            href="/settings"
+            className="flex items-center gap-2 text-white hover:text-primary transition-colors"
+          >
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-[#131d0c] font-bold text-sm">
+              A
             </div>
-            <p className="text-sm text-grey-500">Search functionality coming soon...</p>
-          </div>
+          </Link>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-[#2D5F4F] border-t border-[#3a5f4f] py-4 px-6">
+          <nav className="flex flex-col gap-3">
+            {[...mainNavItems, ...moreNavItems].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`text-sm font-medium transition-colors ${
+                  isActive(item.href)
+                    ? 'text-primary'
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
         </div>
       )}
-
-      {/* Backdrop for dropdowns */}
-      {(moreDropdownOpen || profileDropdownOpen) && (
-        <div 
-          className="fixed inset-0 z-40"
-          onClick={() => {
-            setMoreDropdownOpen(false)
-            setProfileDropdownOpen(false)
-          }}
-        ></div>
-      )}
-    </>
+    </header>
   )
 }
