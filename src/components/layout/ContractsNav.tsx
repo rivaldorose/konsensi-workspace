@@ -22,9 +22,6 @@ export function ContractsNav() {
             <Link href="/contracts" className="text-white text-sm font-medium">
               Contracten
             </Link>
-            <Link href="/analytics" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">
-              Financiën
-            </Link>
             <Link href="/settings/team" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">
               HR
             </Link>

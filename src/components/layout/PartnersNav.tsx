@@ -24,9 +24,6 @@ export function PartnersNav() {
           <Link href="/partners" className="text-primary font-bold text-sm leading-normal border-b-2 border-primary py-1">
             Partners
           </Link>
-          <Link href="/analytics" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">
-            Finance
-          </Link>
           <Link href="/settings/team" className="text-gray-300 hover:text-white text-sm font-medium transition-colors">
             Team
           </Link>

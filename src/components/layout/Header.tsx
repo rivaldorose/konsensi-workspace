@@ -25,9 +25,6 @@ export function Header() {
             <Link href="/partners" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
               CRM
             </Link>
-            <Link href="/analytics" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-              Reports
-            </Link>
           </nav>
           <div className="flex items-center gap-4">
             <button className="relative p-2 text-gray-300 hover:text-white transition-colors rounded-full hover:bg-white/10">
