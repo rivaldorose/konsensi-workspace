@@ -35,31 +35,75 @@ export default function AddPartnerPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (!formData.name?.trim()) {
+      alert('Partner Name is required')
+      return
+    }
+    
+    if (!formData.contact_name?.trim()) {
+      alert('Primary Contact Name is required')
+      return
+    }
+    
+    if (!formData.contact_email?.trim()) {
+      alert('Email is required')
+      return
+    }
+    
+    if (!formData.owner_id) {
+      alert('Owner is required')
+      return
+    }
+    
     try {
       await createPartner.mutateAsync({
-        ...formData,
-        tags,
-        notes: opportunity || formData.notes
+        name: formData.name.trim(),
+        type: formData.type || 'client',
+        sector: formData.sector || '',
+        contact_name: formData.contact_name.trim(),
+        contact_email: formData.contact_email.trim(),
+        contact_phone: formData.contact_phone || '',
+        status: formData.status || 'in_gesprek',
+        annual_value: formData.annual_value || 0,
+        owner_id: formData.owner_id,
+        next_action: formData.next_action || '',
+        next_action_date: formData.next_action_date || '',
+        tags: tags || [],
+        notes: opportunity || formData.notes || ''
       })
       router.push('/partners')
     } catch (error) {
       console.error('Failed to create partner:', error)
-      alert('Failed to create partner. Please try again.')
+      alert(`Failed to create partner: ${error instanceof Error ? error.message : 'Please try again.'}`)
     }
   }
 
   const handleSaveDraft = async () => {
+    if (!formData.name?.trim()) {
+      alert('Partner Name is required')
+      return
+    }
+    
     try {
       await createPartner.mutateAsync({
-        ...formData,
-        tags,
+        name: formData.name.trim(),
+        type: formData.type || 'client',
+        sector: formData.sector || '',
+        contact_name: formData.contact_name || '',
+        contact_email: formData.contact_email || '',
+        contact_phone: formData.contact_phone || '',
         status: 'to_contact',
-        notes: opportunity || formData.notes
+        annual_value: formData.annual_value || 0,
+        owner_id: formData.owner_id || currentUser?.id || '',
+        next_action: formData.next_action || '',
+        next_action_date: formData.next_action_date || '',
+        tags: tags || [],
+        notes: opportunity || formData.notes || ''
       })
       router.push('/partners')
     } catch (error) {
       console.error('Failed to save draft:', error)
-      alert('Failed to save draft. Please try again.')
+      alert(`Failed to save draft: ${error instanceof Error ? error.message : 'Please try again.'}`)
     }
   }
 

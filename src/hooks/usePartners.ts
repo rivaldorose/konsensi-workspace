@@ -63,11 +63,18 @@ export function useCreatePartner() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
+      // Use partner.owner_id if provided, otherwise use current user
+      const ownerId = partner.owner_id || user?.id
+      
+      if (!ownerId) {
+        throw new Error('Owner ID is required')
+      }
+      
       const { data, error } = await supabase
         .from('partners')
         .insert({
           ...partner,
-          owner_id: user?.id
+          owner_id: ownerId
         })
         .select('*')
         .single()
