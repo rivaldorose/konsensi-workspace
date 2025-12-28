@@ -9,26 +9,7 @@ export function useDocuments() {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('documents')
-        .select(`
-          id,
-          title,
-          type,
-          folder,
-          status,
-          last_edited,
-          owner_id,
-          owner:users(id, full_name, avatar_url),
-          last_edited_by_id,
-          last_edited_by:users(id, full_name),
-          comment_count,
-          view_count,
-          created_at,
-          updated_at,
-          collaborators:document_collaborators(
-            id,
-            user:users(id, full_name, avatar_url)
-          )
-        `)
+        .select('id, title, type, folder, status, last_edited, owner_id, comment_count, view_count, created_at, updated_at, owner:users(id, full_name, avatar_url), last_edited_by:users(id, full_name, avatar_url), collaborators:document_collaborators(id, user:users(id, full_name, avatar_url))')
         .order('updated_at', { ascending: false })
         .limit(100)
       
