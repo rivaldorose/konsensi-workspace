@@ -38,7 +38,13 @@ export function useDocument(id: string) {
         .single()
       
       if (error) throw error
-      return data as Document
+      // Transform the data to match Document type
+      const transformed = {
+        ...data,
+        last_edited_by: Array.isArray((data as any).last_edited_by) ? (data as any).last_edited_by[0] : (data as any).last_edited_by,
+        owner: Array.isArray((data as any).owner) ? (data as any).owner[0] : (data as any).owner,
+      }
+      return transformed as Document
     },
     enabled: !!id
   })
@@ -63,7 +69,13 @@ export function useCreateDocument() {
         .single()
       
       if (error) throw error
-      return data
+      // Transform the data to match Document type
+      const transformed = {
+        ...data,
+        last_edited_by: Array.isArray((data as any).last_edited_by) ? (data as any).last_edited_by[0] : (data as any).last_edited_by,
+        owner: Array.isArray((data as any).owner) ? (data as any).owner[0] : (data as any).owner,
+      }
+      return transformed as Document
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
@@ -85,7 +97,13 @@ export function useUpdateDocument() {
         .single()
       
       if (error) throw error
-      return data
+      // Transform the data to match Document type
+      const transformed = {
+        ...data,
+        last_edited_by: Array.isArray((data as any).last_edited_by) ? (data as any).last_edited_by[0] : (data as any).last_edited_by,
+        owner: Array.isArray((data as any).owner) ? (data as any).owner[0] : (data as any).owner,
+      }
+      return transformed as Document
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] })
