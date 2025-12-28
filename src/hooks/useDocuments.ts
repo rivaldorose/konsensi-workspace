@@ -15,7 +15,7 @@ export function useDocuments() {
       
       if (error) throw error
       // Transform the data to match Document type - Supabase returns owner and last_edited_by as arrays
-      const transformed = (data || []).map((doc: any) => {
+      const transformed: Document[] = (data || []).map((doc: any): Document => {
         const owner = Array.isArray(doc.owner) ? (doc.owner[0] || null) : (doc.owner || null)
         const lastEditedBy = Array.isArray(doc.last_edited_by) ? (doc.last_edited_by[0] || null) : (doc.last_edited_by || null)
         const collaborators = (doc.collaborators || []).map((collab: any) => ({
@@ -28,7 +28,7 @@ export function useDocuments() {
           owner: owner || undefined,
           last_edited_by: lastEditedBy || undefined,
           collaborators: collaborators.length > 0 ? collaborators : undefined,
-        } as Document
+        }
       })
       return transformed
     },
