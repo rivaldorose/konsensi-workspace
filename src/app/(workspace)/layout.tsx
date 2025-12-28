@@ -6,13 +6,9 @@ export default function WorkspaceLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-background-light">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <Navbar />
-      
-      {/* Main content - navbar is fixed with h-16 (4rem), so children start below it */}
-      <main className="pt-16 min-h-[calc(100vh-4rem)]">
-        {children}
-      </main>
+      {children}
     </div>
   )
 }
