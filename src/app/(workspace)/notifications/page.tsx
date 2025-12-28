@@ -2,6 +2,90 @@
 
 import { useState } from 'react'
 
+// Icon component helper
+const getIconSVG = (iconName: string, className: string = 'w-5 h-5') => {
+  const iconMap: Record<string, JSX.Element> = {
+    settings: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>
+    ),
+    alternate_email: (
+      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.5 14.5h-3c-.28 0-.5-.22-.5-.5v-4c0-.28.22-.5.5-.5h3c.28 0 .5.22.5.5v4c0 .28-.22.5-.5.5zm-3-5.5c-.83 0-1.5-.67-1.5-1.5S9.67 8 10.5 8 12 8.67 12 9.5 11.33 11 10.5 11zm5 0c-.83 0-1.5-.67-1.5-1.5S14.67 8 15.5 8 17 8.67 17 9.5 16.33 11 15.5 11z" />
+      </svg>
+    ),
+    fact_check: (
+      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM10 17H5v-2h5v2zm0-4H5v-2h5v2zm0-4H5V7h5v2zm4.82 6L12 12.16l1.41-1.41 1.41 1.42L17.99 9l1.42 1.42L14.82 15z" />
+      </svg>
+    ),
+    handshake: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+      </svg>
+    ),
+    security_update_warning: (
+      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
+      </svg>
+    ),
+    comment: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      </svg>
+    ),
+    reply: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+      </svg>
+    ),
+    visibility: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+      </svg>
+    ),
+    check: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      </svg>
+    ),
+    close: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    ),
+    description: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    ),
+    lock_reset: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+      </svg>
+    ),
+    forum: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+      </svg>
+    ),
+    more_vert: (
+      <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+      </svg>
+    ),
+    refresh: (
+      <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+    ),
+  }
+  return iconMap[iconName] || <div className={className} />
+}
+
 const notifications = {
   today: [
     {
@@ -111,7 +195,7 @@ export default function NotificationsPage() {
               onClick={() => setSettingsOpen(true)}
               className="text-sm font-bold text-[#131c0d] dark:text-gray-200 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/10 px-4 py-2 rounded-lg shadow-sm transition-all flex items-center gap-2"
             >
-              <span className="material-symbols-outlined text-[18px]">settings</span>
+              {getIconSVG('settings', 'w-[18px] h-[18px]')}
               <span>Settings</span>
             </button>
             <button className="text-sm font-bold text-[#131c0d] dark:text-gray-900 bg-primary hover:bg-primary-dark hover:text-white px-4 py-2 rounded-lg shadow-sm shadow-primary/20 transition-all">
@@ -151,7 +235,7 @@ export default function NotificationsPage() {
                 <div className="flex gap-4 items-start">
                   <div className="shrink-0 mt-1">
                     <div className={`size-10 rounded-full ${notification.iconColor} flex items-center justify-center`}>
-                      <span className="material-symbols-outlined">{notification.icon}</span>
+                      {getIconSVG(notification.icon, 'w-5 h-5')}
                     </div>
                   </div>
                   <div className="flex-grow min-w-0">
@@ -170,7 +254,7 @@ export default function NotificationsPage() {
                           key={idx}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${action.color} text-xs font-bold rounded-lg hover:opacity-90 transition-colors`}
                         >
-                          {action.icon && <span className="material-symbols-outlined text-[16px]">{action.icon}</span>}
+                          {action.icon && getIconSVG(action.icon, 'w-4 h-4')}
                           {action.label}
                         </button>
                       ))}
@@ -180,7 +264,7 @@ export default function NotificationsPage() {
                     <span className="text-xs text-gray-400 font-medium">{notification.time}</span>
                     <div className="relative">
                       <button className="p-1 rounded-md text-gray-400 hover:text-[#131c0d] hover:bg-gray-100 dark:hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100">
-                        <span className="material-symbols-outlined">more_vert</span>
+                        {getIconSVG('more_vert', 'w-5 h-5')}
                       </button>
                     </div>
                   </div>
@@ -200,7 +284,7 @@ export default function NotificationsPage() {
                 <div className="flex gap-4 items-start">
                   <div className="shrink-0 mt-1">
                     <div className={`size-10 rounded-full ${notification.iconColor} flex items-center justify-center`}>
-                      <span className="material-symbols-outlined">{notification.icon}</span>
+                      {getIconSVG(notification.icon, 'w-5 h-5')}
                     </div>
                   </div>
                   <div className="flex-grow min-w-0">
@@ -219,7 +303,7 @@ export default function NotificationsPage() {
                           key={idx}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${action.color} text-xs font-bold rounded-lg hover:opacity-90 transition-colors`}
                         >
-                          {action.icon && <span className="material-symbols-outlined text-[16px]">{action.icon}</span>}
+                          {action.icon && getIconSVG(action.icon, 'w-4 h-4')}
                           {action.label}
                         </button>
                       ))}
@@ -229,7 +313,7 @@ export default function NotificationsPage() {
                     <span className="text-xs text-gray-400 font-medium">{notification.time}</span>
                     <div className="relative">
                       <button className="p-1 rounded-md text-gray-400 hover:text-[#131c0d] hover:bg-gray-100 dark:hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100">
-                        <span className="material-symbols-outlined">more_vert</span>
+                        {getIconSVG('more_vert', 'w-5 h-5')}
                       </button>
                     </div>
                   </div>
@@ -249,7 +333,7 @@ export default function NotificationsPage() {
                 <div className="flex gap-4 items-start">
                   <div className="shrink-0 mt-1">
                     <div className={`size-10 rounded-full ${notification.iconColor} flex items-center justify-center`}>
-                      <span className="material-symbols-outlined">{notification.icon}</span>
+                      {getIconSVG(notification.icon, 'w-5 h-5')}
                     </div>
                   </div>
                   <div className="flex-grow min-w-0">
@@ -268,7 +352,7 @@ export default function NotificationsPage() {
                           key={idx}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${action.color} text-xs font-bold rounded-lg hover:opacity-90 transition-colors ${action.color.includes('border') ? 'border' : ''}`}
                         >
-                          {action.icon && <span className="material-symbols-outlined text-[16px]">{action.icon}</span>}
+                          {action.icon && getIconSVG(action.icon, 'w-4 h-4')}
                           {action.label}
                         </button>
                       ))}
@@ -278,7 +362,7 @@ export default function NotificationsPage() {
                     <span className="text-xs text-gray-400 font-medium">{notification.time}</span>
                     <div className="relative">
                       <button className="p-1 rounded-md text-gray-400 hover:text-[#131c0d] hover:bg-gray-100 dark:hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100">
-                        <span className="material-symbols-outlined">more_vert</span>
+                        {getIconSVG('more_vert', 'w-5 h-5')}
                       </button>
                     </div>
                   </div>
@@ -290,7 +374,9 @@ export default function NotificationsPage() {
           {/* Load More */}
           <div className="flex justify-center pt-4 pb-12">
             <button className="text-sm font-bold text-gray-500 hover:text-primary transition-colors flex items-center gap-2">
-              <span className="material-symbols-outlined animate-spin" style={{ fontSize: '18px', animationDuration: '2s' }}>refresh</span>
+              <svg className="w-[18px] h-[18px] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ animationDuration: '2s' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
               Load More...
             </button>
           </div>
@@ -313,7 +399,7 @@ export default function NotificationsPage() {
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                 onClick={() => setSettingsOpen(false)}
               >
-                <span className="material-symbols-outlined">close</span>
+                {getIconSVG('close', 'w-5 h-5')}
               </button>
             </div>
             {/* Modal Content */}
