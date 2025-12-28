@@ -204,8 +204,9 @@ export default function NotificationsPage() {
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{notification.message}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {notification.actions.map((action, idx) => (
+                    {notification.actions && notification.actions.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {notification.actions.map((action, idx) => (
                         <button 
                           key={idx}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${action.color} text-xs font-bold rounded-lg hover:opacity-90 transition-colors`}
@@ -213,8 +214,9 @@ export default function NotificationsPage() {
                           {action.icon && getIconSVG(action.icon, 'w-4 h-4')}
                           {action.label}
                         </button>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="shrink-0 flex flex-col items-end gap-2">
                     <span className="text-xs text-gray-400 font-medium">{notification.time}</span>
@@ -255,8 +257,9 @@ export default function NotificationsPage() {
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{notification.message}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {notification.actions.map((action, idx) => (
+                    {notification.actions && notification.actions.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {notification.actions.map((action, idx) => (
                         <button 
                           key={idx}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${action.color} text-xs font-bold rounded-lg hover:opacity-90 transition-colors`}
@@ -264,8 +267,9 @@ export default function NotificationsPage() {
                           {action.icon && getIconSVG(action.icon, 'w-4 h-4')}
                           {action.label}
                         </button>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="shrink-0 flex flex-col items-end gap-2">
                     <span className="text-xs text-gray-400 font-medium">{notification.time}</span>
@@ -306,8 +310,9 @@ export default function NotificationsPage() {
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">{notification.message}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {notification.actions.map((action, idx) => (
+                    {notification.actions && notification.actions.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {notification.actions.map((action, idx) => (
                         <button 
                           key={idx}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${action.color} text-xs font-bold rounded-lg hover:opacity-90 transition-colors ${action.color.includes('border') ? 'border' : ''}`}
@@ -315,8 +320,9 @@ export default function NotificationsPage() {
                           {action.icon && getIconSVG(action.icon, 'w-4 h-4')}
                           {action.label}
                         </button>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="shrink-0 flex flex-col items-end gap-2">
                     <span className="text-xs text-gray-400 font-medium">{notification.time}</span>
