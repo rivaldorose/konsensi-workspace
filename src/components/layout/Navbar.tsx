@@ -17,7 +17,6 @@ const moreNavItems = [
   { label: 'Chat', href: '/chat' },
   { label: 'Marketing', href: '/marketing' },
   { label: 'Contracts', href: '/contracts' },
-  { label: 'Analytics', href: '/analytics' },
 ]
 
 export function Navbar() {
