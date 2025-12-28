@@ -6,11 +6,18 @@ export interface Document {
   folder_id?: string
   status: 'favorite' | 'recent' | 'shared' | 'all'
   last_edited: string
+  owner_id: string
+  owner?: {
+    id: string
+    full_name: string
+    avatar_url?: string
+  }
   last_edited_by?: {
     id: string
     full_name: string
     avatar_url?: string
   }
+  last_edited_by_id?: string
   collaborators?: {
     id: string
     full_name: string
@@ -20,6 +27,5 @@ export interface Document {
   view_count?: number
   created_at: string
   updated_at: string
-  owner_id: string
 }
 
