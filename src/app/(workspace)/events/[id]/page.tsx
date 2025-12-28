@@ -1,14 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useEvent } from '@/hooks/useEvents'
 import { format, differenceInDays } from 'date-fns'
 
-export default function EventDetailPage({ params }: { params: { id: string } }) {
+export default function EventDetailPage() {
   const router = useRouter()
-  const { data: event, isLoading } = useEvent(params.id)
+  const params = useParams()
+  const eventId = params.id as string
+  const { data: event, isLoading } = useEvent(eventId)
   const [activeTab, setActiveTab] = useState('overview')
 
   if (isLoading) {
