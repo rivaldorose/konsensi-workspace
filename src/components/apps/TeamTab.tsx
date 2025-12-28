@@ -12,31 +12,60 @@ export function TeamTab({ appId }: TeamTabProps) {
   const { data: allUsers = [] } = useUsers()
   
   // Get team members from app.team_members array and owner
-  const teamMembers = app ? [
-    ...(app.team_members?.map((userId: string) => {
-      const user = allUsers.find(u => u.id === userId)
-      return user ? {
-        id: user.id,
-        user_id: user.id,
-        app_id: appId,
-        role: 'member' as const,
-        user: {
-          id: user.id,
-          full_name: user.full_name || '',
-          email: user.email || '',
-          avatar_url: user.avatar_url
+  const teamMembers: Array<{
+    id: string
+    user_id: string
+    app_id: string
+    role: 'owner' | 'admin' | 'member'
+    user: {
+      id: string
+      full_name: string
+      email: string
+      avatar_url?: string
+    }
+  }> = []
+  
+  if (app) {
+    // Add team members
+    if (app.team_members) {
+      app.team_members.forEach((userId: string) => {
+        const user = allUsers.find(u => u.id === userId)
+        if (user) {
+          teamMembers.push({
+            id: user.id,
+            user_id: user.id,
+            app_id: appId,
+            role: 'member',
+            user: {
+              id: user.id,
+              full_name: user.full_name || '',
+              email: user.email || '',
+              avatar_url: user.avatar_url
+            }
+          })
         }
-      } : null
-    }).filter(Boolean) || []),
+      })
+    }
+    
     // Add owner
-    app.owner_id ? {
-      id: app.owner_id,
-      user_id: app.owner_id,
-      app_id: appId,
-      role: 'owner' as const,
-      user: app.owner || allUsers.find(u => u.id === app.owner_id)
-    } : null
-  ].filter(Boolean) : []
+    if (app.owner_id) {
+      const owner = app.owner || allUsers.find(u => u.id === app.owner_id)
+      if (owner) {
+        teamMembers.push({
+          id: owner.id,
+          user_id: owner.id,
+          app_id: appId,
+          role: 'owner',
+          user: {
+            id: owner.id,
+            full_name: owner.full_name || '',
+            email: owner.email || '',
+            avatar_url: owner.avatar_url
+          }
+        })
+      }
+    }
+  }
   
   const isLoading = !app
 
