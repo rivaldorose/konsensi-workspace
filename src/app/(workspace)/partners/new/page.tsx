@@ -311,7 +311,9 @@ export default function AddPartnerPage() {
                         <option value="sarah">Sarah Jansen</option>
                         <option value="mark">Mark de Vries</option>
                       </select>
-                      <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#6e9a4c]">expand_more</span>
+                      <svg className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#6e9a4c] w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
                     </div>
                   </div>
                 </div>
