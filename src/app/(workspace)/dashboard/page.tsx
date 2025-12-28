@@ -15,11 +15,15 @@ export default function DashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           <button className="flex items-center justify-center h-10 px-4 bg-white border border-gray-200 shadow-sm rounded-lg hover:bg-gray-50 transition-colors text-text-main font-bold text-sm">
-            <span className="material-symbols-outlined mr-2 text-xl">calendar_today</span>
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" />
+            </svg>
             <span>Oct 24, 2023</span>
           </button>
           <button className="flex items-center justify-center size-10 bg-white border border-gray-200 shadow-sm rounded-lg hover:bg-gray-50 transition-colors relative">
-            <span className="material-symbols-outlined text-text-main">notifications</span>
+            <svg className="w-5 h-5 text-text-main" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+            </svg>
             <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full"></span>
           </button>
         </div>
@@ -31,10 +35,14 @@ export default function DashboardPage() {
         <Card className="bg-card-light rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between h-full group hover:shadow-md transition-all duration-300">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-              <span className="material-symbols-outlined">grid_view</span>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+              </svg>
             </div>
             <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-bold px-2 py-1 rounded-full">
-              <span className="material-symbols-outlined text-sm">trending_up</span>
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" />
+              </svg>
               +12%
             </span>
           </div>
@@ -48,7 +56,9 @@ export default function DashboardPage() {
         <Card className="bg-card-light rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between h-full group hover:shadow-md transition-all duration-300">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2 bg-primary/20 text-secondary-light rounded-lg">
-              <span className="material-symbols-outlined">wifi</span>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.076 13.308-5.076 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.24 0 1 1 0 01-1.415-1.415 5 5 0 017.07 0 1 1 0 01-1.415 1.415zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" />
+              </svg>
             </div>
             <span className="text-secondary text-sm font-bold bg-gray-100 px-2 py-1 rounded-md">3/5 Online</span>
           </div>
@@ -87,7 +97,9 @@ export default function DashboardPage() {
         <Card className="bg-card-light rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between h-full group hover:shadow-md transition-all duration-300">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
-              <span className="material-symbols-outlined">handshake</span>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+              </svg>
             </div>
             <button className="text-xs font-bold text-primary-dark hover:text-secondary hover:underline">View</button>
           </div>
@@ -104,7 +116,9 @@ export default function DashboardPage() {
         <Card className="bg-card-light rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col justify-between h-full group hover:shadow-md transition-all duration-300">
           <div className="flex justify-between items-start mb-4">
             <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
-              <span className="material-symbols-outlined">flag</span>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M3 6a3 3 0 013-3h10a1 1 0 01.8 1.6L14.25 8l2.55 3.4A1 1 0 0116 13H6a1 1 0 00-1 1v3a1 1 0 11-2 0V6z" />
+              </svg>
             </div>
             <span className="text-xs font-bold text-gray-500">Q4</span>
           </div>
@@ -128,8 +142,10 @@ export default function DashboardPage() {
           <Card className="bg-card-light rounded-xl shadow-sm border border-gray-100 flex flex-col">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <h3 className="text-lg font-bold text-secondary flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary-dark">check_circle</span>
-                Jouw Prioriteiten Deze Week
+                <svg className="w-5 h-5 text-primary-dark" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
+                </svg>
+                Priorities This Week
               </h3>
               <div className="flex gap-2">
                 <span className="text-xs font-medium px-2 py-1 bg-gray-100 rounded text-gray-600">Week 43</span>
@@ -146,7 +162,9 @@ export default function DashboardPage() {
                     type="checkbox"
                     readOnly
                   />
-                  <span className="material-symbols-outlined absolute text-secondary opacity-0 peer-checked:opacity-100 pointer-events-none text-base font-bold">check</span>
+                  <svg className="absolute w-4 h-4 text-secondary opacity-0 peer-checked:opacity-100 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                  </svg>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
@@ -164,7 +182,9 @@ export default function DashboardPage() {
                     className="peer appearance-none h-6 w-6 border-2 border-gray-300 rounded-md checked:bg-primary checked:border-primary focus:ring-primary transition-colors cursor-pointer" 
                     type="checkbox"
                   />
-                  <span className="material-symbols-outlined absolute text-secondary opacity-0 peer-checked:opacity-100 pointer-events-none text-base font-bold">check</span>
+                  <svg className="absolute w-4 h-4 text-secondary opacity-0 peer-checked:opacity-100 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                  </svg>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
@@ -174,12 +194,14 @@ export default function DashboardPage() {
                   <p className="text-sm text-text-muted mt-1">Analyze Q3 spending and adjust for Q4.</p>
                   <div className="flex items-center gap-4 mt-3">
                     <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <span className="material-symbols-outlined text-sm">schedule</span>
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
+                      </svg>
                       <span>Due tomorrow</span>
                     </div>
                     <div className="flex -space-x-2">
                       <img alt="User" className="w-6 h-6 rounded-full border-2 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8E5FueIrJ0MTi4tRlgfat3Xfl8VvXl3Hvbyd0CHc-IBJSgXhF-QXTHa5lU95eCfZzvu7T7MxVllK8f8lFhx1j1ugE9SCg4mLVNK4bDOE-LA1GRy9lGFccZBaOxs7FS0_yAjN0v0xnKiz0U0dtjfq_rbOu0QH5tGATxomLo5Zh8Qmt-PbNghe8ksMEpIN5Wnv-Jdod7toE-kEYiSicERAUDtuZAKMKzL-Oyn4vVAvMHA55cr48bDTU3Vb6XAJsf0oM9-jRAkDlK0kM" />
-                      <img alt="User" className="w-6 h-6 rounded-full border-2 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKUaa4P43K0NIvAmy1Qj3S-P3WgppmNYpv4I66irfkyP23bhmVuAjoM_hm0nX8cdXOHcZvtTbUuKal33z2AsTJO9J9mk5g63NT2kjoAh4nob92_7IOZkSYwljEnS4y9-DpRAw3jgyAVt5IRTg4wkE9yUkS_GW_fHVenjNl4ezHbhXMhXRW86J_OOLAeh1-lWlm9cjj3g_Xn_k_WiteL_5QMtrOj6XSZjaCQZiVed7FLDk_gaWQVrMucs8qPVQlXU4h5PCBJ8IRUkCW" />
+                      <img alt="User" className="w-6 h-6 rounded-full border-2 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKUaa4P43K0NIvAmy1Qj3S-P3WgppmNYpv4I66irfkyP23bhmVuAjoM_hm0nX8cdXOHcZvtTbUuKal33z2AsTJO9J9mk5g63NT2kjoAh4nob92_7IOZkSYWljEnS4y9-DpRAw3jgyAVt5IRTg4wkE9yUkS_GW_fHVenjNl4ezHbhXMhXRW86J_OOLAeh1-lWlm9cjj3g_Xn_k_WiteL_5QMtrOj6XSZjaCQZiVed7FLDk_gaWQVrMucs8qPVQlXU4h5PCBJ8IRUkCW" />
                     </div>
                   </div>
                 </div>
@@ -192,7 +214,9 @@ export default function DashboardPage() {
                     className="peer appearance-none h-6 w-6 border-2 border-gray-300 rounded-md checked:bg-primary checked:border-primary focus:ring-primary transition-colors cursor-pointer" 
                     type="checkbox"
                   />
-                  <span className="material-symbols-outlined absolute text-secondary opacity-0 peer-checked:opacity-100 pointer-events-none text-base font-bold">check</span>
+                  <svg className="absolute w-4 h-4 text-secondary opacity-0 peer-checked:opacity-100 pointer-events-none" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                  </svg>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
@@ -204,7 +228,9 @@ export default function DashboardPage() {
               </label>
 
               <button className="mt-2 w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-sm font-bold text-gray-500 hover:text-secondary hover:border-secondary hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-                <span className="material-symbols-outlined text-lg">add</span>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+                </svg>
                 Add New Priority
               </button>
             </div>
@@ -214,7 +240,9 @@ export default function DashboardPage() {
           <Card className="bg-card-light rounded-xl shadow-sm border border-gray-100 flex flex-col">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <h3 className="text-lg font-bold text-secondary flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary-dark">today</span>
+                <svg className="w-5 h-5 text-primary-dark" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" />
+                </svg>
                 To Do Today
               </h3>
               <span className="text-sm font-medium text-gray-500">3 tasks remaining</span>
@@ -223,14 +251,18 @@ export default function DashboardPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
                   <button className="text-gray-400 hover:text-primary-dark transition-colors">
-                    <span className="material-symbols-outlined">radio_button_unchecked</span>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" />
+                    </svg>
                   </button>
                   <span className="text-sm font-medium text-secondary flex-1">Call with Vendor regarding API access</span>
                   <span className="text-xs text-gray-400 bg-white px-2 py-1 rounded border border-gray-200">2:00 PM</span>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
                   <button className="text-gray-400 hover:text-primary-dark transition-colors">
-                    <span className="material-symbols-outlined">radio_button_unchecked</span>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" />
+                    </svg>
                   </button>
                   <span className="text-sm font-medium text-secondary flex-1">Approve vacation requests</span>
                   <div className="flex items-center">
@@ -239,7 +271,9 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
                   <button className="text-gray-400 hover:text-primary-dark transition-colors">
-                    <span className="material-symbols-outlined">radio_button_unchecked</span>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" />
+                    </svg>
                   </button>
                   <span className="text-sm font-medium text-secondary flex-1">Update license keys for dev team</span>
                 </div>
@@ -254,7 +288,9 @@ export default function DashboardPage() {
           <Card className="bg-card-light rounded-xl shadow-sm border border-gray-100 flex flex-col h-full">
             <div className="p-5 border-b border-gray-100 flex justify-between items-center">
               <h3 className="text-base font-bold text-secondary flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary-dark text-xl">history</span>
+                <svg className="w-5 h-5 text-primary-dark" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
+                </svg>
                 Recent Activity
               </h3>
               <button className="text-xs font-semibold text-gray-400 hover:text-secondary transition-colors">View all</button>
@@ -309,11 +345,15 @@ export default function DashboardPage() {
               <p className="text-xs font-bold text-text-muted uppercase mb-3">Quick Actions</p>
               <div className="grid grid-cols-2 gap-2">
                 <button className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 rounded-lg hover:border-primary hover:shadow-sm transition-all text-secondary">
-                  <span className="material-symbols-outlined text-xl mb-1 text-primary-dark">add_box</span>
+                  <svg className="w-6 h-6 mb-1 text-primary-dark" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                  </svg>
                   <span className="text-[10px] font-bold">New Project</span>
                 </button>
                 <button className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 rounded-lg hover:border-primary hover:shadow-sm transition-all text-secondary">
-                  <span className="material-symbols-outlined text-xl mb-1 text-blue-500">person_add</span>
+                  <svg className="w-6 h-6 mb-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+                  </svg>
                   <span className="text-[10px] font-bold">Invite Member</span>
                 </button>
               </div>
@@ -330,7 +370,9 @@ export default function DashboardPage() {
             <p className="text-xs font-bold text-primary mb-1 uppercase tracking-wider">Upcoming</p>
             <h4 className="text-lg font-bold mb-3">Weekly Team Sync</h4>
             <div className="flex items-center gap-2 text-sm text-gray-300 mb-4">
-              <span className="material-symbols-outlined text-base">schedule</span>
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" />
+              </svg>
               <span>Friday, 10:00 AM</span>
             </div>
             <button className="w-full py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition-colors">View Calendar</button>
