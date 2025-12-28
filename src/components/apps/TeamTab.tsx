@@ -1,13 +1,44 @@
 'use client'
 
-import { useAppTeam } from '@/hooks/useApps'
+import { useApp } from '@/hooks/useApps'
+import { useUsers } from '@/hooks/useUsers'
 
 interface TeamTabProps {
   appId: string
 }
 
 export function TeamTab({ appId }: TeamTabProps) {
-  const { data: teamMembers = [], isLoading } = useAppTeam(appId)
+  const { data: app } = useApp(appId)
+  const { data: allUsers = [] } = useUsers()
+  
+  // Get team members from app.team_members array and owner
+  const teamMembers = app ? [
+    ...(app.team_members?.map((userId: string) => {
+      const user = allUsers.find(u => u.id === userId)
+      return user ? {
+        id: user.id,
+        user_id: user.id,
+        app_id: appId,
+        role: 'member' as const,
+        user: {
+          id: user.id,
+          full_name: user.full_name || '',
+          email: user.email || '',
+          avatar_url: user.avatar_url
+        }
+      } : null
+    }).filter(Boolean) || []),
+    // Add owner
+    app.owner_id ? {
+      id: app.owner_id,
+      user_id: app.owner_id,
+      app_id: appId,
+      role: 'owner' as const,
+      user: app.owner || allUsers.find(u => u.id === app.owner_id)
+    } : null
+  ].filter(Boolean) : []
+  
+  const isLoading = !app
 
   const getRoleConfig = (role: string) => {
     switch (role) {
