@@ -183,7 +183,6 @@ export default function AddPartnerPage() {
                       onChange={(e) => setFormData({ ...formData, contact_name: e.target.value })}
                     />
                   </div>
-                  {/* Job Title - Removed as it's not in the Partner type */}
                   {/* Email */}
                   <div className="flex flex-col gap-2">
                     <label className="text-[#131b0d] dark:text-[#e0e0e0] text-sm font-medium leading-normal">Email*</label>
