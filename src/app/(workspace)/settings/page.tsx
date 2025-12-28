@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useCurrentUser, useUsers } from '@/hooks/useUsers'
+import { useCurrentUser, useUsers, useUpdateUser } from '@/hooks/useUsers'
 
 export default function SettingsPage() {
   const { data: currentUser } = useCurrentUser()
@@ -81,9 +81,22 @@ export default function SettingsPage() {
     setProfileData((prev) => ({ ...prev, [field]: value }))
   }
 
+  const updateUserMutation = useUpdateUser()
+
   const handleSaveProfile = async () => {
-    // TODO: Implement save functionality
-    console.log('Saving profile:', profileData)
+    if (!currentUser) return
+    
+    try {
+      await updateUserMutation.mutateAsync({
+        id: currentUser.id,
+        full_name: profileData.full_name,
+        email: profileData.email,
+      })
+      alert('Profile updated successfully!')
+    } catch (error) {
+      console.error('Failed to update profile:', error)
+      alert('Failed to update profile. Please try again.')
+    }
   }
 
   return (

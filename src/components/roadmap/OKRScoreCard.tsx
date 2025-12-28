@@ -54,21 +54,33 @@ export function OKRScoreCard() {
         </div>
 
         <div className="w-full mt-4 space-y-2">
-          <div className="flex justify-between text-xs font-medium">
-            <span className="text-gray-500">Product</span>
-            <span className="text-[#131c0d] dark:text-white font-bold">82%</span>
-          </div>
-          <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div className="h-full bg-primary w-[82%]"></div>
-          </div>
+          {stats && stats.productProgress > 0 && (
+            <>
+              <div className="flex justify-between text-xs font-medium">
+                <span className="text-gray-500">Product</span>
+                <span className="text-[#131c0d] dark:text-white font-bold">{stats.productProgress}%</span>
+              </div>
+              <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-full bg-primary" style={{ width: `${stats.productProgress}%` }}></div>
+              </div>
+            </>
+          )}
 
-          <div className="flex justify-between text-xs font-medium pt-1">
-            <span className="text-gray-500">Growth</span>
-            <span className="text-[#131c0d] dark:text-white font-bold">45%</span>
-          </div>
-          <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div className="h-full bg-orange-400 w-[45%]"></div>
-          </div>
+          {stats && stats.marketingProgress > 0 && (
+            <>
+              <div className="flex justify-between text-xs font-medium pt-1">
+                <span className="text-gray-500">Marketing</span>
+                <span className="text-[#131c0d] dark:text-white font-bold">{stats.marketingProgress}%</span>
+              </div>
+              <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-full bg-orange-400" style={{ width: `${stats.marketingProgress}%` }}></div>
+              </div>
+            </>
+          )}
+
+          {(!stats || (stats.productProgress === 0 && stats.marketingProgress === 0)) && (
+            <p className="text-xs text-gray-400 text-center py-2">No category progress data available</p>
+          )}
         </div>
       </div>
     </div>

@@ -46,7 +46,7 @@ export function useGoalStats() {
       
       const { data: allGoals, error } = await supabase
         .from('goals')
-        .select('status, progress')
+        .select('status, progress, category')
 
       if (error) throw error
 
@@ -58,12 +58,25 @@ export function useGoalStats() {
         ? Math.round(allGoals!.reduce((sum, g) => sum + (g.progress || 0), 0) / total)
         : 0
 
+      // Calculate progress by category
+      const productGoals = allGoals?.filter(g => g.category === 'product') || []
+      const productProgress = productGoals.length > 0
+        ? Math.round(productGoals.reduce((sum, g) => sum + (g.progress || 0), 0) / productGoals.length)
+        : 0
+
+      const marketingGoals = allGoals?.filter(g => g.category === 'marketing') || []
+      const marketingProgress = marketingGoals.length > 0
+        ? Math.round(marketingGoals.reduce((sum, g) => sum + (g.progress || 0), 0) / marketingGoals.length)
+        : 0
+
       return {
         total,
         completed,
         onTrack,
         atRisk,
         overallProgress,
+        productProgress,
+        marketingProgress,
       }
     },
   })

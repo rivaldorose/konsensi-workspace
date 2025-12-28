@@ -52,75 +52,12 @@ export function RoadmapVisualization() {
     })
   })
 
-  // Group items by category
+  // Group items by category - only show real data, no defaults
   const productItems = roadmapItems.filter((item) => item.category === 'product')
   const fundingItems = roadmapItems.filter((item) => item.category === 'funding')
   const teamItems = roadmapItems.filter((item) => item.category === 'team')
   const appItems = roadmapItems.filter((item) => item.category === 'product') // Can be filtered differently
   const partnershipItems = roadmapItems.filter((item) => item.category === 'partnerships')
-
-  // Default items if no data
-  const defaultItems: RoadmapItem[] = [
-    {
-      id: '1',
-      title: 'MVP Beta Launch',
-      startDate: '2025-01-15',
-      endDate: '2025-03-30',
-      category: 'product',
-      color: 'bg-primary',
-    },
-    {
-      id: '2',
-      title: 'Feature V2 Expansion',
-      startDate: '2025-06-01',
-      endDate: '2025-07-31',
-      category: 'product',
-      color: 'bg-[#ecf4e7] dark:bg-[#334025]',
-      borderColor: 'border-primary',
-    },
-    {
-      id: '3',
-      title: 'Seed Round Prep',
-      startDate: '2025-04-01',
-      endDate: '2025-05-31',
-      category: 'funding',
-      color: 'bg-blue-100 dark:bg-blue-900/40',
-      borderColor: 'border-blue-500',
-    },
-    {
-      id: '4',
-      title: 'Ongoing Recruitment',
-      startDate: '2025-01-01',
-      endDate: '2025-12-31',
-      category: 'team',
-      type: 'gradient',
-    },
-    {
-      id: '5',
-      title: 'Mobile App Dev',
-      startDate: '2025-06-15',
-      endDate: '2025-09-15',
-      category: 'apps',
-      color: 'bg-purple-100 dark:bg-purple-900/40',
-      borderColor: 'border-purple-500',
-    },
-    {
-      id: '6',
-      title: 'Strategic Partnership',
-      startDate: '2025-09-01',
-      endDate: '2025-11-30',
-      category: 'partnerships',
-      color: 'bg-orange-100 dark:bg-orange-900/40',
-      borderColor: 'border-orange-500',
-    },
-  ]
-
-  const finalProductItems = productItems.length > 0 ? productItems : defaultItems.filter((i) => i.category === 'product')
-  const finalFundingItems = fundingItems.length > 0 ? fundingItems : defaultItems.filter((i) => i.category === 'funding')
-  const finalTeamItems = teamItems.length > 0 ? teamItems : defaultItems.filter((i) => i.category === 'team')
-  const finalAppItems = appItems.length > 0 ? appItems : defaultItems.filter((i) => i.category === 'apps')
-  const finalPartnershipItems =
-    partnershipItems.length > 0 ? partnershipItems : defaultItems.filter((i) => i.category === 'partnerships')
 
   return (
     <div className="flex-1 bg-surface-light dark:bg-surface-dark rounded-xl border border-[#dae8ce] dark:border-[#334025] overflow-hidden shadow-sm">
@@ -131,21 +68,6 @@ export function RoadmapVisualization() {
           </svg>
           2025 Roadmap
         </h3>
-        <div className="flex gap-2">
-          <button className="p-1.5 rounded hover:bg-[#ecf4e7] dark:hover:bg-[#334025] text-gray-500 transition-colors">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-            </svg>
-          </button>
-          <button className="p-1.5 rounded hover:bg-[#ecf4e7] dark:hover:bg-[#334025] text-gray-500 transition-colors">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M3 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm2 2V5h2v2H5zm-2 7a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4zm2 2v-2h2v2H5zm9-13a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V4a1 1 0 00-1-1h-4zm1 2h2v2h-2V5zm-8 8a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H6a1 1 0 01-1-1v-4zm2 2v-2h2v2H8z"
-              />
-            </svg>
-          </button>
-        </div>
       </div>
 
       {/* Scrollable Timeline Container */}
@@ -169,21 +91,27 @@ export function RoadmapVisualization() {
             </div>
           </div>
 
-          {/* Swimlanes */}
-          <div className="flex flex-col gap-6 relative">
-            {/* Grid Lines Background */}
-            <div className="absolute inset-0 left-[16.66%] right-0 grid grid-cols-4 pointer-events-none">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="border-r border-dashed border-gray-200 dark:border-gray-700 h-full"></div>
-              ))}
+          {/* Swimlanes - Only show if there's data */}
+          {roadmapItems.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <p>No roadmap items yet. Create goals to see them on the roadmap.</p>
             </div>
+          ) : (
+            <div className="flex flex-col gap-6 relative">
+              {/* Grid Lines Background */}
+              <div className="absolute inset-0 left-[16.66%] right-0 grid grid-cols-4 pointer-events-none">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="border-r border-dashed border-gray-200 dark:border-gray-700 h-full"></div>
+                ))}
+              </div>
 
-            <RoadmapSwimlane category="Product" icon="rocket_launch" items={finalProductItems} />
-            <RoadmapSwimlane category="Funding" icon="monetization_on" items={finalFundingItems} />
-            <RoadmapSwimlane category="Team" icon="group" items={finalTeamItems} />
-            <RoadmapSwimlane category="Apps" icon="smartphone" items={finalAppItems} />
-            <RoadmapSwimlane category="Partners" icon="handshake" items={finalPartnershipItems} />
-          </div>
+              {productItems.length > 0 && <RoadmapSwimlane category="Product" icon="rocket_launch" items={productItems} />}
+              {fundingItems.length > 0 && <RoadmapSwimlane category="Funding" icon="monetization_on" items={fundingItems} />}
+              {teamItems.length > 0 && <RoadmapSwimlane category="Team" icon="group" items={teamItems} />}
+              {appItems.length > 0 && <RoadmapSwimlane category="Apps" icon="smartphone" items={appItems} />}
+              {partnershipItems.length > 0 && <RoadmapSwimlane category="Partners" icon="handshake" items={partnershipItems} />}
+            </div>
+          )}
         </div>
       </div>
     </div>
