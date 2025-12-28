@@ -1,7 +1,6 @@
 'use client'
 
 import { useAppTeam } from '@/hooks/useApps'
-import type { AppTeamMember } from '@/types/app'
 
 interface TeamTabProps {
   appId: string
@@ -60,7 +59,7 @@ export function TeamTab({ appId }: TeamTabProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {teamMembers.map((member: AppTeamMember) => {
+            {teamMembers.map((member) => {
               const roleConfig = getRoleConfig(member.role)
               const user = member.user
               

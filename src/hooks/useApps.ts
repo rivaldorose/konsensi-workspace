@@ -108,3 +108,32 @@ export function useDeleteApp() {
   })
 }
 
+export function useAppTeam(appId: string) {
+  return useQuery({
+    queryKey: ['app-team', appId],
+    queryFn: async () => {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('app_team_members')
+        .select('*, user:users(*)')
+        .eq('app_id', appId)
+      
+      if (error) throw error
+      return (data || []) as Array<{
+        id: string
+        app_id: string
+        user_id: string
+        role: 'owner' | 'admin' | 'member'
+        created_at: string
+        user?: {
+          id: string
+          full_name: string
+          email: string
+          avatar_url?: string
+        }
+      }>
+    },
+    enabled: !!appId
+  })
+}
+
