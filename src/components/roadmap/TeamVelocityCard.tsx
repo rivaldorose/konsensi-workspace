@@ -1,11 +1,25 @@
 'use client'
 
 export function TeamVelocityCard() {
-  // Mock data - in real app, this would come from sprint/velocity data
-  const velocityData = [8, 11, 9, 14, 13, 17]
-  const maxVelocity = Math.max(...velocityData)
-  const latestVelocity = velocityData[velocityData.length - 1]
-  const trend = '+12%' // Calculate from previous data
+  // TODO: Implement real velocity tracking from sprint/issue data
+  // For now, show empty state
+  const velocityData: number[] = []
+  const maxVelocity = velocityData.length > 0 ? Math.max(...velocityData) : 0
+  const latestVelocity = velocityData.length > 0 ? velocityData[velocityData.length - 1] : 0
+  const trend = velocityData.length > 1 ? '+0%' : ''
+
+  if (velocityData.length === 0) {
+    return (
+      <div className="bg-surface-light dark:bg-surface-dark rounded-xl border border-[#dae8ce] dark:border-[#334025] p-5 shadow-sm">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="font-bold text-[#131c0d] dark:text-white text-sm">Team Velocity</h3>
+        </div>
+        <div className="text-center py-8 text-gray-400 text-sm">
+          <p>Velocity tracking coming soon</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-surface-light dark:bg-surface-dark rounded-xl border border-[#dae8ce] dark:border-[#334025] p-5 shadow-sm">

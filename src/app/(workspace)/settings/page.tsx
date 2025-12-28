@@ -84,7 +84,7 @@ export default function SettingsPage() {
   const updateUserMutation = useUpdateUser()
 
   const handleSaveProfile = async () => {
-    if (!currentUser) return
+    if (!currentUser || updateUserMutation.isPending) return
     
     try {
       await updateUserMutation.mutateAsync({
@@ -92,6 +92,7 @@ export default function SettingsPage() {
         full_name: profileData.full_name,
         email: profileData.email,
       })
+      // Success message - you can replace this with a toast notification
       alert('Profile updated successfully!')
     } catch (error) {
       console.error('Failed to update profile:', error)
