@@ -8,7 +8,9 @@ export default function WorkspaceLayout({
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark">
       <Navbar />
-      {children}
+      <main className="pt-16">
+        {children}
+      </main>
     </div>
   )
 }
