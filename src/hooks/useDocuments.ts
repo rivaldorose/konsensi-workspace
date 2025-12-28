@@ -14,7 +14,13 @@ export function useDocuments() {
         .limit(100)
       
       if (error) throw error
-      return (data || []) as Document[]
+      // Transform the data to match Document type
+      const transformed = (data || []).map((doc: any) => ({
+        ...doc,
+        last_edited_by: Array.isArray(doc.last_edited_by) ? doc.last_edited_by[0] : doc.last_edited_by,
+        owner: Array.isArray(doc.owner) ? doc.owner[0] : doc.owner,
+      }))
+      return transformed as Document[]
     },
     staleTime: 30000, // Cache for 30 seconds
   })
