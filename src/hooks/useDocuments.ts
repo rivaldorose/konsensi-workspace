@@ -9,9 +9,9 @@ export function useDocuments() {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('documents')
-        .select('*, owner:users(*), last_edited_by:users(*), collaborators:document_collaborators(*, user:users(*))')
+        .select('id, title, type, document_mode, file_name, file_size, file_type, file_url, file_path, folder_id, status, owner_id, last_edited_by_id, is_favorite, created_at, updated_at, owner:users!documents_owner_id_fkey(id, full_name, email, avatar_url), last_edited_by:users!documents_last_edited_by_id_fkey(id, full_name, email, avatar_url)')
         .order('updated_at', { ascending: false })
-        .limit(100)
+        .limit(50)
       
       if (error) throw error
       // Transform the data to match Document type - Supabase returns owner and last_edited_by as arrays

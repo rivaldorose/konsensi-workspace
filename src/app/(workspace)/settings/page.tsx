@@ -275,9 +275,10 @@ export default function SettingsPage() {
               </button>
               <button
                 onClick={handleSaveProfile}
-                className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-bold shadow-md shadow-primary/20 transition-all"
+                disabled={updateUserMutation.isPending || !currentUser}
+                className="px-6 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-bold shadow-md shadow-primary/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Changes
+                {updateUserMutation.isPending ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>
