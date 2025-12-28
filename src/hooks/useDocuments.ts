@@ -9,7 +9,7 @@ export function useDocuments() {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('documents')
-        .select('id, title, type, folder, status, last_edited, owner_id, comment_count, view_count, created_at, updated_at, owner:users(id, full_name, avatar_url), last_edited_by:users(id, full_name, avatar_url), collaborators:document_collaborators(id, user:users(id, full_name, avatar_url))')
+        .select('*, owner:users(*), last_edited_by:users(*), collaborators:document_collaborators(*, user:users(*))')
         .order('updated_at', { ascending: false })
         .limit(100)
       
