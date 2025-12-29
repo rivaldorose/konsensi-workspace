@@ -100,23 +100,34 @@ export function useCreateDocument() {
           owner_id: user?.id,
           last_edited_by_id: user?.id
         })
-        .select('*, owner:users!documents_owner_id_fkey(*), last_edited_by:users!documents_last_edited_by_id_fkey(*), collaborators:document_collaborators(*, user:users(*))')
+        .select('*')
         .single()
       
       if (error) throw error
-      // Transform the data to match Document type - Supabase returns owner and last_edited_by as arrays
-      const owner = Array.isArray((data as any).owner) ? ((data as any).owner[0] || null) : ((data as any).owner || null)
-      const lastEditedBy = Array.isArray((data as any).last_edited_by) ? ((data as any).last_edited_by[0] || null) : ((data as any).last_edited_by || null)
-      const collaborators = ((data as any).collaborators || []).map((collab: any) => ({
-        ...collab,
-        user: Array.isArray(collab.user) ? (collab.user[0] || null) : (collab.user || null),
-      }))
+      
+      // Fetch users separately to avoid foreign key ambiguity
+      let owner, lastEditedBy
+      if (data.owner_id) {
+        const { data: ownerData } = await supabase
+          .from('users')
+          .select('id, full_name, email, avatar_url')
+          .eq('id', data.owner_id)
+          .single()
+        owner = ownerData || undefined
+      }
+      if (data.last_edited_by_id) {
+        const { data: lastEditedData } = await supabase
+          .from('users')
+          .select('id, full_name, email, avatar_url')
+          .eq('id', data.last_edited_by_id)
+          .single()
+        lastEditedBy = lastEditedData || undefined
+      }
       
       const transformed: Document = {
         ...data,
-        owner: owner || undefined,
-        last_edited_by: lastEditedBy || undefined,
-        collaborators: collaborators.length > 0 ? collaborators : undefined,
+        owner: owner,
+        last_edited_by: lastEditedBy,
       }
       return transformed
     },
