@@ -193,9 +193,9 @@ export default function CreateDocumentPage() {
                       <option value="engineering-backend">Engineering / Backend</option>
                       <option value="personal-folder">Personal Folder</option>
                     </select>
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[20px]">
-                      folder
-                    </span>
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
                     <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
@@ -239,9 +239,9 @@ export default function CreateDocumentPage() {
                           checked={sharingOption === 'specific-people'}
                           onChange={() => setSharingOption('specific-people')}
                         />
-                        <span className="material-symbols-outlined absolute text-[#131b0d] text-[14px] opacity-0 peer-checked:opacity-100 font-bold scale-50 peer-checked:scale-100 transition-transform">
-                          check
-                        </span>
+                        <svg className="absolute text-[#131b0d] w-3.5 h-3.5 opacity-0 peer-checked:opacity-100 font-bold scale-50 peer-checked:scale-100 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                        </svg>
                       </div>
                       <span className="text-sm font-medium text-[#131b0d] dark:text-gray-200">
                         Specific people
@@ -251,49 +251,69 @@ export default function CreateDocumentPage() {
                     {/* Conditional Multi-Select */}
                     {sharingOption === 'specific-people' && (
                       <div className="ml-8 animate-in slide-in-from-top-2 fade-in duration-200">
-                        <div className="flex flex-wrap items-center gap-2 p-2 min-h-[48px] rounded-lg border border-primary/50 bg-white dark:bg-black/20 ring-1 ring-primary/20">
-                          {/* Person Chips */}
-                          {selectedPeople.map((person) => (
-                            <div
-                              key={person.id}
-                              className="flex items-center gap-2 bg-gray-100 dark:bg-white/10 pl-1 pr-2 py-0.5 rounded-full border border-gray-200 dark:border-white/5"
-                            >
-                              {person.avatar ? (
-                                <img
-                                  className="size-5 rounded-full object-cover"
-                                  src={person.avatar}
-                                  alt={`Avatar of ${person.name}`}
-                                />
-                              ) : (
-                                <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center">
-                                  <span className="text-xs text-primary font-bold">
-                                    {person.name.charAt(0)}
+                        <div className="flex flex-col gap-2">
+                          {/* Person Chips Container */}
+                          {selectedPeople.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-2 p-2 min-h-[48px] rounded-lg border border-primary/50 bg-white dark:bg-black/20 ring-1 ring-primary/20">
+                              {selectedPeople.map((person) => (
+                                <div
+                                  key={person.id}
+                                  className="flex items-center gap-2 bg-gray-100 dark:bg-white/10 pl-1 pr-2 py-0.5 rounded-full border border-gray-200 dark:border-white/5"
+                                >
+                                  {person.avatar ? (
+                                    <img
+                                      className="size-5 rounded-full object-cover"
+                                      src={person.avatar}
+                                      alt={`Avatar of ${person.name}`}
+                                    />
+                                  ) : (
+                                    <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center">
+                                      <span className="text-xs text-primary font-bold">
+                                        {person.name.charAt(0).toUpperCase()}
+                                      </span>
+                                    </div>
+                                  )}
+                                  <span className="text-xs font-semibold text-[#131b0d] dark:text-gray-200">
+                                    {person.name}
                                   </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemovePerson(person.id)}
+                                    className="hover:text-red-500 transition-colors"
+                                  >
+                                    <svg className="w-3.5 h-3.5 leading-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
                                 </div>
-                              )}
-                              <span className="text-xs font-semibold text-[#131b0d] dark:text-gray-200">
-                                {person.name}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => handleRemovePerson(person.id)}
-                                className="hover:text-red-500 transition-colors"
-                              >
-                                <span className="material-symbols-outlined text-[14px] leading-none">
-                                  close
-                                </span>
-                              </button>
+                              ))}
                             </div>
-                          ))}
-                          {/* Input Trigger */}
-                          <input
-                            className="bg-transparent border-none focus:ring-0 text-sm p-0 text-[#131b0d] dark:text-white placeholder:text-gray-400 min-w-[80px]"
-                            placeholder="Add more..."
-                            type="text"
-                            value={newPersonInput}
-                            onChange={(e) => setNewPersonInput(e.target.value)}
-                            onKeyDown={handleAddPerson}
-                          />
+                          )}
+                          {/* User Select Dropdown */}
+                          <div className="relative">
+                            <select
+                              className="w-full h-10 pl-3 pr-10 appearance-none rounded-lg border border-primary/50 bg-white dark:bg-black/20 text-[#131b0d] dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
+                              value={selectedUserId}
+                              onChange={(e) => {
+                                setSelectedUserId(e.target.value)
+                                if (e.target.value) {
+                                  handleAddPerson()
+                                }
+                              }}
+                            >
+                              <option value="">Add more...</option>
+                              {users
+                                .filter(user => !selectedPeople.some(p => p.id === user.id))
+                                .map((user) => (
+                                  <option key={user.id} value={user.id}>
+                                    {user.full_name || user.email}
+                                  </option>
+                                ))}
+                            </select>
+                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -374,9 +394,9 @@ export default function CreateDocumentPage() {
                       <option value="project-website-redesign">Project: Website Redesign</option>
                       <option value="event-weekly-sync">Event: Weekly Sync</option>
                     </select>
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[20px]">
-                      link
-                    </span>
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
                     <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
