@@ -100,7 +100,7 @@ export function useCreateDocument() {
           owner_id: user?.id,
           last_edited_by_id: user?.id
         })
-        .select('*, owner:users(*), last_edited_by:users(*), collaborators:document_collaborators(*, user:users(*))')
+        .select('*, owner:users!documents_owner_id_fkey(*), last_edited_by:users!documents_last_edited_by_id_fkey(*), collaborators:document_collaborators(*, user:users(*))')
         .single()
       
       if (error) throw error
@@ -136,7 +136,7 @@ export function useUpdateDocument() {
         .from('documents')
         .update(updates)
         .eq('id', id)
-        .select('*, owner:users(*), last_edited_by:users(*), collaborators:document_collaborators(*, user:users(*))')
+        .select('*, owner:users!documents_owner_id_fkey(*), last_edited_by:users!documents_last_edited_by_id_fkey(*), collaborators:document_collaborators(*, user:users(*))')
         .single()
       
       if (error) throw error
@@ -287,7 +287,7 @@ export function useUploadDocument() {
           status: 'draft',
           is_favorite: false
         })
-        .select('*, owner:users(*), last_edited_by:users(*)')
+        .select('*, owner:users!documents_owner_id_fkey(*), last_edited_by:users!documents_last_edited_by_id_fkey(*)')
         .single()
       
       if (error) throw error
