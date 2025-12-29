@@ -57,13 +57,18 @@ export default function AddPartnerPage() {
     }
     
     try {
+      // Ensure at least email or phone is provided (validation already done above)
+      // Note: Database requires contact_email NOT NULL, so we use empty string if only phone is provided
+      const emailValue = formData.contact_email?.trim() || ''
+      const phoneValue = formData.contact_phone?.trim() || ''
+      
       await createPartner.mutateAsync({
         name: formData.name.trim(),
         type: formData.type || 'client',
         sector: formData.sector || '',
         contact_name: formData.contact_name.trim(),
-        contact_email: formData.contact_email?.trim() || undefined,
-        contact_phone: formData.contact_phone?.trim() || undefined,
+        contact_email: emailValue,
+        contact_phone: phoneValue || undefined,
         status: formData.status || 'in_gesprek',
         annual_value: formData.annual_value || 0,
         owner_id: formData.owner_id,
@@ -73,9 +78,10 @@ export default function AddPartnerPage() {
         notes: opportunity || formData.notes || ''
       })
       router.push('/partners')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create partner:', error)
-      alert(`Failed to create partner: ${error instanceof Error ? error.message : 'Please try again.'}`)
+      const errorMessage = error?.message || error?.details || error?.hint || 'Unknown error'
+      alert(`Failed to create partner: ${errorMessage}`)
     }
   }
 
@@ -86,13 +92,17 @@ export default function AddPartnerPage() {
     }
     
     try {
+      // Ensure at least email or phone is provided for draft (if both empty, use empty string for email)
+      const emailValue = formData.contact_email?.trim() || ''
+      const phoneValue = formData.contact_phone?.trim() || ''
+      
       await createPartner.mutateAsync({
         name: formData.name.trim(),
         type: formData.type || 'client',
         sector: formData.sector || '',
         contact_name: formData.contact_name || '',
-        contact_email: formData.contact_email?.trim() || undefined,
-        contact_phone: formData.contact_phone?.trim() || undefined,
+        contact_email: emailValue,
+        contact_phone: phoneValue || undefined,
         status: 'to_contact',
         annual_value: formData.annual_value || 0,
         owner_id: formData.owner_id || currentUser?.id || '',
