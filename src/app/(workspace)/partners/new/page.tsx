@@ -145,7 +145,7 @@ export default function AddPartnerPage() {
         annual_value: formData.annual_value || 0,
         owner_id: formData.owner_id || currentUser?.id || '',
         next_action: formData.next_action || '',
-        next_action_date: formData.next_action_date || '',
+        next_action_date: formData.next_action_date?.trim() || undefined, // Send undefined for empty dates
         tags: tags || [],
         notes: opportunity || formData.notes || ''
       })
