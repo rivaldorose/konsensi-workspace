@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCreateDocument } from '@/hooks/useDocuments'
+import { useUsers, useCurrentUser } from '@/hooks/useUsers'
+import type { User } from '@/types'
 
 interface TeamMember {
   id: string
@@ -13,16 +15,15 @@ interface TeamMember {
 export default function CreateDocumentPage() {
   const router = useRouter()
   const createDocument = useCreateDocument()
+  const { data: users = [] } = useUsers()
+  const { data: currentUser } = useCurrentUser()
   
   const [documentName, setDocumentName] = useState('')
   const [template, setTemplate] = useState('blank')
   const [location, setLocation] = useState('marketing-q3')
   const [sharingOption, setSharingOption] = useState<'whole-team' | 'specific-people' | 'only-me'>('specific-people')
-  const [selectedPeople, setSelectedPeople] = useState<TeamMember[]>([
-    { id: '1', name: 'Sarah', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB4ic3WUaimV4-VDTZeJFw6q4XhnBy5LJTTcXrajg4qZb-07SBtkzzz9kPYwE6uJvWERGgziDc5V7KuBGAlnH048P81YcgqnTQVDFm9iwQaZR6G4AVn4QMBfib9j_xV14CZb0JhXvfW73q48MM0V7UFS1n8tk8gjUw5dwrWt_gIeYdWs80XuIycBopZD0bfhGdokhbXSXeM5J0aenAMNNoiuz2w_s10Bv22Sx1u2bM2o5Bd4Q0ElrxbScb0TfKTyy7duZSUdx2oz0fg' },
-    { id: '2', name: 'Mike', avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAMomJsFaSMxgc5Ja82FOXC3JRkB84xKTckwkFlF4OFsXoue5A5d9yT5DSpa0wTxycIrsXaIEYW-kekIGYC7DK0w59OubAYc7VDP6d6bi6nn02g8HIuam4ND39OP-CaQhbGeiX-bceyWyG_JGoqjs_0wCX6A4sb2lBj62rVjrzRa3Qj_i9mrR_vyQV59VzO_0Sbe_mJHYtLO8CaLYxIdCjeOHd9hML2ZoGssD7tXoydGFWLEtufzRQUn3kh58G1wh4T3E1kb44aUpSL' }
-  ])
-  const [newPersonInput, setNewPersonInput] = useState('')
+  const [selectedPeople, setSelectedPeople] = useState<TeamMember[]>([])
+  const [selectedUserId, setSelectedUserId] = useState('')
   const [tags, setTags] = useState<string[]>(['Q3'])
   const [newTag, setNewTag] = useState('')
   const [relatedTo, setRelatedTo] = useState('')
@@ -75,17 +76,24 @@ export default function CreateDocumentPage() {
     setSelectedPeople(selectedPeople.filter(p => p.id !== personId))
   }
 
-  const handleAddPerson = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && newPersonInput.trim()) {
-      e.preventDefault()
-      // Mock: Add person by name
-      const newPerson: TeamMember = {
-        id: Date.now().toString(),
-        name: newPersonInput.trim()
-      }
-      setSelectedPeople([...selectedPeople, newPerson])
-      setNewPersonInput('')
+  const handleAddPerson = () => {
+    if (!selectedUserId) return
+    
+    const user = users.find(u => u.id === selectedUserId)
+    if (!user) return
+    
+    // Check if user already selected
+    if (selectedPeople.some(p => p.id === user.id)) {
+      return
     }
+    
+    const newPerson: TeamMember = {
+      id: user.id,
+      name: user.full_name || user.email,
+      avatar: user.avatar_url
+    }
+    setSelectedPeople([...selectedPeople, newPerson])
+    setSelectedUserId('')
   }
 
   return (
@@ -124,9 +132,9 @@ export default function CreateDocumentPage() {
               onClick={handleClose}
               className="group p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
             >
-              <span className="material-symbols-outlined text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200">
-                close
-              </span>
+              <svg className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
 
@@ -165,9 +173,9 @@ export default function CreateDocumentPage() {
                       <option value="project-proposal">Project Proposal</option>
                       <option value="technical-spec">Technical Spec</option>
                     </select>
-                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-                      expand_more
-                    </span>
+                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </div>
                 </div>
 
@@ -188,9 +196,9 @@ export default function CreateDocumentPage() {
                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[20px]">
                       folder
                     </span>
-                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-                      expand_more
-                    </span>
+                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -211,12 +219,12 @@ export default function CreateDocumentPage() {
                         checked={sharingOption === 'whole-team'}
                         onChange={() => setSharingOption('whole-team')}
                       />
-                      <span className="material-symbols-outlined absolute text-[#131b0d] text-[14px] opacity-0 peer-checked:opacity-100 font-bold scale-50 peer-checked:scale-100 transition-transform">
-                        check
-                      </span>
+                      <svg className="absolute text-[#131b0d] w-3.5 h-3.5 opacity-0 peer-checked:opacity-100 font-bold scale-50 peer-checked:scale-100 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                      </svg>
                     </div>
                     <span className="text-sm font-medium text-[#131b0d] dark:text-gray-200">
-                      Whole team <span className="text-gray-400 font-normal ml-1">(4 members)</span>
+                      Whole team <span className="text-gray-400 font-normal ml-1">({users.length} {users.length === 1 ? 'member' : 'members'})</span>
                     </span>
                   </label>
 
@@ -301,9 +309,9 @@ export default function CreateDocumentPage() {
                         checked={sharingOption === 'only-me'}
                         onChange={() => setSharingOption('only-me')}
                       />
-                      <span className="material-symbols-outlined absolute text-[#131b0d] text-[14px] opacity-0 peer-checked:opacity-100 font-bold scale-50 peer-checked:scale-100 transition-transform">
-                        check
-                      </span>
+                      <svg className="absolute text-[#131b0d] w-3.5 h-3.5 opacity-0 peer-checked:opacity-100 font-bold scale-50 peer-checked:scale-100 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                      </svg>
                     </div>
                     <span className="text-sm font-medium text-[#131b0d] dark:text-gray-200">
                       Only me
@@ -318,7 +326,9 @@ export default function CreateDocumentPage() {
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-bold text-[#131b0d] dark:text-white">Tags</label>
                   <div className="flex items-center gap-2 w-full h-12 px-3 rounded-lg border border-[#dae7cf] dark:border-[#3a4d2e] bg-[#f7f8f6] dark:bg-[#182210] overflow-hidden focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary transition-all">
-                    <span className="material-symbols-outlined text-gray-400">label</span>
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
                     <div className="flex gap-1">
                       {tags.map((tag) => (
                         <span
@@ -326,13 +336,15 @@ export default function CreateDocumentPage() {
                           className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                         >
                           {tag}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveTag(tag)}
-                            className="hover:text-green-900 dark:hover:text-green-100 transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[12px] leading-none">close</span>
-                          </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveTag(tag)}
+                              className="hover:text-green-900 dark:hover:text-green-100 transition-colors"
+                            >
+                              <svg className="w-3 h-3 leading-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
                         </span>
                       ))}
                     </div>
@@ -365,9 +377,9 @@ export default function CreateDocumentPage() {
                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[20px]">
                       link
                     </span>
-                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
-                      expand_more
-                    </span>
+                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -389,7 +401,9 @@ export default function CreateDocumentPage() {
               disabled={createDocument.isPending}
               className="flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold bg-primary text-[#131b0d] hover:bg-[#60d60b] active:scale-95 transition-all shadow-[0_0_15px_-3px_rgba(113,236,19,0.15)]"
             >
-              <span className="material-symbols-outlined text-[18px] font-bold">edit_square</span>
+              <svg className="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
               Create & Start Writing
             </button>
           </div>
