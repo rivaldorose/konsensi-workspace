@@ -89,7 +89,7 @@ export default function AddPartnerPage() {
       console.error('Error details array:', error?.details)
       console.error('Error hint:', error?.hint)
       
-      // Try to extract a readable error message with code
+      // Build comprehensive error message
       let errorMessage = 'Unknown error'
       if (error?.message) {
         errorMessage = error.message
@@ -101,12 +101,25 @@ export default function AddPartnerPage() {
         errorMessage = error.hint
       }
       
-      // Include error code for better debugging
-      const fullErrorMessage = error?.code 
-        ? `[${error.code}] ${errorMessage}${error?.hint ? `\n\nHint: ${error.hint}` : ''}`
-        : errorMessage
+      // Build full error message with all available information
+      let fullErrorMessage = ''
+      if (error?.code) {
+        fullErrorMessage += `Error Code: ${error.code}\n\n`
+      }
+      fullErrorMessage += `Error Message: ${errorMessage}`
       
-      alert(`Failed to create partner:\n\n${fullErrorMessage}`)
+      if (error?.hint) {
+        fullErrorMessage += `\n\nHint: ${error.hint}`
+      }
+      
+      if (error?.details && typeof error.details === 'string') {
+        fullErrorMessage += `\n\nDetails: ${error.details}`
+      } else if (error?.details) {
+        fullErrorMessage += `\n\nDetails: ${JSON.stringify(error.details, null, 2)}`
+      }
+      
+      // Show full error in alert
+      alert(`Failed to create partner:\n\n${fullErrorMessage}\n\nCheck console for more details (F12)`)
     }
   }
 
