@@ -64,7 +64,7 @@ export default function AddPartnerPage() {
       await createPartner.mutateAsync({
         name: formData.name.trim(),
         type: formData.type || 'client',
-        sector: formData.sector || '',
+        sector: formData.sector?.trim() || 'General', // Database requires NOT NULL
         contact_name: formData.contact_name.trim(),
         contact_email: emailValue,
         contact_phone: phoneValue,
@@ -115,7 +115,7 @@ export default function AddPartnerPage() {
       await createPartner.mutateAsync({
         name: formData.name.trim(),
         type: formData.type || 'client',
-        sector: formData.sector || '',
+        sector: formData.sector?.trim() || 'General', // Database requires NOT NULL, so use default
         contact_name: formData.contact_name || '',
         contact_email: emailValue,
         contact_phone: phoneValue,
