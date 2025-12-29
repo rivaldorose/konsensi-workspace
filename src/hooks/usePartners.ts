@@ -104,6 +104,8 @@ export function useCreatePartner() {
       // #endregion
       
       console.log('Inserting partner with data:', JSON.stringify(insertData, null, 2))
+      console.log('Email value:', insertData.contact_email, 'Type:', typeof insertData.contact_email)
+      console.log('Phone value:', insertData.contact_phone, 'Type:', typeof insertData.contact_phone)
       
       const { data, error } = await supabase
         .from('partners')
