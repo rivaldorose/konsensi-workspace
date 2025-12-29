@@ -233,7 +233,7 @@ export function useUploadFile() {
       
       // #region agent log
       if (uploadError) {
-        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useUploadFile',message:'Storage upload error',data:{error:uploadError.message,code:uploadError.statusCode,errorName:uploadError.name,bucket:'files'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useUploadFile',message:'Storage upload error',data:{error:uploadError.message,errorName:uploadError.name,bucket:'files'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
       } else {
         fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useUploadFile',message:'Storage upload success',data:{uploadData},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
       }
