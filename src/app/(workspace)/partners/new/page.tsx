@@ -45,8 +45,9 @@ export default function AddPartnerPage() {
       return
     }
     
-    if (!formData.contact_email?.trim()) {
-      alert('Email is required')
+    // Either email or phone is required (not both)
+    if (!formData.contact_email?.trim() && !formData.contact_phone?.trim()) {
+      alert('Either Email or Phone number is required')
       return
     }
     
@@ -61,8 +62,8 @@ export default function AddPartnerPage() {
         type: formData.type || 'client',
         sector: formData.sector || '',
         contact_name: formData.contact_name.trim(),
-        contact_email: formData.contact_email.trim(),
-        contact_phone: formData.contact_phone || '',
+        contact_email: formData.contact_email?.trim() || undefined,
+        contact_phone: formData.contact_phone?.trim() || undefined,
         status: formData.status || 'in_gesprek',
         annual_value: formData.annual_value || 0,
         owner_id: formData.owner_id,
@@ -90,8 +91,8 @@ export default function AddPartnerPage() {
         type: formData.type || 'client',
         sector: formData.sector || '',
         contact_name: formData.contact_name || '',
-        contact_email: formData.contact_email || '',
-        contact_phone: formData.contact_phone || '',
+        contact_email: formData.contact_email?.trim() || undefined,
+        contact_phone: formData.contact_phone?.trim() || undefined,
         status: 'to_contact',
         annual_value: formData.annual_value || 0,
         owner_id: formData.owner_id || currentUser?.id || '',
@@ -239,7 +240,7 @@ export default function AddPartnerPage() {
                   </div>
                   {/* Email */}
                   <div className="flex flex-col gap-2">
-                    <label className="text-[#131b0d] dark:text-[#e0e0e0] text-sm font-medium leading-normal">Email*</label>
+                    <label className="text-[#131b0d] dark:text-[#e0e0e0] text-sm font-medium leading-normal">Email</label>
                     <div className="relative">
                       <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6e9a4c] w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -247,7 +248,6 @@ export default function AddPartnerPage() {
                       <input
                         className="form-input flex w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4b30] bg-[#fafcf8] dark:bg-[#151c10] h-12 placeholder:text-[#6e9a4c]/70 pl-11 pr-4 text-base font-normal transition-all"
                         placeholder="email@company.com"
-                        required
                         type="email"
                         value={formData.contact_email || ''}
                         onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
