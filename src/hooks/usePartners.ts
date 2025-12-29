@@ -70,10 +70,15 @@ export function useCreatePartner() {
         throw new Error('Owner ID is required')
       }
       
+      // Clean up partner data - remove undefined values
+      const cleanPartner = Object.fromEntries(
+        Object.entries(partner).filter(([_, value]) => value !== undefined)
+      ) as Partial<Partner>
+      
       const { data, error } = await supabase
         .from('partners')
         .insert({
-          ...partner,
+          ...cleanPartner,
           owner_id: ownerId
         })
         .select('*')
@@ -81,6 +86,7 @@ export function useCreatePartner() {
       
       if (error) {
         console.error('Create partner error:', error)
+        console.error('Partner data that was sent:', { ...cleanPartner, owner_id: ownerId })
         throw error
       }
       return data
