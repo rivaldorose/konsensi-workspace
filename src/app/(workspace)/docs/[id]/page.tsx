@@ -61,13 +61,48 @@ export default function DocumentEditorPage() {
   useEffect(() => {
     if (isFile && file?.name) {
       setDocumentTitle(file.name)
-      // If it's a file (uploaded file), redirect to file URL immediately
-      if (file.type === 'file' && file.file_url) {
+      // If it's a file (uploaded file), generate signed URL and open it
+      if (file.type === 'file' && file.storage_path) {
         // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:DocumentEditorPage',message:'Redirecting to file URL',data:{fileUrl:file.file_url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:DocumentEditorPage',message:'Generating signed URL for file',data:{storagePath:file.storage_path},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
-        window.open(file.file_url, '_blank')
-        router.replace('/docs')
+        
+        // Generate signed URL (works for both public and private buckets)
+        const openFile = async () => {
+          try {
+            const { createClient } = await import('@/lib/supabase/client')
+            const supabase = createClient()
+            
+            const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+              .from('files')
+              .createSignedUrl(file.storage_path, 3600) // 1 hour expiry
+            
+            if (signedUrlError) {
+              // #region agent log
+              fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:openFile',message:'Signed URL error, trying public URL',data:{error:signedUrlError.message,storagePath:file.storage_path},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+              // #endregion
+              // Fallback to stored file_url if signed URL fails
+              if (file.file_url) {
+                window.open(file.file_url, '_blank')
+              } else {
+                throw signedUrlError
+              }
+            } else {
+              // #region agent log
+              fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:openFile',message:'Signed URL created, opening file',data:{signedUrl:signedUrlData.signedUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+              // #endregion
+              window.open(signedUrlData.signedUrl, '_blank')
+            }
+            router.replace('/docs')
+          } catch (error) {
+            // #region agent log
+            fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:openFile',message:'Error opening file',data:{error:error instanceof Error ? error.message : String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            console.error('Error opening file:', error)
+          }
+        }
+        
+        openFile()
         return
       }
     } else if (isDocument && document?.title) {

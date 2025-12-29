@@ -224,18 +224,47 @@ export function useUploadFile() {
       
       // Upload to storage
       const fileName = `${user.id}/${Date.now()}-${file.name}`
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useUploadFile',message:'Before storage upload',data:{storagePath:fileName,bucket:'files'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('files')
         .upload(fileName, file)
+      
+      // #region agent log
+      if (uploadError) {
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useUploadFile',message:'Storage upload error',data:{error:uploadError.message,code:uploadError.statusCode,errorName:uploadError.name,bucket:'files'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      } else {
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useUploadFile',message:'Storage upload success',data:{uploadData},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      }
+      // #endregion
       
       if (uploadError) {
         throw uploadError
       }
       
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Get signed URL (works for both public and private buckets)
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useUploadFile',message:'Before getSignedUrl',data:{storagePath:fileName,bucket:'files'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from('files')
-        .getPublicUrl(fileName)
+        .createSignedUrl(fileName, 3600) // 1 hour expiry
+      
+      let fileUrl: string
+      // #region agent log
+      if (signedUrlError) {
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useUploadFile',message:'Signed URL error, trying public URL',data:{error:signedUrlError.message,bucket:'files'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // Fallback to public URL if signed URL fails
+        const { data: { publicUrl } } = supabase.storage
+          .from('files')
+          .getPublicUrl(fileName)
+        fileUrl = publicUrl
+      } else {
+        fileUrl = signedUrlData.signedUrl
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useUploadFile',message:'Signed URL created',data:{signedUrl:fileUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      }
+      // #endregion
       
       // Create file record
       const { data, error } = await supabase
@@ -246,7 +275,7 @@ export function useUploadFile() {
           mime_type: file.type,
           size: file.size,
           parent_id: folderId || null,
-          file_url: publicUrl,
+          file_url: fileUrl,
           storage_path: fileName,
           is_favorite: false,
           created_by: user.id
