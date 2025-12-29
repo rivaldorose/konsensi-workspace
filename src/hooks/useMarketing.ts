@@ -25,7 +25,7 @@ export function useMarketingPosts() {
         if (post.author_id) authorIds.add(post.author_id)
       })
       
-      let authors: User[] = []
+      let authors: Array<Pick<User, 'id' | 'full_name' | 'email' | 'avatar_url'>> = []
       if (authorIds.size > 0) {
         // Fetch authors in one query
         const { data: fetchedAuthors, error: authorsError } = await supabase
@@ -34,17 +34,24 @@ export function useMarketingPosts() {
           .in('id', Array.from(authorIds))
         
         if (authorsError) throw authorsError
-        authors = fetchedAuthors || []
+        authors = (fetchedAuthors || []) as Array<Pick<User, 'id' | 'full_name' | 'email' | 'avatar_url'>>
       }
       
       // Create a map for quick author lookup
       const authorMap = new Map(authors.map(author => [author.id, author]))
       
       // Transform posts with author data
-      const transformed: MarketingPost[] = posts.map((post: any): MarketingPost => ({
-        ...post,
-        author: post.author_id ? (authorMap.get(post.author_id) || undefined) : undefined,
-      }))
+      const transformed: MarketingPost[] = posts.map((post: any): MarketingPost => {
+        const author = post.author_id ? authorMap.get(post.author_id) : undefined
+        return {
+          ...post,
+          author: author ? {
+            id: author.id,
+            full_name: author.full_name || '',
+            avatar_url: author.avatar_url
+          } : undefined,
+        }
+      })
       
       return transformed
     },
