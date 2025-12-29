@@ -79,7 +79,10 @@ export function useCreatePartner() {
         .select('*')
         .single()
       
-      if (error) throw error
+      if (error) {
+        console.error('Create partner error:', error)
+        throw error
+      }
       return data
     },
     onSuccess: () => {

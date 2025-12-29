@@ -93,8 +93,8 @@ export function useCreateDocument() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
-      // Remove 'folder' if present - use folder_id instead
-      const { folder, ...documentData } = document as any
+      // Remove 'folder' and 'document_mode' if present - these don't exist in the database
+      const { folder, document_mode, ...documentData } = document as any
       
       const { data, error } = await supabase
         .from('documents')

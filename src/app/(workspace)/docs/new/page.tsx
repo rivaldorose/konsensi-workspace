@@ -44,7 +44,6 @@ export default function CreateDocumentPage() {
       const newDocument = await createDocument.mutateAsync({
         title: documentName,
         type: 'doc',
-        document_mode: 'text',
         folder_id: location !== 'general-root' ? location : null,
         status: 'draft',
         is_favorite: false
