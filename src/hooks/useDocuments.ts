@@ -25,16 +25,19 @@ export function useDocuments() {
         if (doc.last_edited_by_id) userIds.add(doc.last_edited_by_id)
       })
       
-      // Fetch users in one query
-      const { data: users, error: usersError } = await supabase
-        .from('users')
-        .select('id, full_name, email, avatar_url')
-        .in('id', Array.from(userIds))
-      
-      if (usersError) throw usersError
-      
-      // Create a map for quick user lookup
-      const userMap = new Map((users || []).map(user => [user.id, user]))
+      // Fetch users in one query (only if we have user IDs)
+      let userMap = new Map()
+      if (userIds.size > 0) {
+        const { data: users, error: usersError } = await supabase
+          .from('users')
+          .select('id, full_name, email, avatar_url')
+          .in('id', Array.from(userIds))
+        
+        if (usersError) throw usersError
+        
+        // Create a map for quick user lookup
+        userMap = new Map((users || []).map((user: any) => [user.id, user]))
+      }
       
       // Transform documents with user data
       const transformed: Document[] = docs.map((doc: any): Document => ({
