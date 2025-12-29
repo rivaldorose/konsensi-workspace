@@ -63,7 +63,8 @@ export default function DocumentEditorPage() {
       setDocumentTitle(file.name)
       // If it's a file (uploaded file), generate signed URL and open it
       if (file.type === 'file' && file.storage_path) {
-        const storagePath = file.storage_path // Store in const to satisfy TypeScript
+        // Store in const outside async function to satisfy TypeScript narrowing
+        const storagePath: string = file.storage_path
         // #region agent log
         fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:DocumentEditorPage',message:'Generating signed URL for file',data:{storagePath},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
