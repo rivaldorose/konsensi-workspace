@@ -80,7 +80,23 @@ export default function AddPartnerPage() {
     } catch (error: any) {
       console.error('Failed to create partner:', error)
       console.error('Error details:', JSON.stringify(error, null, 2))
-      const errorMessage = error?.message || error?.details?.[0]?.message || error?.hint || 'Unknown error'
+      console.error('Error message:', error?.message)
+      console.error('Error code:', error?.code)
+      console.error('Error details array:', error?.details)
+      console.error('Error hint:', error?.hint)
+      
+      // Try to extract a readable error message
+      let errorMessage = 'Unknown error'
+      if (error?.message) {
+        errorMessage = error.message
+      } else if (error?.details) {
+        errorMessage = typeof error.details === 'string' 
+          ? error.details 
+          : error.details[0]?.message || JSON.stringify(error.details)
+      } else if (error?.hint) {
+        errorMessage = error.hint
+      }
+      
       alert(`Failed to create partner: ${errorMessage}`)
     }
   }

@@ -75,18 +75,26 @@ export function useCreatePartner() {
         Object.entries(partner).filter(([_, value]) => value !== undefined)
       ) as Partial<Partner>
       
+      const insertData = {
+        ...cleanPartner,
+        owner_id: ownerId
+      }
+      
+      console.log('Inserting partner with data:', JSON.stringify(insertData, null, 2))
+      
       const { data, error } = await supabase
         .from('partners')
-        .insert({
-          ...cleanPartner,
-          owner_id: ownerId
-        })
+        .insert(insertData)
         .select('*')
         .single()
       
       if (error) {
         console.error('Create partner error:', error)
-        console.error('Partner data that was sent:', { ...cleanPartner, owner_id: ownerId })
+        console.error('Error code:', error.code)
+        console.error('Error message:', error.message)
+        console.error('Error details:', error.details)
+        console.error('Error hint:', error.hint)
+        console.error('Partner data that was sent:', JSON.stringify(insertData, null, 2))
         throw error
       }
       return data
