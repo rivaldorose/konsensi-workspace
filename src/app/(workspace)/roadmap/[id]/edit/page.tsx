@@ -145,17 +145,23 @@ export default function EditGoalPage({ params }: { params: { id: string } }) {
 
   const owner = goal.owner || allUsers?.find((u) => u.id === goal.owner_id)
 
-  const statusColors: Record<Goal['status'], string> = {
+  const statusColors: Partial<Record<Goal['status'], string>> = {
     not_started: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
+    in_progress: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
     on_track: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     at_risk: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+    behind: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+    complete: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
     completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
   }
 
-  const statusLabels: Record<Goal['status'], string> = {
+  const statusLabels: Partial<Record<Goal['status'], string>> = {
     not_started: 'Not Started',
+    in_progress: 'In Progress',
     on_track: 'On Track',
-    at_risk: 'In Progress',
+    at_risk: 'At Risk',
+    behind: 'Behind',
+    complete: 'Complete',
     completed: 'Completed',
   }
 

@@ -338,7 +338,7 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-2 text-xs text-gray-500">
                         <span className="capitalize">{goal.status.replace('_', ' ')}</span>
                         <span>•</span>
-                        <span>{format(new Date(goal.target_date), 'MMM d')}</span>
+                        <span>{goal.target_date ? format(new Date(goal.target_date), 'MMM d') : '-'}</span>
                       </div>
                       <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
                         <div

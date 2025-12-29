@@ -4,7 +4,7 @@ import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useGoals } from '@/hooks/useGoals'
-import { useDocuments } from '@/hooks/useDocuments'
+import { useFiles } from '@/hooks/useFiles'
 import { usePartners } from '@/hooks/usePartners'
 import { useApps } from '@/hooks/useApps'
 
@@ -20,7 +20,7 @@ function SearchPageContent() {
 
   // Fetch data (mock filtering for now - in real app would search all tables)
   const { data: allGoals } = useGoals()
-  const { data: allDocuments } = useDocuments()
+  const { data: allFiles } = useFiles() // Fetch all files (no folder filter)
   const { data: allPartners } = usePartners()
   const { data: allApps } = useApps()
 
@@ -28,9 +28,30 @@ function SearchPageContent() {
   const filteredGoals = allGoals?.filter((goal) =>
     goal.title.toLowerCase().includes(query.toLowerCase())
   ) || []
-  const filteredDocuments = allDocuments?.filter((doc) =>
-    doc.title.toLowerCase().includes(query.toLowerCase())
-  ) || []
+  // Filter files - only show files, not folders, and filter by name
+  const filteredDocuments = (allFiles?.filter((file) =>
+    file.type === 'file' && file.name.toLowerCase().includes(query.toLowerCase())
+  ) || []).map(file => ({
+    id: file.id,
+    title: file.name,
+    type: file.mime_type?.includes('pdf') ? 'pdf' : file.mime_type?.includes('sheet') ? 'sheet' : file.mime_type?.includes('presentation') ? 'slide' : 'doc',
+    document_mode: 'file' as const,
+    file_name: file.name,
+    file_size: file.size,
+    file_type: file.mime_type,
+    file_url: file.file_url,
+    file_path: file.storage_path,
+    folder_id: file.parent_id,
+    owner_id: file.created_by,
+    owner: file.created_by_user ? {
+      id: file.created_by_user.id,
+      full_name: file.created_by_user.full_name || file.created_by_user.email,
+      avatar_url: file.created_by_user.avatar_url
+    } : undefined,
+    is_favorite: file.is_favorite,
+    created_at: file.created_at,
+    updated_at: file.updated_at,
+  }))
   const filteredPartners = allPartners?.filter((partner) =>
     partner.name.toLowerCase().includes(query.toLowerCase())
   ) || []
@@ -187,7 +208,7 @@ function SearchPageContent() {
                   <div className="mt-auto pt-4 border-t border-gray-100 dark:border-[#2a3620] flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-500">
-                        Edited {doc.last_edited ? new Date(doc.last_edited).toLocaleDateString() : 'recently'}
+                        Edited {doc.updated_at ? new Date(doc.updated_at).toLocaleDateString() : 'recently'}
                       </span>
                     </div>
                     <Link

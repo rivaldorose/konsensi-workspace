@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { useUploadDocument } from '@/hooks/useDocuments'
+import { useUploadFile } from '@/hooks/useFiles'
 
 interface UploadDocumentModalProps {
   folders?: Array<{ id: string; name: string }>
@@ -13,7 +13,7 @@ export function UploadDocumentModal({ folders = [], onClose }: UploadDocumentMod
   const [folderId, setFolderId] = useState<string>('')
   const [isDragging, setIsDragging] = useState(false)
   
-  const uploadMutation = useUploadDocument()
+  const uploadMutation = useUploadFile()
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -79,7 +79,7 @@ export function UploadDocumentModal({ folders = [], onClose }: UploadDocumentMod
       for (const file of files) {
         await uploadMutation.mutateAsync({
           file,
-          folderId: folderId || undefined
+          folderId: folderId || null
         })
       }
       onClose()

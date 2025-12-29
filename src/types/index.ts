@@ -105,20 +105,27 @@ export interface Event {
   updated_at: string
 }
 
+// Legacy Goal interface - use roadmap.ts for new code
 export interface Goal {
   id: string
   title: string
-  objective: string
-  category: 'product' | 'partnerships' | 'funding' | 'marketing' | 'operations' | 'team'
+  objective?: string
+  category: 'product' | 'partnerships' | 'funding' | 'marketing' | 'operations' | 'team' | 'Product' | 'Growth' | 'Funding' | 'Team' | 'Apps' | 'Partners' | 'Marketing'
   quarter: string
   start_date: string
-  target_date: string
-  priority: 'critical' | 'high' | 'medium' | 'low'
+  target_date?: string
+  due_date?: string
+  priority: 'critical' | 'high' | 'medium' | 'low' | 'none'
   owner_id: string
   owner?: User
-  status: 'not_started' | 'on_track' | 'at_risk' | 'completed'
+  status: 'not_started' | 'on_track' | 'at_risk' | 'completed' | 'in_progress' | 'behind' | 'complete'
   progress: number
   event_id?: string
+  emoji?: string
+  year?: number
+  kanban_column?: string
+  kanban_position?: number
+  completed_at?: string
   created_at: string
   updated_at: string
 }
@@ -126,4 +133,5 @@ export interface Goal {
 export * from './marketing'
 export * from './document'
 export * from './contract'
+export * from './roadmap'
 

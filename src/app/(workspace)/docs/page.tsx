@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useDocuments } from '@/hooks/useDocuments'
-import type { Document } from '@/types/document'
+import { useFiles, useFolders, useRecentFiles, useFavoriteFiles, useToggleFavorite } from '@/hooks/useFiles'
+import type { FileItem } from '@/types/files'
 import DocumentCard from '@/components/documents/DocumentCard'
 import { DocsSidebar } from '@/components/documents/DocsSidebar'
 import { UploadDocumentModal } from '@/components/documents/UploadDocumentModal'
@@ -11,7 +11,12 @@ import { format } from 'date-fns'
 
 export default function DocumentsPage() {
   const router = useRouter()
-  const { data: documents = [], isLoading } = useDocuments()
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
+  const { data: files = [], isLoading } = useFiles(currentFolderId)
+  const { data: folders = [] } = useFolders()
+  const { data: recentFiles = [] } = useRecentFiles()
+  const { data: favoriteFiles = [] } = useFavoriteFiles()
+  const toggleFavorite = useToggleFavorite()
   
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<'all' | 'recent' | 'shared' | 'favorites'>('all')
@@ -19,45 +24,48 @@ export default function DocumentsPage() {
   const [selectedFolder, setSelectedFolder] = useState('all')
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
 
-  // Filter documents
-  const filteredDocuments = useMemo(() => {
-    if (!documents || documents.length === 0) return []
+  // Filter files based on active filter
+  const filteredFiles = useMemo(() => {
+    let sourceFiles: FileItem[] = files
     
-    let filtered = documents
-
+    // Apply filter
+    if (activeFilter === 'favorites') {
+      sourceFiles = favoriteFiles
+    } else if (activeFilter === 'recent') {
+      sourceFiles = recentFiles
+    } else if (activeFilter === 'shared') {
+      // For shared, show all files for now (would need separate query)
+      sourceFiles = files
+    }
+    
     // Filter by search query
     if (searchQuery) {
       const queryLower = searchQuery.toLowerCase()
-      filtered = filtered.filter(doc =>
-        doc.title.toLowerCase().includes(queryLower)
+      sourceFiles = sourceFiles.filter(file =>
+        file.name.toLowerCase().includes(queryLower)
       )
     }
 
-    // Filter by tab
-    if (activeFilter === 'favorites') {
-      filtered = filtered.filter(doc => doc.is_favorite === true)
-    } else if (activeFilter === 'recent') {
-      // Show recent documents (last 7 days)
-      const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000)
-      filtered = filtered.filter(doc => {
-        const docDate = new Date(doc.updated_at || doc.created_at).getTime()
-        return docDate >= sevenDaysAgo
-      })
-    } else if (activeFilter === 'shared') {
-      // Note: collaborators are not loaded in useDocuments for performance
-      // This filter would need a separate query or flag in the database
-      filtered = filtered // For now, show all documents for shared filter
+    // Filter by folder
+    if (selectedFolder !== 'all') {
+      sourceFiles = sourceFiles.filter(file => file.parent_id === selectedFolder)
+    } else if (currentFolderId === null) {
+      // Only show root files
+      sourceFiles = sourceFiles.filter(file => !file.parent_id)
     }
 
-    return filtered
-  }, [documents, searchQuery, activeFilter])
+    // Only show files (not folders) in the main view
+    sourceFiles = sourceFiles.filter(file => file.type === 'file')
 
-  // Group documents by date (optimized)
-  const groupedDocuments = useMemo(() => {
-    const today: Document[] = []
-    const yesterday: Document[] = []
-    const thisWeek: Document[] = []
-    const older: Document[] = []
+    return sourceFiles
+  }, [files, favoriteFiles, recentFiles, searchQuery, activeFilter, selectedFolder, currentFolderId])
+
+  // Group files by date
+  const groupedFiles = useMemo(() => {
+    const today: FileItem[] = []
+    const yesterday: FileItem[] = []
+    const thisWeek: FileItem[] = []
+    const older: FileItem[] = []
 
     const now = new Date()
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -66,21 +74,21 @@ export default function DocumentsPage() {
     const weekStart = new Date(todayStart)
     weekStart.setDate(weekStart.getDate() - 7)
 
-    filteredDocuments.forEach(doc => {
-      const docDate = new Date(doc.updated_at || doc.created_at)
-      if (docDate >= todayStart) {
-        today.push(doc)
-      } else if (docDate >= yesterdayStart) {
-        yesterday.push(doc)
-      } else if (docDate >= weekStart) {
-        thisWeek.push(doc)
+    filteredFiles.forEach(file => {
+      const fileDate = new Date(file.updated_at || file.created_at)
+      if (fileDate >= todayStart) {
+        today.push(file)
+      } else if (fileDate >= yesterdayStart) {
+        yesterday.push(file)
+      } else if (fileDate >= weekStart) {
+        thisWeek.push(file)
       } else {
-        older.push(doc)
+        older.push(file)
       }
     })
 
     return { today, yesterday, thisWeek, older }
-  }, [filteredDocuments])
+  }, [filteredFiles])
 
   const handleOpen = (id: string) => {
     router.push(`/docs/${id}`)
@@ -90,9 +98,18 @@ export default function DocumentsPage() {
     router.push(`/docs/${id}/share`)
   }
 
-  const handleFavorite = (id: string) => {
-    // TODO: Implement favorite toggle
-    console.log('Toggle favorite:', id)
+  const handleFavorite = async (id: string) => {
+    const file = files.find(f => f.id === id)
+    if (file) {
+      try {
+        await toggleFavorite.mutateAsync({
+          id,
+          isFavorite: !file.is_favorite
+        })
+      } catch (error) {
+        console.error('Failed to toggle favorite:', error)
+      }
+    }
   }
 
   const handleNewDoc = () => {
@@ -103,7 +120,7 @@ export default function DocumentsPage() {
     return (
       <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-pulse text-gray-400">Loading documents...</div>
+          <div className="animate-pulse text-gray-400">Loading files...</div>
         </div>
       </div>
     )
@@ -113,16 +130,17 @@ export default function DocumentsPage() {
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       {/* Sidebar */}
       <DocsSidebar
-        recentDocs={documents.slice(0, 5)}
+        recentDocs={recentFiles.slice(0, 5)}
         selectedFolder={selectedFolder}
         onSelectFolder={setSelectedFolder}
+        folders={folders}
       />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col bg-[#f7f8f6] relative h-full w-full min-w-0 overflow-hidden">
-        <div className="flex flex-col gap-6 px-8 py-6 bg-[#f7f8f6] z-10 shrink-0">
+      <main className="flex-1 flex flex-col bg-[#f7f8f6] dark:bg-[#131b0d] relative h-full w-full min-w-0 overflow-hidden">
+        <div className="flex flex-col gap-6 px-8 py-6 bg-[#f7f8f6] dark:bg-[#182210] z-10 shrink-0">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-[#131b0d] tracking-tight">Documents</h1>
+            <h1 className="text-3xl font-bold text-[#131b0d] dark:text-white tracking-tight">Documents</h1>
             <div className="flex items-center gap-4">
               <div className="relative group w-64 md:w-80">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -131,8 +149,8 @@ export default function DocumentsPage() {
                   </svg>
                 </div>
                 <input
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm transition-all shadow-sm"
-                  placeholder="Search documents..."
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-200 dark:border-[#334025] rounded-lg leading-5 bg-white dark:bg-[#1f2b15] placeholder-gray-400 dark:placeholder-gray-500 text-[#131b0d] dark:text-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary sm:text-sm transition-all shadow-sm"
+                  placeholder="Search files..."
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -159,14 +177,14 @@ export default function DocumentsPage() {
             </div>
           </div>
 
-      <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setActiveFilter('all')}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all shadow-sm ${
                   activeFilter === 'all'
-                    ? 'bg-[#131b0d] text-white'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#131b0d] hover:border-gray-300'
+                    ? 'bg-[#131b0d] dark:bg-white text-white dark:text-[#131b0d]'
+                    : 'bg-white dark:bg-[#1f2b15] border border-gray-200 dark:border-[#334025] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#2a3820] hover:text-[#131b0d] dark:hover:text-white hover:border-gray-300 dark:hover:border-[#3a4d2e]'
                 }`}
               >
                 All
@@ -175,8 +193,8 @@ export default function DocumentsPage() {
                 onClick={() => setActiveFilter('recent')}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                   activeFilter === 'recent'
-                    ? 'bg-[#131b0d] text-white shadow-sm'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#131b0d] hover:border-gray-300'
+                    ? 'bg-[#131b0d] dark:bg-white text-white dark:text-[#131b0d] shadow-sm'
+                    : 'bg-white dark:bg-[#1f2b15] border border-gray-200 dark:border-[#334025] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#2a3820] hover:text-[#131b0d] dark:hover:text-white hover:border-gray-300 dark:hover:border-[#3a4d2e]'
                 }`}
               >
                 Recent
@@ -185,8 +203,8 @@ export default function DocumentsPage() {
                 onClick={() => setActiveFilter('shared')}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                   activeFilter === 'shared'
-                    ? 'bg-[#131b0d] text-white shadow-sm'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#131b0d] hover:border-gray-300'
+                    ? 'bg-[#131b0d] dark:bg-white text-white dark:text-[#131b0d] shadow-sm'
+                    : 'bg-white dark:bg-[#1f2b15] border border-gray-200 dark:border-[#334025] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#2a3820] hover:text-[#131b0d] dark:hover:text-white hover:border-gray-300 dark:hover:border-[#3a4d2e]'
                 }`}
               >
                 Shared
@@ -195,8 +213,8 @@ export default function DocumentsPage() {
                 onClick={() => setActiveFilter('favorites')}
                 className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                   activeFilter === 'favorites'
-                    ? 'bg-[#131b0d] text-white shadow-sm'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#131b0d] hover:border-gray-300'
+                    ? 'bg-[#131b0d] dark:bg-white text-white dark:text-[#131b0d] shadow-sm'
+                    : 'bg-white dark:bg-[#1f2b15] border border-gray-200 dark:border-[#334025] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#2a3820] hover:text-[#131b0d] dark:hover:text-white hover:border-gray-300 dark:hover:border-[#3a4d2e]'
                 }`}
               >
                 Favorites
@@ -205,22 +223,22 @@ export default function DocumentsPage() {
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-500">Sort by:</span>
-                <button className="flex items-center gap-1.5 text-sm font-medium text-[#131b0d] hover:bg-gray-200/50 px-2 py-1 rounded transition-colors">
+                <span className="text-sm text-gray-500 dark:text-gray-400">Sort by:</span>
+                <button className="flex items-center gap-1.5 text-sm font-medium text-[#131b0d] dark:text-white hover:bg-gray-200/50 dark:hover:bg-white/10 px-2 py-1 rounded transition-colors">
                   Modified
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                   </svg>
                 </button>
               </div>
-              <div className="h-4 w-px bg-gray-300"></div>
-              <div className="flex bg-white rounded-lg border border-gray-200 p-0.5 shadow-sm">
+              <div className="h-4 w-px bg-gray-300 dark:bg-[#334025]"></div>
+              <div className="flex bg-white dark:bg-[#1f2b15] rounded-lg border border-gray-200 dark:border-[#334025] p-0.5 shadow-sm">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-1 rounded transition-colors ${
                     viewMode === 'grid' 
-                      ? 'text-[#131b0d] bg-gray-100' 
-                      : 'text-gray-400 hover:text-[#131b0d] hover:bg-gray-50'
+                      ? 'text-[#131b0d] dark:text-white bg-gray-100 dark:bg-[#2a3820]' 
+                      : 'text-gray-400 dark:text-gray-500 hover:text-[#131b0d] dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#2a3820]'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -231,8 +249,8 @@ export default function DocumentsPage() {
                   onClick={() => setViewMode('list')}
                   className={`p-1 rounded transition-colors ${
                     viewMode === 'list' 
-                      ? 'text-[#131b0d] bg-gray-100' 
-                      : 'text-gray-400 hover:text-[#131b0d] hover:bg-gray-50'
+                      ? 'text-[#131b0d] dark:text-white bg-gray-100 dark:bg-[#2a3820]' 
+                      : 'text-gray-400 dark:text-gray-500 hover:text-[#131b0d] dark:hover:text-white hover:bg-gray-50 dark:hover:bg-[#2a3820]'
                   }`}
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -246,17 +264,17 @@ export default function DocumentsPage() {
 
         <div className="flex-1 overflow-y-auto px-8 pb-10">
           {/* Today */}
-          {groupedDocuments.today.length > 0 && (
+          {groupedFiles.today.length > 0 && (
             <div className="mb-10">
-              <h3 className="text-sm font-bold text-gray-500 mb-4 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-4 flex items-center gap-2">
                 Today
-                <span className="h-px bg-gray-200 flex-1"></span>
+                <span className="h-px bg-gray-200 dark:bg-[#334025] flex-1"></span>
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {groupedDocuments.today.map((doc) => (
-                  <DocumentCard
-                    key={doc.id}
-                    document={doc}
+                {groupedFiles.today.map((file) => (
+                  <FileCard
+                    key={file.id}
+                    file={file}
                     onOpen={handleOpen}
                     onShare={handleShare}
                     onFavorite={handleFavorite}
@@ -267,17 +285,17 @@ export default function DocumentsPage() {
           )}
 
           {/* Yesterday */}
-          {groupedDocuments.yesterday.length > 0 && (
+          {groupedFiles.yesterday.length > 0 && (
             <div className="mb-10">
-              <h3 className="text-sm font-bold text-gray-500 mb-4 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-4 flex items-center gap-2">
                 Yesterday
-                <span className="h-px bg-gray-200 flex-1"></span>
+                <span className="h-px bg-gray-200 dark:bg-[#334025] flex-1"></span>
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {groupedDocuments.yesterday.map((doc) => (
-                  <DocumentCard
-                    key={doc.id}
-                    document={doc}
+                {groupedFiles.yesterday.map((file) => (
+                  <FileCard
+                    key={file.id}
+                    file={file}
                     onOpen={handleOpen}
                     onShare={handleShare}
                     onFavorite={handleFavorite}
@@ -288,34 +306,34 @@ export default function DocumentsPage() {
           )}
 
           {/* This Week */}
-          {groupedDocuments.thisWeek.length > 0 && (
+          {groupedFiles.thisWeek.length > 0 && (
             <div className="mb-10">
-              <h3 className="text-sm font-bold text-gray-500 mb-4 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-4 flex items-center gap-2">
                 This Week
-                <span className="h-px bg-gray-200 flex-1"></span>
+                <span className="h-px bg-gray-200 dark:bg-[#334025] flex-1"></span>
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {groupedDocuments.thisWeek.map((doc) => (
-                  <DocumentCard
-                    key={doc.id}
-                    document={doc}
+                {groupedFiles.thisWeek.map((file) => (
+                  <FileCard
+                    key={file.id}
+                    file={file}
                     onOpen={handleOpen}
                     onShare={handleShare}
                     onFavorite={handleFavorite}
                   />
                 ))}
               </div>
-      </div>
+            </div>
           )}
 
           {/* Empty State */}
-          {filteredDocuments.length === 0 && (
+          {filteredFiles.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20">
-              <h3 className="text-2xl font-bold text-gray-300 mb-2">
-                No documents found
+              <h3 className="text-2xl font-bold text-gray-300 dark:text-gray-600 mb-2">
+                No files found
               </h3>
-              <p className="text-gray-400 text-sm mb-6">
-                {searchQuery ? 'Try adjusting your search' : 'Create your first document to get started'}
+              <p className="text-gray-400 dark:text-gray-500 text-sm mb-6">
+                {searchQuery ? 'Try adjusting your search' : 'Create your first file to get started'}
               </p>
               {!searchQuery && (
                 <button
@@ -336,10 +354,55 @@ export default function DocumentsPage() {
       {/* Upload Modal */}
       {uploadModalOpen && (
         <UploadDocumentModal
-          folders={[]}
+          folders={folders}
           onClose={() => setUploadModalOpen(false)}
         />
       )}
     </div>
+  )
+}
+
+// FileCard component - wrapper to convert FileItem to Document-like format for DocumentCard
+function FileCard({
+  file,
+  onOpen,
+  onShare,
+  onFavorite,
+}: {
+  file: FileItem
+  onOpen?: (id: string) => void
+  onShare?: (id: string) => void
+  onFavorite?: (id: string) => void
+}) {
+  // Convert FileItem to Document-like format for compatibility with DocumentCard
+  const documentLike = {
+    id: file.id,
+    title: file.name,
+    type: file.mime_type?.includes('pdf') ? 'pdf' : file.mime_type?.includes('sheet') ? 'sheet' : file.mime_type?.includes('presentation') ? 'slide' : 'doc',
+    document_mode: 'file' as const,
+    file_name: file.name,
+    file_size: file.size,
+    file_type: file.mime_type,
+    file_url: file.file_url,
+    file_path: file.storage_path,
+    folder_id: file.parent_id,
+    owner_id: file.created_by,
+    owner: file.created_by_user ? {
+      id: file.created_by_user.id,
+      full_name: file.created_by_user.full_name || file.created_by_user.email,
+      avatar_url: file.created_by_user.avatar_url
+    } : undefined,
+    is_favorite: file.is_favorite,
+    created_at: file.created_at,
+    updated_at: file.updated_at,
+  }
+
+  return (
+    <DocumentCard
+      document={documentLike as any}
+      onOpen={onOpen}
+      onShare={onShare}
+      onFavorite={onFavorite}
+    />
   )
 }

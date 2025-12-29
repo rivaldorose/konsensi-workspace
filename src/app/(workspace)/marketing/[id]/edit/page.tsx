@@ -80,7 +80,7 @@ export default function EditMarketingPostPage() {
       
       await updatePost.mutateAsync({
         id: post.id,
-        platforms,
+        platforms: platforms as any,
         caption,
         scheduled_date: date || undefined,
         scheduled_time: time || undefined,

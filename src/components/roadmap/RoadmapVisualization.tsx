@@ -43,7 +43,7 @@ export function RoadmapVisualization() {
       id: goal.id,
       title: goal.title,
       startDate: goal.start_date,
-      endDate: goal.target_date,
+      endDate: goal.target_date || goal.due_date || goal.start_date,
       progress: goal.progress,
       category: goal.category,
       color,

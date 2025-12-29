@@ -4,24 +4,33 @@ import Link from 'next/link'
 import { useGoals } from '@/hooks/useGoals'
 import type { Goal } from '@/types'
 
-const statusColors: Record<Goal['status'], string> = {
+const statusColors: Partial<Record<Goal['status'], string>> = {
   not_started: 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300',
+  in_progress: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
   on_track: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300',
   at_risk: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300',
+  behind: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
+  complete: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
   completed: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
 }
 
-const statusDots: Record<Goal['status'], string> = {
+const statusDots: Partial<Record<Goal['status'], string>> = {
   not_started: 'bg-gray-500',
+  in_progress: 'bg-blue-500',
   on_track: 'bg-green-500',
   at_risk: 'bg-yellow-500',
+  behind: 'bg-red-500',
+  complete: 'bg-blue-500',
   completed: 'bg-blue-500',
 }
 
-const statusLabels: Record<Goal['status'], string> = {
+const statusLabels: Partial<Record<Goal['status'], string>> = {
   not_started: 'Not Started',
+  in_progress: 'In Progress',
   on_track: 'On Track',
   at_risk: 'At Risk',
+  behind: 'Behind',
+  complete: 'Complete',
   completed: 'Completed',
 }
 
