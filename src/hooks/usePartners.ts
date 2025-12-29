@@ -118,12 +118,24 @@ export function useCreatePartner() {
         fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePartners.ts:95',message:'Supabase insert error',data:{errorCode:error.code,errorMessage:error.message,errorDetails:error.details,errorHint:error.hint,insertData},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ALL'})}).catch(()=>{});
         // #endregion
         
-        console.error('Create partner error:', error)
+        // Log full error object for debugging
+        console.group('🚨 CREATE PARTNER ERROR - Full Details')
+        console.error('Full error object:', error)
         console.error('Error code:', error.code)
         console.error('Error message:', error.message)
         console.error('Error details:', error.details)
         console.error('Error hint:', error.hint)
-        console.error('Partner data that was sent:', JSON.stringify(insertData, null, 2))
+        console.error('Complete error JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2))
+        console.groupEnd()
+        
+        console.group('📦 DATA THAT WAS SENT')
+        console.error('Insert data:', JSON.stringify(insertData, null, 2))
+        console.error('Contact email:', insertData.contact_email, 'Type:', typeof insertData.contact_email)
+        console.error('Contact phone:', insertData.contact_phone, 'Type:', typeof insertData.contact_phone)
+        console.error('Sector:', insertData.sector, 'Type:', typeof insertData.sector)
+        console.error('Owner ID:', insertData.owner_id, 'Type:', typeof insertData.owner_id)
+        console.groupEnd()
+        
         throw error
       }
       
