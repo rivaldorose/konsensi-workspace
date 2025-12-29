@@ -7,27 +7,46 @@ export function useDocuments() {
     queryKey: ['documents'],
     queryFn: async () => {
       const supabase = createClient()
-      const { data, error } = await supabase
-        .from('documents')
-        .select('id, title, type, document_mode, file_name, file_size, file_type, file_url, file_path, folder_id, status, owner_id, last_edited_by_id, is_favorite, created_at, updated_at, owner:users!documents_owner_id_fkey(id, full_name, email, avatar_url), last_edited_by:users!documents_last_edited_by_id_fkey(id, full_name, email, avatar_url)')
-        .order('updated_at', { ascending: false })
-        .limit(50)
       
-      if (error) throw error
-      // Transform the data to match Document type - Supabase returns owner and last_edited_by as arrays
-      const transformed: Document[] = (data || []).map((doc: any): Document => {
-        const owner = Array.isArray(doc.owner) ? (doc.owner[0] || null) : (doc.owner || null)
-        const lastEditedBy = Array.isArray(doc.last_edited_by) ? (doc.last_edited_by[0] || null) : (doc.last_edited_by || null)
-        
-        return {
-          ...doc,
-          owner: owner || undefined,
-          last_edited_by: lastEditedBy || undefined,
-        }
+      // First, get documents without joins for better performance
+      const { data: docs, error: docsError } = await supabase
+        .from('documents')
+        .select('id, title, type, document_mode, file_name, file_size, file_type, file_url, file_path, folder_id, status, owner_id, last_edited_by_id, is_favorite, created_at, updated_at')
+        .order('updated_at', { ascending: false })
+        .limit(100)
+      
+      if (docsError) throw docsError
+      if (!docs || docs.length === 0) return []
+      
+      // Get unique user IDs
+      const userIds = new Set<string>()
+      docs.forEach(doc => {
+        if (doc.owner_id) userIds.add(doc.owner_id)
+        if (doc.last_edited_by_id) userIds.add(doc.last_edited_by_id)
       })
+      
+      // Fetch users in one query
+      const { data: users, error: usersError } = await supabase
+        .from('users')
+        .select('id, full_name, email, avatar_url')
+        .in('id', Array.from(userIds))
+      
+      if (usersError) throw usersError
+      
+      // Create a map for quick user lookup
+      const userMap = new Map((users || []).map(user => [user.id, user]))
+      
+      // Transform documents with user data
+      const transformed: Document[] = docs.map((doc: any): Document => ({
+        ...doc,
+        owner: doc.owner_id ? (userMap.get(doc.owner_id) || undefined) : undefined,
+        last_edited_by: doc.last_edited_by_id ? (userMap.get(doc.last_edited_by_id) || undefined) : undefined,
+      }))
+      
       return transformed
     },
-    staleTime: 30000, // Cache for 30 seconds
+    staleTime: 60000, // Cache for 60 seconds (increased from 30)
+    gcTime: 300000, // Keep in cache for 5 minutes
   })
 }
 

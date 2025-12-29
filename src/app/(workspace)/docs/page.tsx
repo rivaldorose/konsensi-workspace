@@ -44,7 +44,9 @@ export default function DocumentsPage() {
         return docDate >= sevenDaysAgo
       })
     } else if (activeFilter === 'shared') {
-      filtered = filtered.filter(doc => doc.collaborators && doc.collaborators.length > 0)
+      // Note: collaborators are not loaded in useDocuments for performance
+      // This filter would need a separate query or flag in the database
+      filtered = filtered // For now, show all documents for shared filter
     }
 
     return filtered
