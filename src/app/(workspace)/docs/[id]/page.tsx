@@ -3,37 +3,102 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useDocument, useUpdateDocument } from '@/hooks/useDocuments'
+import { useFile, useRenameFile } from '@/hooks/useFiles'
 
 export default function DocumentEditorPage() {
   const router = useRouter()
   const params = useParams()
   const documentId = params.id as string
   
-  const { data: document, isLoading } = useDocument(documentId)
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:DocumentEditorPage',message:'Page loaded',data:{documentId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+  }, [documentId]);
+  // #endregion
+  
+  // Try to fetch as file first (new system)
+  const { data: file, isLoading: isLoadingFile, error: fileError } = useFile(documentId)
+  const renameFile = useRenameFile()
+  
+  // Also try as document (old system) for backward compatibility
+  const { data: document, isLoading: isLoadingDocument, error: documentError } = useDocument(documentId)
   const updateDocument = useUpdateDocument()
+  
+  const isLoading = isLoadingFile || isLoadingDocument
+  const isFile = !!file
+  const isDocument = !!document
+  
+  // #region agent log
+  useEffect(() => {
+    if (fileError) {
+      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:DocumentEditorPage',message:'File query error',data:{error:fileError instanceof Error ? fileError.message : String(fileError),documentId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+    }
+    if (documentError) {
+      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:DocumentEditorPage',message:'Document query error',data:{error:documentError instanceof Error ? documentError.message : String(documentError),documentId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
+    }
+  }, [fileError, documentError, documentId]);
+  // #endregion
+  
+  // #region agent log
+  useEffect(() => {
+    if (file) {
+      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:DocumentEditorPage',message:'File found',data:{fileId:file.id,fileName:file.name,fileType:file.type,mimeType:file.mime_type,fileUrl:file.file_url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    }
+    if (document) {
+      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:DocumentEditorPage',message:'Document found',data:{documentId:document.id,documentTitle:document.title},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    }
+    if (!isLoading && !file && !document) {
+      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:DocumentEditorPage',message:'Neither file nor document found',data:{documentId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+    }
+  }, [file, document, isLoading, documentId]);
+  // #endregion
   
   const [activeTab, setActiveTab] = useState<'activity' | 'history'>('activity')
   const [documentTitle, setDocumentTitle] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
-  // Update title when document loads
+  // Update title when document/file loads
   useEffect(() => {
-    if (document?.title) {
+    if (isFile && file?.name) {
+      setDocumentTitle(file.name)
+      // If it's a file (uploaded file), redirect to file URL immediately
+      if (file.type === 'file' && file.file_url) {
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:DocumentEditorPage',message:'Redirecting to file URL',data:{fileUrl:file.file_url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        window.open(file.file_url, '_blank')
+        router.replace('/docs')
+        return
+      }
+    } else if (isDocument && document?.title) {
       setDocumentTitle(document.title)
     }
-  }, [document])
+  }, [file, document, isFile, isDocument, router])
 
   const handleTitleChange = async (newTitle: string) => {
     setDocumentTitle(newTitle)
     setIsSaving(true)
     
     try {
-      await updateDocument.mutateAsync({
-        id: documentId,
-        title: newTitle
-      })
+      if (isFile) {
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:handleTitleChange',message:'Renaming file',data:{fileId:documentId,newName:newTitle},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        await renameFile.mutateAsync({
+          id: documentId,
+          name: newTitle
+        })
+      } else if (isDocument) {
+        await updateDocument.mutateAsync({
+          id: documentId,
+          title: newTitle
+        })
+      }
     } catch (error) {
-      console.error('Failed to update document:', error)
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:handleTitleChange',message:'Update failed',data:{error:error instanceof Error ? error.message : String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      console.error('Failed to update document/file:', error)
     } finally {
       setIsSaving(false)
     }
@@ -55,12 +120,26 @@ export default function DocumentEditorPage() {
     )
   }
 
-  if (!document) {
-  return (
+  // If it's a file, we redirect, so show loading/redirect message
+  if (isFile && file?.type === 'file' && file.file_url) {
+    return (
       <div className="flex items-center justify-center h-screen">
-      <div>
-          <p>Document not found</p>
-          <button onClick={() => router.push('/docs')} className="mt-4 text-primary">
+        <div className="text-center">
+          <p className="text-lg mb-4">Opening file...</p>
+          <p className="text-sm text-gray-500">If the file doesn't open, <button onClick={() => window.open(file.file_url, '_blank')} className="text-primary underline">click here</button></p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show not found only after loading is complete
+  if (!isLoading && !document && !file) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <p className="text-lg mb-2">Document/File not found</p>
+          <p className="text-sm text-gray-500 mb-4">The file you're looking for doesn't exist or you don't have permission to view it.</p>
+          <button onClick={() => router.push('/docs')} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#63d80e] transition-colors">
             Back to Documents
           </button>
         </div>
@@ -252,7 +331,7 @@ export default function DocumentEditorPage() {
                 suppressContentEditableWarning
                 onBlur={(e) => handleTitleChange(e.currentTarget.textContent || '')}
               >
-                {documentTitle || document.title}
+                {documentTitle || (isFile ? file?.name : document?.title) || 'Untitled'}
               </h1>
             </div>
 

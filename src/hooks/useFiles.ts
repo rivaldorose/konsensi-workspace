@@ -27,7 +27,9 @@ export function useFiles(folderId?: string | null) {
       
       const { data: files, error: filesError } = await query
       
-      if (filesError) throw filesError
+      if (filesError) {
+        throw filesError
+      }
       if (!files || files.length === 0) return []
       
       // Get unique created_by IDs
@@ -216,7 +218,9 @@ export function useUploadFile() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
-      if (!user) throw new Error('Not authenticated')
+      if (!user) {
+        throw new Error('Not authenticated')
+      }
       
       // Upload to storage
       const fileName = `${user.id}/${Date.now()}-${file.name}`
@@ -224,7 +228,9 @@ export function useUploadFile() {
         .from('files')
         .upload(fileName, file)
       
-      if (uploadError) throw uploadError
+      if (uploadError) {
+        throw uploadError
+      }
       
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -248,7 +254,10 @@ export function useUploadFile() {
         .select()
         .single()
       
-      if (error) throw error
+      if (error) {
+        throw error
+      }
+      
       return data
     },
     onSuccess: () => {
@@ -397,12 +406,26 @@ export function useFile(id: string | null) {
     queryFn: async () => {
       if (!id) return null
       
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useFile',message:'Query started',data:{fileId:id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      // #endregion
+      
       const supabase = createClient()
       const { data, error } = await supabase
         .from('files')
         .select('id, name, type, mime_type, size, parent_id, file_url, storage_path, is_favorite, created_by, created_at, updated_at')
         .eq('id', id)
         .single()
+      
+      // #region agent log
+      if (error) {
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useFile',message:'Query error',data:{error:error.message,code:error.code,hint:error.hint,details:error.details,fileId:id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      } else if (!data) {
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useFile',message:'No data returned',data:{fileId:id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      } else {
+        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useFiles.ts:useFile',message:'File found',data:{fileId:data.id,fileName:data.name,fileType:data.type},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      }
+      // #endregion
       
       if (error) throw error
       if (!data) return null
