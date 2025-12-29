@@ -56,13 +56,15 @@ export default function DocumentEditorPage() {
   const [activeTab, setActiveTab] = useState<'activity' | 'history'>('activity')
   const [documentTitle, setDocumentTitle] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [fileViewUrl, setFileViewUrl] = useState<string | null>(null)
+  const [isGeneratingUrl, setIsGeneratingUrl] = useState(false)
 
-  // Update title when document/file loads
+  // Update title when document/file loads and generate view URL for files
   useEffect(() => {
     if (isFile && file?.name) {
       setDocumentTitle(file.name)
-      // If it's a file (uploaded file), generate signed URL and open it
-      if (file.type === 'file' && file.storage_path) {
+      // If it's a file (uploaded file), generate signed URL for viewing
+      if (file.type === 'file' && file.storage_path && !fileViewUrl) {
         // Store in const with explicit type to satisfy TypeScript narrowing
         const storagePath: string = file.storage_path
         // #region agent log
@@ -70,7 +72,8 @@ export default function DocumentEditorPage() {
         // #endregion
         
         // Generate signed URL (works for both public and private buckets)
-        const openFile = async () => {
+        const generateViewUrl = async () => {
+          setIsGeneratingUrl(true)
           try {
             const { createClient } = await import('@/lib/supabase/client')
             const supabase = createClient()
@@ -81,36 +84,34 @@ export default function DocumentEditorPage() {
             
             if (signedUrlError) {
               // #region agent log
-              fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:openFile',message:'Signed URL error, trying public URL',data:{error:signedUrlError.message,storagePath},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+              fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:generateViewUrl',message:'Signed URL error, trying public URL',data:{error:signedUrlError.message,storagePath},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
               // #endregion
               // Fallback to stored file_url if signed URL fails
               if (file.file_url) {
-                window.open(file.file_url, '_blank')
-              } else {
-                throw signedUrlError
+                setFileViewUrl(file.file_url)
               }
             } else {
               // #region agent log
-              fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:openFile',message:'Signed URL created, opening file',data:{signedUrl:signedUrlData.signedUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+              fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:generateViewUrl',message:'Signed URL created',data:{signedUrl:signedUrlData.signedUrl},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
               // #endregion
-              window.open(signedUrlData.signedUrl, '_blank')
+              setFileViewUrl(signedUrlData.signedUrl)
             }
-            router.replace('/docs')
           } catch (error) {
             // #region agent log
-            fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:openFile',message:'Error opening file',data:{error:error instanceof Error ? error.message : String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+            fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'docs/[id]/page.tsx:generateViewUrl',message:'Error generating view URL',data:{error:error instanceof Error ? error.message : String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
             // #endregion
-            console.error('Error opening file:', error)
+            console.error('Error generating view URL:', error)
+          } finally {
+            setIsGeneratingUrl(false)
           }
         }
         
-        openFile()
-        return
+        generateViewUrl()
       }
     } else if (isDocument && document?.title) {
       setDocumentTitle(document.title)
     }
-  }, [file, document, isFile, isDocument, router])
+  }, [file, document, isFile, isDocument, fileViewUrl])
 
   const handleTitleChange = async (newTitle: string) => {
     setDocumentTitle(newTitle)
@@ -157,14 +158,99 @@ export default function DocumentEditorPage() {
     )
   }
 
-  // If it's a file, we redirect, so show loading/redirect message
-  if (isFile && file?.type === 'file' && file.file_url) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <p className="text-lg mb-4">Opening file...</p>
-          <p className="text-sm text-gray-500">If the file doesn't open, <button onClick={() => window.open(file.file_url, '_blank')} className="text-primary underline">click here</button></p>
+  // If it's a file, show file viewer
+  if (isFile && file?.type === 'file') {
+    const isPDF = file.mime_type?.includes('pdf') || file.name?.endsWith('.pdf')
+    const isImage = file.mime_type?.includes('image') || /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name || '')
+    
+    if (isGeneratingUrl) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <div className="animate-pulse mb-4">Loading file...</div>
+          </div>
         </div>
+      )
+    }
+    
+    if (!fileViewUrl) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <p className="text-lg mb-2">Unable to load file</p>
+            <p className="text-sm text-gray-500 mb-4">The file could not be loaded.</p>
+            <button onClick={() => router.push('/docs')} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#63d80e] transition-colors">
+              Back to Documents
+            </button>
+          </div>
+        </div>
+      )
+    }
+    
+    // Render file viewer
+    return (
+      <div className="flex flex-1 overflow-hidden h-[calc(100vh-4rem)]" style={{ marginTop: '-4rem' }}>
+        {/* Main Content Area: File Viewer */}
+        <main className="flex-1 flex flex-col bg-[#f7f8f6] relative h-full w-full min-w-0 overflow-hidden">
+          {/* Sticky Header */}
+          <div className="sticky top-0 z-30 flex items-center justify-between px-4 h-14 bg-white border-b border-[#ecf3e7] shadow-sm">
+            <h1 className="text-lg font-bold text-[#131b0d] truncate">{file.name}</h1>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => window.open(fileViewUrl, '_blank')}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-[#ecf3e7] text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                  <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                </svg>
+                Open in New Tab
+              </button>
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-[#ecf3e7] text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+                </svg>
+                Share
+              </button>
+            </div>
+          </div>
+
+          {/* File Viewer */}
+          <div className="flex-1 overflow-auto p-4 bg-gray-100">
+            {isPDF ? (
+              <iframe
+                src={fileViewUrl}
+                className="w-full h-full min-h-[600px] border border-gray-300 rounded-lg bg-white"
+                title={file.name}
+              />
+            ) : isImage ? (
+              <div className="flex items-center justify-center h-full">
+                <img
+                  src={fileViewUrl}
+                  alt={file.name}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full bg-white rounded-lg border border-gray-300 p-8">
+                <svg className="w-16 h-16 text-gray-400 mb-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" />
+                </svg>
+                <p className="text-lg font-medium text-gray-700 mb-2">{file.name}</p>
+                <p className="text-sm text-gray-500 mb-4">Preview not available for this file type</p>
+                <button
+                  onClick={() => window.open(fileViewUrl, '_blank')}
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-[#63d80e] transition-colors"
+                >
+                  Open in New Tab
+                </button>
+              </div>
+            )}
+          </div>
+        </main>
       </div>
     )
   }
