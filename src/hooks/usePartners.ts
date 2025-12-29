@@ -78,16 +78,15 @@ export function useCreatePartner() {
         throw new Error('Owner ID is required')
       }
       
-      // Clean up partner data - remove undefined values and convert empty strings to null for optional fields
+      // Clean up partner data - ensure contact fields are explicitly set (null or value, never undefined)
       const cleanPartner: any = {}
       for (const [key, value] of Object.entries(partner)) {
-        if (value !== undefined) {
-          // Convert empty strings to null for optional contact fields (database expects null, not empty string)
-          if ((key === 'contact_email' || key === 'contact_phone') && value === '') {
-            cleanPartner[key] = null
-          } else {
-            cleanPartner[key] = value
-          }
+        // For contact_email and contact_phone, explicitly set to null if undefined or empty string
+        if (key === 'contact_email' || key === 'contact_phone') {
+          cleanPartner[key] = (value === undefined || value === '' || value === null) ? null : value
+        } else if (value !== undefined) {
+          // For other fields, only include if not undefined
+          cleanPartner[key] = value
         }
       }
       
