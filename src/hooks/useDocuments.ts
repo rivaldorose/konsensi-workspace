@@ -93,17 +93,23 @@ export function useCreateDocument() {
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       
+      // Remove 'folder' if present - use folder_id instead
+      const { folder, ...documentData } = document as any
+      
       const { data, error } = await supabase
         .from('documents')
         .insert({
-          ...document,
+          ...documentData,
           owner_id: user?.id,
           last_edited_by_id: user?.id
         })
         .select('*')
         .single()
       
-      if (error) throw error
+      if (error) {
+        console.error('Create document error:', error)
+        throw error
+      }
       
       // Fetch users separately to avoid foreign key ambiguity
       let owner, lastEditedBy

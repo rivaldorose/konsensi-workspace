@@ -45,16 +45,16 @@ export default function CreateDocumentPage() {
         title: documentName,
         type: 'doc',
         document_mode: 'text',
-        folder: location,
         folder_id: location !== 'general-root' ? location : null,
         status: 'draft',
         is_favorite: false
       })
       
       router.push(`/docs/${newDocument.id}`)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create document:', error)
-      alert('Failed to create document. Please try again.')
+      const errorMessage = error?.message || error?.details || 'Unknown error'
+      alert(`Failed to create document: ${errorMessage}`)
     }
   }
 
