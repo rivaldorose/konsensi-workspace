@@ -137,9 +137,19 @@ export default function AddPartnerPage() {
         notes: opportunity || formData.notes || ''
       })
       router.push('/partners')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save draft:', error)
-      alert(`Failed to save draft: ${error instanceof Error ? error.message : 'Please try again.'}`)
+      console.error('Error code:', error?.code)
+      console.error('Error message:', error?.message)
+      console.error('Error details:', error?.details)
+      console.error('Error hint:', error?.hint)
+      
+      const errorMessage = error?.message || 'Please try again.'
+      const fullErrorMessage = error?.code 
+        ? `[${error.code}] ${errorMessage}${error?.hint ? `\n\nHint: ${error.hint}` : ''}`
+        : errorMessage
+      
+      alert(`Failed to save draft:\n\n${fullErrorMessage}`)
     }
   }
 
