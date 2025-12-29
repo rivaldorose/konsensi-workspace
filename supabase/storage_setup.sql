@@ -1,52 +1,77 @@
--- Supabase Storage Setup for Documents
--- Run this AFTER creating the documents bucket in Supabase Dashboard
+-- Storage bucket setup for documents
+-- This creates the 'documents' bucket in Supabase Storage if it doesn't exist
+-- Run this in the Supabase SQL Editor
 
--- Create the documents bucket (run this in Supabase Dashboard > Storage > Create Bucket)
--- Bucket name: documents
--- Public bucket: false
--- File size limit: 10485760 (10MB)
--- Allowed MIME types: (leave empty for all types, or specify: application/pdf,application/msword,application/vnd.*,image/*)
+-- Note: Storage buckets must be created via the Supabase Dashboard or using the Storage API
+-- This SQL script sets up RLS policies for an existing bucket
 
--- RLS Policies for storage.objects (for documents bucket)
--- Note: These policies allow authenticated users to upload/read/delete their own files
+-- First, ensure the bucket exists (this must be done via Supabase Dashboard):
+-- 1. Go to Storage in Supabase Dashboard
+-- 2. Click "New bucket"
+-- 3. Name it "documents"
+-- 4. Make it private (not public)
+-- 5. Enable File size limit if needed (e.g., 10MB)
 
--- Allow authenticated users to upload files to their own folder
-CREATE POLICY "Users can upload documents"
+-- RLS Policies for documents bucket
+-- These policies allow authenticated users to manage files in their own folders
+
+-- Policy: Users can upload files to their own folder
+CREATE POLICY IF NOT EXISTS "Users can upload files to their own folder"
 ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (
-  bucket_id = 'documents' 
-  AND auth.uid()::text = (storage.foldername(name))[1]
+  bucket_id = 'documents' AND
+  (storage.foldername(name))[1] = auth.uid()::text
 );
 
--- Allow users to read their own documents
-CREATE POLICY "Users can read own documents"
+-- Policy: Users can view files they own or have access to
+CREATE POLICY IF NOT EXISTS "Users can view files they own"
 ON storage.objects FOR SELECT
 TO authenticated
 USING (
-  bucket_id = 'documents' 
-  AND auth.uid()::text = (storage.foldername(name))[1]
+  bucket_id = 'documents' AND
+  (
+    (storage.foldername(name))[1] = auth.uid()::text OR
+    EXISTS (
+      SELECT 1 FROM public.documents
+      WHERE file_path = name
+      AND (
+        owner_id = auth.uid() OR
+        EXISTS (
+          SELECT 1 FROM public.document_collaborators
+          WHERE document_id = documents.id
+          AND user_id = auth.uid()
+        )
+      )
+    )
+  )
 );
 
--- Allow users to delete their own documents
-CREATE POLICY "Users can delete own documents"
-ON storage.objects FOR DELETE
-TO authenticated
-USING (
-  bucket_id = 'documents' 
-  AND auth.uid()::text = (storage.foldername(name))[1]
-);
-
--- Allow users to update their own documents (for renaming, etc.)
-CREATE POLICY "Users can update own documents"
+-- Policy: Users can update files they own
+CREATE POLICY IF NOT EXISTS "Users can update files they own"
 ON storage.objects FOR UPDATE
 TO authenticated
 USING (
-  bucket_id = 'documents' 
-  AND auth.uid()::text = (storage.foldername(name))[1]
+  bucket_id = 'documents' AND
+  (storage.foldername(name))[1] = auth.uid()::text
 )
 WITH CHECK (
-  bucket_id = 'documents' 
-  AND auth.uid()::text = (storage.foldername(name))[1]
+  bucket_id = 'documents' AND
+  (storage.foldername(name))[1] = auth.uid()::text
 );
 
+-- Policy: Users can delete files they own
+CREATE POLICY IF NOT EXISTS "Users can delete files they own"
+ON storage.objects FOR DELETE
+TO authenticated
+USING (
+  bucket_id = 'documents' AND
+  (
+    (storage.foldername(name))[1] = auth.uid()::text OR
+    EXISTS (
+      SELECT 1 FROM public.documents
+      WHERE file_path = name
+      AND owner_id = auth.uid()
+    )
+  )
+);
