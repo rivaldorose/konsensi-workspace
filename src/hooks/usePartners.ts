@@ -78,10 +78,18 @@ export function useCreatePartner() {
         throw new Error('Owner ID is required')
       }
       
-      // Clean up partner data - remove undefined values
-      const cleanPartner = Object.fromEntries(
-        Object.entries(partner).filter(([_, value]) => value !== undefined)
-      ) as Partial<Partner>
+      // Clean up partner data - remove undefined values and convert empty strings to null for optional fields
+      const cleanPartner: any = {}
+      for (const [key, value] of Object.entries(partner)) {
+        if (value !== undefined) {
+          // Convert empty strings to null for optional contact fields (database expects null, not empty string)
+          if ((key === 'contact_email' || key === 'contact_phone') && value === '') {
+            cleanPartner[key] = null
+          } else {
+            cleanPartner[key] = value
+          }
+        }
+      }
       
       // #region agent log
       fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePartners.ts:76',message:'Partner data cleaned',data:{cleanPartner,hasEmail:!!cleanPartner.contact_email,hasPhone:!!cleanPartner.contact_phone,emailValue:cleanPartner.contact_email,phoneValue:cleanPartner.contact_phone,sector:cleanPartner.sector},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
