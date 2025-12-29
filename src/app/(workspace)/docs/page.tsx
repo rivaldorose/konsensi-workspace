@@ -7,6 +7,7 @@ import type { FileItem } from '@/types/files'
 import DocumentCard from '@/components/documents/DocumentCard'
 import { DocsSidebar } from '@/components/documents/DocsSidebar'
 import { UploadDocumentModal } from '@/components/documents/UploadDocumentModal'
+import { CreateFolderModal } from '@/components/documents/CreateFolderModal'
 import { format } from 'date-fns'
 
 export default function DocumentsPage() {
@@ -23,6 +24,7 @@ export default function DocumentsPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedFolder, setSelectedFolder] = useState('all')
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
+  const [createFolderModalOpen, setCreateFolderModalOpen] = useState(false)
 
   // Filter files based on active filter
   const filteredFiles = useMemo(() => {
@@ -156,6 +158,15 @@ export default function DocumentsPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
+              <button
+                onClick={() => setCreateFolderModalOpen(true)}
+                className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors text-sm font-bold shadow-sm border border-gray-200"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                </svg>
+                <span>New Folder</span>
+              </button>
               <button
                 onClick={() => setUploadModalOpen(true)}
                 className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-bold shadow-sm"
@@ -356,6 +367,14 @@ export default function DocumentsPage() {
         <UploadDocumentModal
           folders={folders}
           onClose={() => setUploadModalOpen(false)}
+        />
+      )}
+
+      {/* Create Folder Modal */}
+      {createFolderModalOpen && (
+        <CreateFolderModal
+          currentFolderId={currentFolderId}
+          onClose={() => setCreateFolderModalOpen(false)}
         />
       )}
     </div>
