@@ -61,6 +61,10 @@ export default function AddPartnerPage() {
       const emailValue = formData.contact_email?.trim() || undefined
       const phoneValue = formData.contact_phone?.trim() || undefined
       
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'partners/new/page.tsx:63',message:'Form submission - values before mutation',data:{formData,emailValue,phoneValue,tags,opportunity},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ALL'})}).catch(()=>{});
+      // #endregion
+      
       await createPartner.mutateAsync({
         name: formData.name.trim(),
         type: formData.type || 'client',
