@@ -121,9 +121,31 @@ export function useUpdatePartner() {
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Partner> }) => {
       const supabase = createClient()
+      
+      // Clean up date fields - omit if empty (don't send empty strings)
+      const cleanedUpdates: any = {}
+      for (const [key, value] of Object.entries(updates)) {
+        // For date fields, completely omit if empty (don't send null or empty string)
+        if (key === 'next_action_date' || key === 'partnership_start' || key === 'contract_end') {
+          // Only include date field if it has a valid value
+          if (value !== undefined && value !== null && value !== '' && (typeof value !== 'string' || value.trim() !== '')) {
+            cleanedUpdates[key] = value
+          }
+          // Otherwise, don't include the field at all
+        }
+        // For contact fields, convert empty strings to null
+        else if (key === 'contact_email' || key === 'contact_phone') {
+          cleanedUpdates[key] = (value === undefined || value === '' || value === null) ? null : value
+        }
+        // For other fields, include if not undefined
+        else if (value !== undefined) {
+          cleanedUpdates[key] = value
+        }
+      }
+      
       const { data, error } = await supabase
         .from('partners')
-        .update(updates)
+        .update(cleanedUpdates)
         .eq('id', id)
         .select('*')
         .single()
