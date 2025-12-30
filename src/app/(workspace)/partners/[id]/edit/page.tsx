@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { usePartner, useUpdatePartner, useDeletePartner } from '@/hooks/usePartners'
+import { useUsers } from '@/hooks/useUsers'
 import type { Partner } from '@/types'
 
 export default function EditPartnerPage() {
@@ -13,6 +14,7 @@ export default function EditPartnerPage() {
   const { data: partner, isLoading } = usePartner(partnerId)
   const updatePartner = useUpdatePartner()
   const deletePartner = useDeletePartner()
+  const { data: users = [] } = useUsers()
   
   const [activeTab, setActiveTab] = useState('basic')
   const [formData, setFormData] = useState<Partial<Partner>>({})
@@ -33,17 +35,40 @@ export default function EditPartnerPage() {
   const handleSave = async () => {
     if (!partnerId) return
     
+    // Clean up date fields - convert empty strings to undefined
+    const cleanedUpdates: Partial<Partner> = {
+      ...formData,
+      tags
+    }
+    
+    // Convert empty date strings to undefined so they're omitted (database will use NULL)
+    if (cleanedUpdates.partnership_start === '') {
+      delete cleanedUpdates.partnership_start
+    }
+    if (cleanedUpdates.contract_end === '') {
+      delete cleanedUpdates.contract_end
+    }
+    if (cleanedUpdates.next_action_date === '') {
+      delete cleanedUpdates.next_action_date
+    }
+    
+    // Convert empty contact fields to null
+    if (cleanedUpdates.contact_email === '') {
+      cleanedUpdates.contact_email = null as any
+    }
+    if (cleanedUpdates.contact_phone === '') {
+      cleanedUpdates.contact_phone = null as any
+    }
+    
     try {
       await updatePartner.mutateAsync({
         id: partnerId,
-        updates: {
-          ...formData,
-          tags
-        }
+        updates: cleanedUpdates
       })
       router.push('/partners')
     } catch (error) {
       console.error('Failed to save partner:', error)
+      alert(`Failed to save partner: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -157,7 +182,9 @@ export default function EditPartnerPage() {
                     {/* General Information */}
                     <div className="space-y-4">
                       <h3 className="text-lg font-bold text-text-dark dark:text-white flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary">domain</span>
+                        <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
                         General Information
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -181,7 +208,9 @@ export default function EditPartnerPage() {
                               <option value="client">Client</option>
                               <option value="partner">Strategic Partner</option>
                             </select>
-                            <span className="material-symbols-outlined absolute right-4 top-3 pointer-events-none text-gray-500">expand_more</span>
+                            <svg className="absolute right-4 top-3.5 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
                           </div>
                         </label>
                         <label className="flex flex-col flex-1">
@@ -200,14 +229,15 @@ export default function EditPartnerPage() {
                               value={formData.owner_id || ''}
                               onChange={(e) => setFormData({ ...formData, owner_id: e.target.value })}
                             >
-                              <option value="mk">Maarten K.</option>
-                              <option value="js">Julia S.</option>
-                              <option value="ab">Alex B.</option>
+                              {users.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                  {user.full_name || user.email}
+                                </option>
+                              ))}
                             </select>
-                            <div className="absolute right-4 top-2.5 flex items-center gap-2 pointer-events-none">
-                              <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700">JS</div>
-                              <span className="material-symbols-outlined text-gray-500">expand_more</span>
-                            </div>
+                            <svg className="absolute right-4 top-3.5 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
                           </div>
                         </label>
                       </div>
@@ -218,7 +248,9 @@ export default function EditPartnerPage() {
                     {/* Agreement Details */}
                     <div className="space-y-4">
                       <h3 className="text-lg font-bold text-text-dark dark:text-white flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary">contract</span>
+                        <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                         Agreement Details
                       </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -262,7 +294,9 @@ export default function EditPartnerPage() {
                                   onClick={() => handleRemoveTag(tag)}
                                   className="hover:text-red-500"
                                 >
-                                  <span className="material-symbols-outlined text-sm">close</span>
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
                                 </button>
                               </span>
                             ))}
@@ -296,7 +330,9 @@ export default function EditPartnerPage() {
                 {activeTab === 'contact' && (
                   <div className="space-y-4">
                     <h3 className="text-lg font-bold text-text-dark dark:text-white flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary">person</span>
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
                       Primary Contact
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -309,14 +345,6 @@ export default function EditPartnerPage() {
                         />
                       </label>
                       <label className="flex flex-col flex-1">
-                        <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Job Title</p>
-                        <input
-                          className="form-input w-full rounded-lg text-[#131b0d] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#dae7cf] dark:border-[#3a4d2c] bg-white dark:bg-[#1a2016] h-12 px-4 text-base font-normal leading-normal placeholder:text-[#6e9a4c]/60"
-                          value={formData.contact_email || ''}
-                          onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
-                        />
-                      </label>
-                      <label className="flex flex-col flex-1">
                         <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-2">Email*</p>
                         <div className="relative">
                           <input
@@ -325,7 +353,9 @@ export default function EditPartnerPage() {
                             value={formData.contact_email || ''}
                             onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
                           />
-                          <span className="material-symbols-outlined absolute left-3 top-3 text-gray-400">mail</span>
+                          <svg className="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                          </svg>
                         </div>
                       </label>
                       <label className="flex flex-col flex-1">
@@ -337,7 +367,9 @@ export default function EditPartnerPage() {
                             value={formData.contact_phone || ''}
                             onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
                           />
-                          <span className="material-symbols-outlined absolute left-3 top-3 text-gray-400">call</span>
+                          <svg className="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                          </svg>
                         </div>
                       </label>
                     </div>
@@ -348,7 +380,9 @@ export default function EditPartnerPage() {
                 {activeTab === 'status' && (
                   <div className="space-y-4">
                     <h3 className="text-lg font-bold text-text-dark dark:text-white flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary">flag</span>
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                      </svg>
                       Status & Tracking
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -501,7 +535,9 @@ export default function EditPartnerPage() {
               onClick={handleDelete}
               className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-bold flex items-center gap-1"
             >
-              <span className="material-symbols-outlined text-[18px]">delete</span>
+              <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
               Delete Partner
             </button>
             <div className="flex gap-4">
@@ -521,7 +557,9 @@ export default function EditPartnerPage() {
                 onClick={handleSaveAndClose}
                 className="h-10 px-6 rounded-lg bg-primary hover:bg-[#64d60f] text-[#131b0d] text-sm font-bold shadow-sm transition-colors flex items-center gap-2"
               >
-                <span className="material-symbols-outlined text-[18px]">check</span>
+                <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
                 Save & Close
               </button>
             </div>
