@@ -20,13 +20,6 @@ export default function PartnersPage() {
     )
   }
 
-  const expandAll = (status: string) => {
-    const partnerIds = partners
-      ?.filter(p => p.status === status)
-      .map(p => p.id) || []
-    setExpandedPartners(prev => [...new Set([...prev, ...partnerIds])])
-  }
-
   // Filter partners
   const filteredPartners = partners?.filter(partner =>
     partner.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
