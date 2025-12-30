@@ -35,30 +35,74 @@ export default function EditPartnerPage() {
   const handleSave = async () => {
     if (!partnerId) return
     
-    // Clean up date fields - convert empty strings to undefined
-    const cleanedUpdates: Partial<Partner> = {
-      ...formData,
-      tags
+    // Ensure required fields are present
+    if (!formData.name?.trim()) {
+      alert('Partner Name is required')
+      return
     }
     
-    // Convert empty date strings to undefined so they're omitted (database will use NULL)
-    if (cleanedUpdates.partnership_start === '') {
-      delete cleanedUpdates.partnership_start
-    }
-    if (cleanedUpdates.contract_end === '') {
-      delete cleanedUpdates.contract_end
-    }
-    if (cleanedUpdates.next_action_date === '') {
-      delete cleanedUpdates.next_action_date
+    // Build updates object - only include fields that are actually being updated
+    const cleanedUpdates: any = {}
+    
+    // Required fields
+    if (formData.name !== undefined) cleanedUpdates.name = formData.name.trim()
+    if (formData.type !== undefined) cleanedUpdates.type = formData.type || 'client'
+    if (formData.sector !== undefined) cleanedUpdates.sector = formData.sector?.trim() || 'General'
+    if (formData.status !== undefined) cleanedUpdates.status = formData.status || 'active'
+    if (formData.contact_name !== undefined) cleanedUpdates.contact_name = formData.contact_name?.trim() || ''
+    
+    // Owner ID
+    if (formData.owner_id !== undefined) cleanedUpdates.owner_id = formData.owner_id
+    
+    // Date fields - convert YYYY-MM-DD to ISO strings
+    if (formData.partnership_start !== undefined && formData.partnership_start !== '') {
+      const dateStr = formData.partnership_start
+      if (!dateStr.includes('T')) {
+        // Convert YYYY-MM-DD to ISO string
+        cleanedUpdates.partnership_start = new Date(dateStr + 'T00:00:00').toISOString()
+      } else {
+        cleanedUpdates.partnership_start = dateStr
+      }
+    } else if (formData.partnership_start === '') {
+      // Empty string means clear the field - set to null
+      cleanedUpdates.partnership_start = null
     }
     
-    // Convert empty contact fields to null
-    if (cleanedUpdates.contact_email === '') {
-      cleanedUpdates.contact_email = null as any
+    if (formData.contract_end !== undefined && formData.contract_end !== '') {
+      const dateStr = formData.contract_end
+      if (!dateStr.includes('T')) {
+        cleanedUpdates.contract_end = new Date(dateStr + 'T00:00:00').toISOString()
+      } else {
+        cleanedUpdates.contract_end = dateStr
+      }
+    } else if (formData.contract_end === '') {
+      cleanedUpdates.contract_end = null
     }
-    if (cleanedUpdates.contact_phone === '') {
-      cleanedUpdates.contact_phone = null as any
+    
+    if (formData.next_action_date !== undefined && formData.next_action_date !== '') {
+      const dateStr = formData.next_action_date
+      if (!dateStr.includes('T')) {
+        cleanedUpdates.next_action_date = new Date(dateStr + 'T00:00:00').toISOString()
+      } else {
+        cleanedUpdates.next_action_date = dateStr
+      }
+    } else if (formData.next_action_date === '') {
+      cleanedUpdates.next_action_date = null
     }
+    
+    // Contact fields - convert empty strings to null
+    if (formData.contact_email !== undefined) {
+      cleanedUpdates.contact_email = formData.contact_email?.trim() || null
+    }
+    if (formData.contact_phone !== undefined) {
+      cleanedUpdates.contact_phone = formData.contact_phone?.trim() || null
+    }
+    
+    // Other fields
+    if (formData.annual_value !== undefined) cleanedUpdates.annual_value = formData.annual_value || 0
+    if (formData.next_action !== undefined) cleanedUpdates.next_action = formData.next_action?.trim() || ''
+    if (formData.notes !== undefined) cleanedUpdates.notes = formData.notes?.trim() || ''
+    if (tags !== undefined) cleanedUpdates.tags = tags
     
     try {
       await updatePartner.mutateAsync({
@@ -66,9 +110,23 @@ export default function EditPartnerPage() {
         updates: cleanedUpdates
       })
       router.push('/partners')
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save partner:', error)
-      alert(`Failed to save partner: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error('Error details:', JSON.stringify(error, null, 2))
+      console.error('Updates being sent:', JSON.stringify(cleanedUpdates, null, 2))
+      
+      let errorMessage = 'Unknown error'
+      if (error?.message) {
+        errorMessage = error.message
+      } else if (error?.details) {
+        errorMessage = typeof error.details === 'string' 
+          ? error.details 
+          : error.details[0]?.message || JSON.stringify(error.details)
+      } else if (error?.hint) {
+        errorMessage = error.hint
+      }
+      
+      alert(`Failed to save partner:\n\n${errorMessage}\n\nCheck console for more details (F12)`)
     }
   }
 
