@@ -457,7 +457,9 @@ export default function EditPartnerPage() {
                             <option value="active">Active</option>
                             <option value="paused">Paused</option>
                           </select>
-                          <span className="material-symbols-outlined absolute right-4 top-3 pointer-events-none text-gray-500">expand_more</span>
+                          <svg className="absolute right-4 top-3.5 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
                         </div>
                       </label>
                       <label className="flex flex-col flex-1">
@@ -499,8 +501,8 @@ export default function EditPartnerPage() {
                   <div className="space-y-5">
                     <div>
                       <p className="text-[#131b0d] dark:text-[#e4e8e1] text-sm font-medium leading-normal pb-3">Current Status</p>
-                      <div className="flex gap-3">
-                        {['active', 'in_gesprek', 'paused'].map((status) => {
+                      <div className="flex gap-3 flex-wrap">
+                        {['to_contact', 'in_gesprek', 'active', 'paused'].map((status) => {
                           const isSelected = formData.status === status
                           return (
                             <label key={status} className="cursor-pointer">
@@ -514,13 +516,15 @@ export default function EditPartnerPage() {
                               <div className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${
                                 isSelected
                                   ? status === 'active'
-                                    ? 'bg-primary/20 border-primary text-text-dark'
+                                    ? 'bg-primary/20 border-primary text-text-dark dark:text-white'
                                     : status === 'in_gesprek'
                                     ? 'bg-yellow-100 border-yellow-400 text-yellow-900 dark:bg-yellow-900/20 dark:border-yellow-400 dark:text-yellow-300'
+                                    : status === 'to_contact'
+                                    ? 'bg-blue-100 border-blue-400 text-blue-900 dark:bg-blue-900/20 dark:border-blue-400 dark:text-blue-300'
                                     : 'bg-gray-200 border-gray-400 text-gray-900 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-300'
-                                  : 'border-[#dae7cf] dark:border-[#2a3820] bg-gray-50 text-gray-600 dark:text-gray-400'
+                                  : 'border-[#dae7cf] dark:border-[#2a3820] bg-gray-50 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10'
                               }`}>
-                                {status === 'active' ? 'Active' : status === 'in_gesprek' ? 'In Gesprek' : 'Paused'}
+                                {status === 'active' ? 'Active' : status === 'in_gesprek' ? 'In Gesprek' : status === 'to_contact' ? 'To Contact' : 'Paused'}
                               </div>
                             </label>
                           )
