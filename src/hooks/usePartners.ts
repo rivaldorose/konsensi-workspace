@@ -78,7 +78,7 @@ export function useCreatePartner() {
         throw new Error('Owner ID is required')
       }
       
-      // Clean up partner data - ensure contact fields and date fields are explicitly set (null or value, never undefined)
+      // Clean up partner data - ensure contact fields and date fields are explicitly set (null or value, never undefined or empty string)
       const cleanPartner: any = {}
       for (const [key, value] of Object.entries(partner)) {
         // For contact_email and contact_phone, explicitly set to null if undefined or empty string
@@ -86,14 +86,26 @@ export function useCreatePartner() {
           cleanPartner[key] = (value === undefined || value === '' || value === null) ? null : value
         } 
         // For date fields, convert empty strings to null (database expects null, not empty string)
+        // Also handle if value is already a string that's empty
         else if (key === 'next_action_date' || key === 'partnership_start' || key === 'contract_end') {
-          cleanPartner[key] = (value === undefined || value === '' || value === null) ? null : value
+          if (value === undefined || value === null || value === '' || (typeof value === 'string' && value.trim() === '')) {
+            cleanPartner[key] = null
+          } else {
+            cleanPartner[key] = value
+          }
         } 
         // For other fields, only include if not undefined
         else if (value !== undefined) {
           cleanPartner[key] = value
         }
       }
+      
+      // Debug: Log date fields to ensure they're correct
+      console.log('Date fields after cleanup:', {
+        next_action_date: cleanPartner.next_action_date,
+        partnership_start: cleanPartner.partnership_start,
+        contract_end: cleanPartner.contract_end
+      })
       
       // #region agent log
       fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePartners.ts:76',message:'Partner data cleaned',data:{cleanPartner,hasEmail:!!cleanPartner.contact_email,hasPhone:!!cleanPartner.contact_phone,emailValue:cleanPartner.contact_email,phoneValue:cleanPartner.contact_phone,sector:cleanPartner.sector},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
