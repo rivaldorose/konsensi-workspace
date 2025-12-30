@@ -60,16 +60,8 @@ export function useCreatePartner() {
   
   return useMutation({
     mutationFn: async (partner: Partial<Partner>) => {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePartners.ts:62',message:'useCreatePartner mutation called',data:{partnerRaw:partner},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ALL'})}).catch(()=>{});
-      // #endregion
-      
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePartners.ts:67',message:'User auth check',data:{hasUser:!!user,userId:user?.id,partnerOwnerId:partner.owner_id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
       
       // Use partner.owner_id if provided, otherwise use current user
       const ownerId = partner.owner_id || user?.id
@@ -100,29 +92,10 @@ export function useCreatePartner() {
         }
       }
       
-      // Debug: Log date fields to ensure they're correct
-      console.log('Date fields after cleanup:', {
-        next_action_date: cleanPartner.next_action_date,
-        partnership_start: cleanPartner.partnership_start,
-        contract_end: cleanPartner.contract_end
-      })
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePartners.ts:76',message:'Partner data cleaned',data:{cleanPartner,hasEmail:!!cleanPartner.contact_email,hasPhone:!!cleanPartner.contact_phone,emailValue:cleanPartner.contact_email,phoneValue:cleanPartner.contact_phone,sector:cleanPartner.sector},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
-      
       const insertData = {
         ...cleanPartner,
         owner_id: ownerId
       }
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePartners.ts:82',message:'Final insert data before Supabase',data:insertData,timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
-      
-      console.log('Inserting partner with data:', JSON.stringify(insertData, null, 2))
-      console.log('Email value:', insertData.contact_email, 'Type:', typeof insertData.contact_email)
-      console.log('Phone value:', insertData.contact_phone, 'Type:', typeof insertData.contact_phone)
       
       const { data, error } = await supabase
         .from('partners')
@@ -131,34 +104,8 @@ export function useCreatePartner() {
         .single()
       
       if (error) {
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePartners.ts:95',message:'Supabase insert error',data:{errorCode:error.code,errorMessage:error.message,errorDetails:error.details,errorHint:error.hint,insertData},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ALL'})}).catch(()=>{});
-        // #endregion
-        
-        // Log full error object for debugging
-        console.group('🚨 CREATE PARTNER ERROR - Full Details')
-        console.error('Full error object:', error)
-        console.error('Error code:', error.code)
-        console.error('Error message:', error.message)
-        console.error('Error details:', error.details)
-        console.error('Error hint:', error.hint)
-        console.error('Complete error JSON:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2))
-        console.groupEnd()
-        
-        console.group('📦 DATA THAT WAS SENT')
-        console.error('Insert data:', JSON.stringify(insertData, null, 2))
-        console.error('Contact email:', insertData.contact_email, 'Type:', typeof insertData.contact_email)
-        console.error('Contact phone:', insertData.contact_phone, 'Type:', typeof insertData.contact_phone)
-        console.error('Sector:', insertData.sector, 'Type:', typeof insertData.sector)
-        console.error('Owner ID:', insertData.owner_id, 'Type:', typeof insertData.owner_id)
-        console.groupEnd()
-        
         throw error
       }
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/0a454eb1-d3d1-4c43-8c8e-e087d82e49ee',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'usePartners.ts:107',message:'Partner created successfully',data:{partnerId:data?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'ALL'})}).catch(()=>{});
-      // #endregion
       
       return data
     },
