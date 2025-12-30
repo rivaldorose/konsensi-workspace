@@ -85,14 +85,14 @@ export function useCreatePartner() {
         if (key === 'contact_email' || key === 'contact_phone') {
           cleanPartner[key] = (value === undefined || value === '' || value === null) ? null : value
         } 
-        // For date fields, convert empty strings to null (database expects null, not empty string)
-        // Also handle if value is already a string that's empty
+        // For date fields, completely omit if empty (don't send null or empty string)
+        // Supabase will use the column default (NULL) if field is omitted
         else if (key === 'next_action_date' || key === 'partnership_start' || key === 'contract_end') {
-          if (value === undefined || value === null || value === '' || (typeof value === 'string' && value.trim() === '')) {
-            cleanPartner[key] = null
-          } else {
+          // Only include date field if it has a valid value
+          if (value !== undefined && value !== null && value !== '' && (typeof value !== 'string' || value.trim() !== '')) {
             cleanPartner[key] = value
           }
+          // Otherwise, don't include the field at all (let database use default NULL)
         } 
         // For other fields, only include if not undefined
         else if (value !== undefined) {
