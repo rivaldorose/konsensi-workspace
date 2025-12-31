@@ -120,11 +120,13 @@ export function PartnerCard({ partner, variant, isExpanded, onToggle }: PartnerC
   // Compact Card (for In Gesprek / To Contact)
   return (
     <div 
-      className="p-4 border-b last:border-b-0 border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors cursor-pointer group"
-      onClick={() => onToggle?.(partner.id)}
+      className="p-4 border-b last:border-b-0 border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group"
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <Link 
+          href={`/partners/${partner.id}/edit`}
+          className="flex items-center gap-3 flex-1 cursor-pointer"
+        >
           <div className={`w-8 h-8 rounded-full ${avatarColor} flex items-center justify-center text-xs font-bold`}>
             {initials}
           </div>
@@ -140,11 +142,20 @@ export function PartnerCard({ partner, variant, isExpanded, onToggle }: PartnerC
               {partner.contact_email || partner.next_action || 'No action set'}
             </p>
           </div>
-        </div>
+        </Link>
         <div className="flex items-center gap-3">
-          <svg className="w-5 h-5 text-gray-300 group-hover:text-primary transition-colors" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
-          </svg>
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onToggle?.(partner.id)
+            }}
+            className="p-1 hover:bg-gray-100 dark:hover:bg-white/10 rounded transition-colors"
+          >
+            <svg className="w-5 h-5 text-gray-300 group-hover:text-primary transition-colors" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>

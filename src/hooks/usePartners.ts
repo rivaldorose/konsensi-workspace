@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 import type { Partner } from '@/types'
+import { useCreateNotification } from './useNotifications'
 
 export function usePartners() {
   return useQuery({
@@ -109,8 +110,33 @@ export function useCreatePartner() {
       
       return data
     },
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: ['partners'] })
+      
+      // Create notification for partner creation
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user && data) {
+          await supabase.from('notifications').insert({
+            user_id: user.id,
+            type: 'partner_created',
+            title: 'New Partner Added',
+            message: `Partner "${data.name}" has been added to your workspace`,
+            icon: 'handshake',
+            icon_color: 'text-primary',
+            border_color: 'border-primary',
+            badge: 'New',
+            badge_color: 'bg-primary/20 text-primary',
+            metadata: { partner_id: data.id, partner_name: data.name },
+            is_read: false
+          })
+        }
+      } catch (error) {
+        console.error('Failed to create notification:', error)
+        // Don't throw - notification failure shouldn't break partner creation
+      }
     }
   })
 }
@@ -121,6 +147,13 @@ export function useUpdatePartner() {
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Partner> }) => {
       const supabase = createClient()
+      
+      // Get old partner data BEFORE update to compare status
+      const { data: oldPartner } = await supabase
+        .from('partners')
+        .select('status, name')
+        .eq('id', id)
+        .single()
       
       // Clean up date fields - omit if empty (don't send empty strings)
       const cleanedUpdates: any = {}
@@ -151,11 +184,72 @@ export function useUpdatePartner() {
         .single()
       
       if (error) throw error
-      return data
+      
+      // Return data with old partner info for notification
+      return { ...data, _oldPartner: oldPartner }
     },
-    onSuccess: (_, variables) => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['partners'] })
       queryClient.invalidateQueries({ queryKey: ['partner', variables.id] })
+      
+      // Create notification for partner update, especially status changes
+      try {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        
+        if (user && data) {
+          const oldPartner = (data as any)._oldPartner
+          
+          if (variables.updates.status && oldPartner && oldPartner.status !== variables.updates.status) {
+            // Status changed
+            const statusLabels: Record<string, string> = {
+              'to_contact': 'To Contact',
+              'in_gesprek': 'In Gesprek',
+              'active': 'Active',
+              'paused': 'Paused'
+            }
+            
+            const newStatusLabel = statusLabels[variables.updates.status] || variables.updates.status
+            
+            await supabase.from('notifications').insert({
+              user_id: user.id,
+              type: 'status_changed',
+              title: 'Partner Status Updated',
+              message: `Partner "${data.name}" status changed to "${newStatusLabel}"`,
+              icon: 'handshake',
+              icon_color: 'text-primary',
+              border_color: 'border-primary',
+              badge: newStatusLabel,
+              badge_color: 'bg-primary/20 text-primary',
+              metadata: { 
+                partner_id: data.id, 
+                partner_name: data.name,
+                old_status: oldPartner.status,
+                new_status: variables.updates.status
+              },
+              is_read: false
+            })
+          } else {
+            // General update notification (only if status didn't change)
+            await supabase.from('notifications').insert({
+              user_id: user.id,
+              type: 'partner_updated',
+              title: 'Partner Updated',
+              message: `Partner "${data.name}" has been updated`,
+              icon: 'handshake',
+              icon_color: 'text-primary',
+              border_color: 'border-primary',
+              badge: 'Updated',
+              badge_color: 'bg-primary/20 text-primary',
+              metadata: { partner_id: data.id, partner_name: data.name },
+              is_read: false
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Failed to create notification:', error)
+        // Don't throw - notification failure shouldn't break partner update
+      }
     }
   })
 }
