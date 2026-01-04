@@ -75,6 +75,7 @@ export function Navbar() {
     { label: 'Partners', href: '/partners' },
     { label: 'Events', href: '/events' },
     { label: 'Docs', href: '/docs' },
+    { label: 'News', href: '/news' },
     { label: 'Roadmap', href: '/roadmap' },
   ]
 
