@@ -6,6 +6,7 @@ import { useDocument, useUpdateDocument } from '@/hooks/useDocuments'
 import { useFile, useRenameFile } from '@/hooks/useFiles'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
+import { PDFViewer, usePDFViewer } from '@/components/documents/PDFViewer'
 
 export default function DocumentEditorPage() {
   const router = useRouter()
@@ -57,10 +58,12 @@ export default function DocumentEditorPage() {
   
   const [sidebarTab, setSidebarTab] = useState<'details' | 'comments'>('details')
   const [showOutline, setShowOutline] = useState(false)
-  const [zoom, setZoom] = useState(100)
   const [fileViewUrl, setFileViewUrl] = useState<string | null>(null)
   const [isGeneratingUrl, setIsGeneratingUrl] = useState(false)
   const [parentFolder, setParentFolder] = useState<{ id: string; name: string } | null>(null)
+  
+  // PDF viewer controls
+  const pdfViewer = usePDFViewer(fileViewUrl || '')
 
   // Update title when document/file loads and generate view URL for files
   useEffect(() => {
@@ -294,27 +297,47 @@ export default function DocumentEditorPage() {
                   </button>
                   <span className="text-xs font-medium">Outline</span>
                 </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => pdfViewer.prevPage()}
+                    disabled={pdfViewer.pageNum <= 1}
+                    className="size-6 flex items-center justify-center rounded hover:bg-white hover:shadow-sm text-gray-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" />
+                    </svg>
+                  </button>
+                  <span className="text-xs font-medium text-gray-500">
+                    {pdfViewer.numPages > 0 ? `${pdfViewer.pageNum} / ${pdfViewer.numPages}` : 'Loading...'}
+                  </span>
+                  <button
+                    onClick={() => pdfViewer.nextPage()}
+                    disabled={pdfViewer.pageNum >= pdfViewer.numPages}
+                    className="size-6 flex items-center justify-center rounded hover:bg-white hover:shadow-sm text-gray-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" />
+                    </svg>
+                  </button>
+                </div>
                 <div className="flex items-center bg-gray-100 rounded-lg p-0.5 gap-1">
                   <button
-                    onClick={() => setZoom(Math.max(25, zoom - 10))}
+                    onClick={() => pdfViewer.zoomOut()}
                     className="size-6 flex items-center justify-center rounded hover:bg-white hover:shadow-sm text-gray-500 transition-all"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" />
                     </svg>
                   </button>
-                  <span className="text-xs font-mono w-10 text-center">{zoom}%</span>
+                  <span className="text-xs font-mono w-12 text-center">{Math.round(pdfViewer.scale * 100)}%</span>
                   <button
-                    onClick={() => setZoom(Math.min(200, zoom + 10))}
+                    onClick={() => pdfViewer.zoomIn()}
                     className="size-6 flex items-center justify-center rounded hover:bg-white hover:shadow-sm text-gray-500 transition-all"
                   >
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
                     </svg>
                   </button>
-                </div>
-                <div className="flex items-center gap-2 text-gray-500">
-                  <span className="text-xs font-medium">Page 1 of 1</span>
                 </div>
               </div>
 
@@ -345,13 +368,12 @@ export default function DocumentEditorPage() {
 
               {/* PDF Content */}
               <div className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center bg-[#f0f2f5]">
-                {isPDF ? (
+                {isPDF && fileViewUrl ? (
                   <div className="w-full max-w-3xl">
-                    <iframe
-                      src={fileViewUrl}
-                      className="w-full min-h-[800px] border border-gray-300 rounded-sm bg-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.05)]"
-                      title={file.name}
-                      style={{ height: `${800 * (zoom / 100)}px` }}
+                    <PDFViewer
+                      url={fileViewUrl}
+                      scale={pdfViewer.scale}
+                      onPageCountChange={pdfViewer.setNumPages}
                     />
                   </div>
                 ) : isImage ? (
@@ -360,7 +382,6 @@ export default function DocumentEditorPage() {
                       src={fileViewUrl}
                       alt={file.name}
                       className="w-full h-auto rounded-sm shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06),0_0_0_1px_rgba(0,0,0,0.05)]"
-                      style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
                     />
                   </div>
                 ) : (
