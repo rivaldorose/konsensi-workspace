@@ -450,7 +450,11 @@ export default function DocumentEditorPage() {
                   }`}
                 >
                   Comments
-                  <span className="ml-1.5 bg-primary/20 text-green-800 px-1.5 py-0.5 rounded text-[10px] font-bold align-middle">0</span>
+                  {comments.length > 0 && (
+                    <span className="ml-1.5 bg-primary/20 text-green-800 px-1.5 py-0.5 rounded text-[10px] font-bold align-middle">
+                      {comments.length}
+                    </span>
+                  )}
                 </button>
               </div>
 
