@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useNewsArticle, useNewsArticleComments, useNewsArticleNote, useUpdateNewsArticle, useUpsertNewsArticleNote, useCreateNewsArticleComment, useCurrentUser } from '@/hooks/useNews'
-import { useCurrentUser as useCurrentUserFromUsers } from '@/hooks/useUsers'
+import { useNewsArticle, useNewsArticleComments, useNewsArticleNote, useUpdateNewsArticle, useUpsertNewsArticleNote, useCreateNewsArticleComment } from '@/hooks/useNews'
+import { useCurrentUser } from '@/hooks/useUsers'
 import { formatDistanceToNow } from 'date-fns'
 
 export default function NewsDetailPage() {
