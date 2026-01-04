@@ -33,13 +33,53 @@ export function useChannels() {
     queryKey: ['chat_channels'],
     queryFn: async () => {
       const supabase = createClient()
-      const { data, error } = await supabase
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        return [] as Channel[]
+      }
+      
+      // Get all channels (RLS will filter based on policies)
+      const { data: channels, error: channelsError } = await supabase
         .from('chat_channels')
         .select('*')
         .order('name', { ascending: true })
       
-      if (error) throw error
-      return (data || []) as Channel[]
+      if (channelsError) {
+        console.error('Error fetching channels:', channelsError)
+        throw channelsError
+      }
+      
+      if (!channels || channels.length === 0) return []
+      
+      // Get members for each channel
+      const channelIds = channels.map(c => c.id)
+      const { data: members, error: membersError } = await supabase
+        .from('chat_channel_members')
+        .select('channel_id, user_id')
+        .in('channel_id', channelIds)
+      
+      if (membersError) {
+        console.error('Error fetching channel members:', membersError)
+        throw membersError
+      }
+      
+      // Group members by channel_id
+      const membersByChannel = new Map<string, string[]>()
+      if (members) {
+        members.forEach((m: any) => {
+          if (!membersByChannel.has(m.channel_id)) {
+            membersByChannel.set(m.channel_id, [])
+          }
+          membersByChannel.get(m.channel_id)!.push(m.user_id)
+        })
+      }
+      
+      // Transform to Channel format
+      return (channels || []).map((channel: any) => ({
+        ...channel,
+        members: membersByChannel.get(channel.id) || []
+      })) as Channel[]
     }
   })
 }
