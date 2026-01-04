@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useDocument, useUpdateDocument } from '@/hooks/useDocuments'
 import { useFile, useRenameFile } from '@/hooks/useFiles'
+import { useComments, useCreateComment, useDeleteComment } from '@/hooks/useComments'
+import { useCurrentUser } from '@/hooks/useUsers'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import { PDFViewer, usePDFViewer } from '@/components/documents/PDFViewer'
@@ -61,6 +63,13 @@ export default function DocumentEditorPage() {
   const [fileViewUrl, setFileViewUrl] = useState<string | null>(null)
   const [isGeneratingUrl, setIsGeneratingUrl] = useState(false)
   const [parentFolder, setParentFolder] = useState<{ id: string; name: string } | null>(null)
+  const [commentText, setCommentText] = useState('')
+  
+  // Comments
+  const { data: comments = [], isLoading: isLoadingComments } = useComments(isFile ? file?.id : null)
+  const createComment = useCreateComment()
+  const deleteComment = useDeleteComment()
+  const { data: currentUser } = useCurrentUser()
   
   // PDF viewer controls
   const pdfViewer = usePDFViewer(fileViewUrl || '')
@@ -140,6 +149,21 @@ export default function DocumentEditorPage() {
 
   const handleShare = () => {
     router.push(`/docs/${documentId}/share`)
+  }
+
+  const handlePostComment = async () => {
+    if (!commentText.trim() || !file?.id || createComment.isPending) return
+    
+    try {
+      await createComment.mutateAsync({
+        fileId: file.id,
+        content: commentText.trim(),
+      })
+      setCommentText('')
+    } catch (error) {
+      console.error('Error posting comment:', error)
+      alert('Failed to post comment. Please try again.')
+    }
   }
 
   const formatFileSize = (bytes?: number) => {
@@ -536,22 +560,88 @@ export default function DocumentEditorPage() {
               {/* Comments Tab */}
               {sidebarTab === 'comments' && (
                 <div className="flex-1 overflow-y-auto flex flex-col">
-                  <div className="py-4">
-                    <div className="px-5 pb-3">
-                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">No comments yet</span>
-                    </div>
+                  {/* Comments List */}
+                  <div className="flex-1 overflow-y-auto py-4">
+                    {isLoadingComments ? (
+                      <div className="px-5">
+                        <div className="text-sm text-gray-400">Loading comments...</div>
+                      </div>
+                    ) : comments.length === 0 ? (
+                      <div className="px-5">
+                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">No comments yet</span>
+                      </div>
+                    ) : (
+                      <div className="px-5 space-y-4">
+                        {comments.map((comment) => (
+                          <div key={comment.id} className="flex gap-3 group">
+                            {/* Avatar */}
+                            <div className="shrink-0">
+                              {comment.user?.avatar_url ? (
+                                <div
+                                  className="size-8 rounded-full bg-cover bg-center"
+                                  style={{ backgroundImage: `url("${comment.user.avatar_url}")` }}
+                                />
+                              ) : (
+                                <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center">
+                                  <span className="text-xs font-bold text-primary">
+                                    {(comment.user?.full_name || comment.user?.email || 'U').charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            {/* Comment Content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-baseline gap-2 mb-1">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {comment.user?.full_name || comment.user?.email || 'Unknown User'}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">{comment.content}</p>
+                              {/* Delete button (only for own comments) */}
+                              {currentUser && comment.user_id === currentUser.id && (
+                                <button
+                                  onClick={() => {
+                                    if (file?.id && confirm('Are you sure you want to delete this comment?')) {
+                                      deleteComment.mutate({ commentId: comment.id, fileId: file.id })
+                                    }
+                                  }}
+                                  className="mt-1 text-xs text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  disabled={deleteComment.isPending}
+                                >
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                  
+                  {/* Comment Input */}
                   <div className="p-4 bg-white border-t border-gray-200 mt-auto z-10">
                     <div className="relative bg-gray-50 border border-gray-200 rounded-xl shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
                       <textarea
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && commentText.trim() && file?.id) {
+                            handlePostComment()
+                          }
+                        }}
                         className="block w-full border-0 bg-transparent p-3 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-0 resize-none min-h-[80px]"
-                        placeholder="Add a new comment..."
-                      ></textarea>
+                        placeholder="Add a new comment... (Cmd/Ctrl + Enter to post)"
+                        disabled={createComment.isPending || !file?.id}
+                      />
                       <div className="flex items-center justify-between px-2 pb-2 mt-1">
                         <div className="flex items-center gap-1">
                           <button
                             className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200/50 rounded transition-colors"
                             title="Mention someone"
+                            disabled
                           >
                             <svg className="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 20 20">
                               <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
@@ -561,22 +651,19 @@ export default function DocumentEditorPage() {
                           <button
                             className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200/50 rounded transition-colors"
                             title="Add emoji"
+                            disabled
                           >
                             <svg className="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" />
                             </svg>
                           </button>
-                          <button
-                            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-200/50 rounded transition-colors"
-                            title="Attach file"
-                          >
-                            <svg className="w-4.5 h-4.5" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" />
-                            </svg>
-                          </button>
                         </div>
-                        <button className="bg-primary hover:bg-[#63d80e] text-[#131b0d] text-xs font-bold px-4 py-1.5 rounded-lg shadow-sm shadow-primary/20 transition-all">
-                          Post
+                        <button
+                          onClick={handlePostComment}
+                          disabled={!commentText.trim() || createComment.isPending || !file?.id}
+                          className="bg-primary hover:bg-[#63d80e] disabled:opacity-50 disabled:cursor-not-allowed text-[#131b0d] text-xs font-bold px-4 py-1.5 rounded-lg shadow-sm shadow-primary/20 transition-all"
+                        >
+                          {createComment.isPending ? 'Posting...' : 'Post'}
                         </button>
                       </div>
                     </div>
