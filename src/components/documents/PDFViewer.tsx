@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from 'react'
 import * as pdfjsLib from 'pdfjs-dist'
 
-// Set worker - use CDN (unpkg is more reliable than cdnjs)
+// Set worker - use local worker file from public folder
 if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js'
 }
 
 interface PDFViewerProps {
