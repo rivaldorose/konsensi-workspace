@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { Channel } from '@/hooks/useChat'
+import { useCurrentUser } from '@/hooks/useUsers'
 
 interface ChatSidebarProps {
   channels: Channel[]
@@ -15,18 +16,12 @@ export function ChatSidebar({
   onSelectChannel
 }: ChatSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const { data: currentUser } = useCurrentUser()
 
   // Filter channels by search
   const filteredChannels = channels.filter(channel =>
     channel.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
-
-  // Hardcoded DMs for now (should come from API later)
-  const directMessages = [
-    { id: 'dm-alice', name: 'Alice Smith', online: true, avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCQabE2ulW1HYFyYhdC7VMohuzwSm0umOGJrDsUpDNisMYRYCrCiYSI0X4tDEZ9bO-WtlZ97MHux1u_J_uoh1HugtMHiAT8S4AfznqRLoxt1rLoIg0GN_1Wvd4eIFcqQ7Z2Z8t0SIPtsqHumIIEtwVG57LVKab1gZsyma3Fs9CeOCDdGM2fElgaIuLMnKnq2FM4gtp0qFEiE0JZPyrxWj0vqX87zkArQk7iXndUbmUM4UogTk5hgfIb4i2_1zY0u_3r--x0tRzJUT0n' },
-    { id: 'dm-bob', name: 'Bob Johnson', online: false, avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDtv2xsHjYPycLgk-wU5UuXVMCAclJLBTXnDQ9_7X7zT869EmejAAMInKBXxSPkNCSxbE8KSRiETlEjldnChjCECBV7wQb_DZIqVIy7Q8uSVEUsaiIJNdOBRya-E29sgRmpNWs2-fdNarsaugJ7NXYUOk0IKFZekGAecxesiftw13nqtZ3vuu2krTBdGWt9moxFNQv2A_pSgsDSYLZFfg5w7Xg3MhBTzY_U1ouMVDrgRaGPEnilZtTiNUp1RWUMXdoP_sLp05DL1Tcn' },
-    { id: 'dm-sarah', name: 'Sarah Davis', online: true, avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBi_GI8dgnRAI22OdKDPQJap2SOtMcQAM6JKZYaHfNJ0aLhd3uZIRVVXg-WnCmOvYcNddfVEf5MrTxgacAroN10fvdSVXQ0MV_bvmbUG415HZvQasmMCMplanSqPdXws0AMbK0Jv-_EziRZXVkqXLMwQXJm0nyxX2xp0CU5UtlKiAErjkjKnEzQF--AORu6y0h5zz2wBl1AoGR2lEX3eUxB_ylG6GXBXpoXi4wUmOM84hJ5sIRMcCC5-UvVrusIA_Yvtha0AsaQIlwJ' }
-  ]
 
   return (
     <aside className="w-[240px] flex flex-col bg-[#fafcf8] dark:bg-background-dark border-r border-border-light shrink-0 h-full overflow-hidden">
@@ -82,65 +77,35 @@ export function ChatSidebar({
               )}
             </div>
           </div>
-
-          {/* Direct Messages */}
-          <div>
-            <div className="px-2 mb-2 flex items-center justify-between group">
-              <h3 className="text-xs font-bold text-text-dark dark:text-white uppercase tracking-wider opacity-70">Direct Messages</h3>
-              <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg className="w-4 h-4 text-gray-400 hover:text-primary" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
-                </svg>
-              </button>
-            </div>
-            <div className="space-y-1">
-              {directMessages.map((dm) => (
-                <button
-                  key={dm.id}
-                  onClick={() => onSelectChannel(dm.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                    selectedChannelId === dm.id
-                      ? 'bg-[#ecf3e7] dark:bg-[#25331a]'
-                      : 'hover:bg-gray-100 dark:hover:bg-[#25331a]'
-                  }`}
-                >
-                  <div className="relative shrink-0">
-                    <div
-                      className="w-6 h-6 rounded-full bg-cover bg-center"
-                      style={{ backgroundImage: `url("${dm.avatar}")` }}
-                    />
-                    {dm.online && (
-                      <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-primary border-2 border-[#fafcf8] dark:border-background-dark rounded-full" />
-                    )}
-                  </div>
-                  <span className={`text-sm flex-1 text-left truncate ${
-                    selectedChannelId === dm.id
-                      ? 'text-text-dark dark:text-white font-bold'
-                      : 'text-gray-600 dark:text-gray-300'
-                  }`}>
-                    {dm.name}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* User Status Footer */}
         <div className="mt-auto p-4 border-t border-border-light bg-gray-50 dark:bg-[#1a2412]">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div
-                className="w-8 h-8 rounded-full bg-cover bg-center"
-                style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDbywvUebQjobSlNMjbSt-RDs36agsf5sW7X95k7qwsGuGC-d5MDRd2r9CRQ9jaTKcGkUcOovYFre0lAkftFFXp7SeFtqP-Qm-9DWntplhsAVNswNF7XUWE0OErXp1YzH6EFbKHKYdOPUQzHCIqBi2svF_RiD9qR1kfaUaCIiCOYJo9789QRJp-16TDH7EjFyaCuehLGD89y327Q5Wd2n-49FP4zGOVhSpDPgRSfyq7VV6mWldW05l2VKswK2tAzeoguBGs1Imlu8WZ")' }}
-              />
-              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-primary border-2 border-white dark:border-background-dark rounded-full" />
+          {currentUser && (
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                {currentUser.avatar_url ? (
+                  <div
+                    className="w-8 h-8 rounded-full bg-cover bg-center"
+                    style={{ backgroundImage: `url("${currentUser.avatar_url}")` }}
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                    <span className="text-sm font-bold text-primary">
+                      {currentUser.full_name?.charAt(0)?.toUpperCase() || currentUser.email?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                )}
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-primary border-2 border-white dark:border-background-dark rounded-full" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-bold leading-none text-text-dark dark:text-white truncate">
+                  {currentUser.full_name || currentUser.email || 'User'}
+                </span>
+                <span className="text-xs text-text-secondary">Active</span>
+              </div>
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-bold leading-none text-text-dark dark:text-white">You</span>
-              <span className="text-xs text-text-secondary">Active</span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </aside>
