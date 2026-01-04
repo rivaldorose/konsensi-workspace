@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCurrentUser, useUsers, useUpdateUser } from '@/hooks/useUsers'
+import { useUploadAvatar, useDeleteAvatar } from '@/hooks/useAvatar'
 
 export default function SettingsPage() {
   const { data: currentUser } = useCurrentUser()
@@ -82,6 +83,51 @@ export default function SettingsPage() {
   }
 
   const updateUserMutation = useUpdateUser()
+  const uploadAvatarMutation = useUploadAvatar()
+  const deleteAvatarMutation = useDeleteAvatar()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleUploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file')
+      return
+    }
+
+    // Validate file size (800KB = 819200 bytes)
+    if (file.size > 819200) {
+      alert('File size must be less than 800KB')
+      return
+    }
+
+    try {
+      await uploadAvatarMutation.mutateAsync(file)
+      alert('Avatar uploaded successfully!')
+    } catch (error: any) {
+      console.error('Failed to upload avatar:', error)
+      alert(error?.message || 'Failed to upload avatar. Please try again.')
+    }
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const handleDeleteAvatar = async () => {
+    if (!confirm('Are you sure you want to remove your profile photo?')) return
+
+    try {
+      await deleteAvatarMutation.mutateAsync()
+      alert('Avatar removed successfully!')
+    } catch (error: any) {
+      console.error('Failed to delete avatar:', error)
+      alert(error?.message || 'Failed to remove avatar. Please try again.')
+    }
+  }
 
   const handleSaveProfile = async () => {
     if (!currentUser || updateUserMutation.isPending) return
@@ -165,12 +211,29 @@ export default function SettingsPage() {
               <div className="flex flex-col gap-2">
                 <h3 className="text-base font-bold text-[#131c0d] dark:text-white">Profile Photo</h3>
                 <div className="flex gap-3">
-                  <button className="px-4 py-2 bg-background-light dark:bg-background-dark hover:bg-[#ecf4e7] dark:hover:bg-[#2a3820] border border-[#ecf4e7] dark:border-[#2a3820] rounded-lg text-sm font-bold text-[#131c0d] dark:text-white transition-colors">
-                    Upload new
-                  </button>
-                  <button className="px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg text-sm font-medium transition-colors">
-                    Remove
-                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleUploadAvatar}
+                    className="hidden"
+                    id="avatar-upload"
+                  />
+                  <label
+                    htmlFor="avatar-upload"
+                    className="px-4 py-2 bg-background-light dark:bg-background-dark hover:bg-[#ecf4e7] dark:hover:bg-[#2a3820] border border-[#ecf4e7] dark:border-[#2a3820] rounded-lg text-sm font-bold text-[#131c0d] dark:text-white transition-colors cursor-pointer inline-block"
+                  >
+                    {uploadAvatarMutation.isPending ? 'Uploading...' : 'Upload new'}
+                  </label>
+                  {currentUser?.avatar_url && (
+                    <button
+                      onClick={handleDeleteAvatar}
+                      disabled={deleteAvatarMutation.isPending}
+                      className="px-4 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                    >
+                      {deleteAvatarMutation.isPending ? 'Removing...' : 'Remove'}
+                    </button>
+                  )}
                 </div>
                 <p className="text-xs text-[#6d9c49] mt-1">JPG, GIF or PNG. Max size of 800K</p>
               </div>
