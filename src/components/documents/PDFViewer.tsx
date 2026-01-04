@@ -33,9 +33,16 @@ export function PDFViewer({ url, scale = 1.0, pageNum: controlledPageNum, onPage
     setLoading(true)
     setError(null)
 
-    pdfjsLib
-      .getDocument(url)
-      .promise.then((pdf) => {
+    // Configure PDF.js with CORS support for signed URLs
+    const loadingTask = pdfjsLib.getDocument({
+      url: url,
+      httpHeaders: {},
+      withCredentials: false,
+      verbosity: 0, // Suppress console warnings
+    })
+
+    loadingTask.promise
+      .then((pdf) => {
         setPdfDoc(pdf)
         setNumPages(pdf.numPages)
         setInternalPageNum(1)
@@ -44,11 +51,23 @@ export function PDFViewer({ url, scale = 1.0, pageNum: controlledPageNum, onPage
           onPageCountChange(pdf.numPages)
         }
       })
-      .catch((err) => {
+      .catch((err: any) => {
         console.error('Error loading PDF:', err)
-        setError('Failed to load PDF')
+        // Provide more specific error messages
+        let errorMessage = 'Failed to load PDF'
+        if (err?.message?.includes('network') || err?.name === 'UnknownErrorException') {
+          errorMessage = 'Network error loading PDF. Please check your connection and try again.'
+        } else if (err?.message?.includes('Invalid PDF')) {
+          errorMessage = 'Invalid PDF file'
+        }
+        setError(errorMessage)
         setLoading(false)
       })
+
+    // Cleanup: cancel loading if component unmounts or URL changes
+    return () => {
+      loadingTask.destroy()
+    }
   }, [url, onPageCountChange])
 
   // Render page
