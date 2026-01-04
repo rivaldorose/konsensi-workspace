@@ -57,3 +57,4 @@ SELECT
 FROM public.users
 WHERE email = 'rivaldo.mac-andrew@konsensi-budgetbeheer.nl';
 
+

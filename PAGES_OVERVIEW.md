@@ -309,3 +309,4 @@
 - ✅ Geen individuele navigation components meer
 - ✅ Alleen functionele sidebars waar nodig (docs, chat, settings)
 
+

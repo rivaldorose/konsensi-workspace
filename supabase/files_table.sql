@@ -114,3 +114,4 @@ COMMENT ON COLUMN files.parent_id IS 'References files.id for folder hierarchy. 
 COMMENT ON COLUMN files.storage_path IS 'Path in Supabase Storage bucket';
 COMMENT ON COLUMN files.file_url IS 'Public URL to the file in storage';
 
+

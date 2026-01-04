@@ -54,3 +54,4 @@ Na een nieuwe deployment, controleer in Vercel Dashboard:
 - `349402f`: Fix voor marketing hook TypeScript error ✅
 - `d473807`: Nieuwste commit met alle fixes ✅
 
+

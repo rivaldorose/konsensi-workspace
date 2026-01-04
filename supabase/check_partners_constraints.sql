@@ -16,3 +16,4 @@ FROM pg_constraint
 WHERE conrelid = 'public.partners'::regclass
   AND contype = 'c'; -- 'c' = CHECK constraint
 
+

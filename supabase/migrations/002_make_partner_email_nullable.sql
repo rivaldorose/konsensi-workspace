@@ -16,3 +16,4 @@ ALTER TABLE public.partners
     (contact_phone IS NOT NULL AND contact_phone != '')
   );
 
+

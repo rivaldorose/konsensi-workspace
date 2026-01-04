@@ -110,3 +110,4 @@ If you see permission errors:
 2. Check that `auth.uid()` returns the correct user ID
 3. Ensure the user is authenticated
 
+

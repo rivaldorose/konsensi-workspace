@@ -26,3 +26,4 @@ CREATE INDEX IF NOT EXISTS idx_documents_file_path ON public.documents(file_path
 -- Create index for document_mode
 CREATE INDEX IF NOT EXISTS idx_documents_document_mode ON public.documents(document_mode);
 
+

@@ -82,3 +82,4 @@ export function AppInfoCard({ app }: AppInfoCardProps) {
   )
 }
 
+

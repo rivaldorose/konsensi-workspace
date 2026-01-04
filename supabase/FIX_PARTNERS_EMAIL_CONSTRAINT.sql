@@ -36,3 +36,4 @@ WHERE table_name = 'partners'
   AND table_schema = 'public'
   AND column_name = 'contact_email';
 
+

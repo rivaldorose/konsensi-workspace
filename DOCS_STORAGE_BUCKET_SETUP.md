@@ -96,3 +96,4 @@ After setting up the bucket and policies, try uploading a file through the Docum
 - **"Permission denied" error**: Check that the RLS policies are correctly set up
 - **Files not appearing**: Verify that the `file_path` in the documents table matches the storage path structure
 
+

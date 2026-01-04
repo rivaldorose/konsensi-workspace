@@ -35,3 +35,4 @@ export function AppTabs({ activeTab, onTabChange }: AppTabsProps) {
   )
 }
 
+

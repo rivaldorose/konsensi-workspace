@@ -74,7 +74,9 @@ export default function DeletePartnerPage() {
           <div className="flex items-center justify-between border-b border-neutral-100 dark:border-neutral-800 px-6 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ec1313]/10">
-                <span className="material-symbols-outlined text-[#ec1313]">warning</span>
+                <svg className="w-5 h-5 text-[#ec1313]" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                </svg>
               </div>
               <h3 className="text-xl font-bold leading-tight text-neutral-900 dark:text-neutral-50">
                 Delete Partner
@@ -84,7 +86,9 @@ export default function DeletePartnerPage() {
               onClick={handleClose}
               className="rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 transition-colors"
             >
-              <span className="material-symbols-outlined">close</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
 
@@ -102,23 +106,33 @@ export default function DeletePartnerPage() {
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                  <span className="material-symbols-outlined text-[18px] text-[#ec1313]">check_circle</span>
+                  <svg className="w-[18px] h-[18px] text-[#ec1313]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
                   Partner information
                 </li>
                 <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                  <span className="material-symbols-outlined text-[18px] text-[#ec1313]">check_circle</span>
+                  <svg className="w-[18px] h-[18px] text-[#ec1313]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
                   All contact details
                 </li>
                 <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                  <span className="material-symbols-outlined text-[18px] text-[#ec1313]">check_circle</span>
+                  <svg className="w-[18px] h-[18px] text-[#ec1313]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
                   Internal notes
                 </li>
                 <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                  <span className="material-symbols-outlined text-[18px] text-[#ec1313]">check_circle</span>
+                  <svg className="w-[18px] h-[18px] text-[#ec1313]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
                   Linked documents
                 </li>
                 <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                  <span className="material-symbols-outlined text-[18px] text-[#ec1313]">check_circle</span>
+                  <svg className="w-[18px] h-[18px] text-[#ec1313]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
                   Related contracts
                 </li>
               </ul>
@@ -126,7 +140,9 @@ export default function DeletePartnerPage() {
 
             {/* Critical Warning */}
             <div className="mb-6 flex items-start gap-3 rounded-lg bg-red-50 dark:bg-red-900/10 p-3 text-[#ec1313]">
-              <span className="material-symbols-outlined text-[20px]">error</span>
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+              </svg>
               <p className="text-sm font-medium">This action cannot be undone.</p>
             </div>
 

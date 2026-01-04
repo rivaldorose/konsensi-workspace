@@ -934,3 +934,4 @@ Alle tabellen hebben triggers voor:
 - `updated_at` timestamp (automatisch updaten bij wijzigingen)
 - User profile creation (via `handle_new_user()` functie)
 
+

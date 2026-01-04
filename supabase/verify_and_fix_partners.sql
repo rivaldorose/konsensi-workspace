@@ -71,3 +71,4 @@ SELECT
    AND contype = 'c' 
    AND conname = 'partners_contact_check') AS constraint_exists;
 
+

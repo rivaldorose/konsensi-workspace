@@ -161,3 +161,4 @@ export function DetailsTab({ app }: DetailsTabProps) {
   )
 }
 
+

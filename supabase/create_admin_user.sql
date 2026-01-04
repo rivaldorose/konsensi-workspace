@@ -29,3 +29,4 @@ VALUES (
 ON CONFLICT (id) DO UPDATE SET role = 'admin';
 */
 
+

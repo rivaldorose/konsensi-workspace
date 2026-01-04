@@ -75,3 +75,4 @@ COMMENT ON POLICY "Users can view own files" ON storage.objects IS 'Allows users
 COMMENT ON POLICY "Users can delete own files" ON storage.objects IS 'Allows users to delete their own files';
 COMMENT ON POLICY "Users can update own files" ON storage.objects IS 'Allows users to update metadata of their own files';
 
+
