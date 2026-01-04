@@ -373,6 +373,7 @@ export default function DocumentEditorPage() {
                     <PDFViewer
                       url={fileViewUrl}
                       scale={pdfViewer.scale}
+                      pageNum={pdfViewer.pageNum}
                       onPageCountChange={pdfViewer.setNumPages}
                     />
                   </div>
