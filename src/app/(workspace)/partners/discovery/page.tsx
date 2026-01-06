@@ -20,31 +20,49 @@ export default function AIDiscoveryPage() {
   const createLead = useCreateLead()
 
   const handleGenerateLeads = async () => {
-    // For now, this is a placeholder - in a real implementation, this would call an AI service
-    // For demo purposes, we'll create a mock lead
+    if (!searchCriteria.industry && !searchCriteria.location && !searchCriteria.targetRole && !searchCriteria.keywords) {
+      alert('Please fill in at least one search criteria')
+      return
+    }
+
+    setIsGenerating(true)
     try {
-      await createLead.mutateAsync({
-        company_name: 'TechNova Solutions',
-        industry: searchCriteria.industry || 'SaaS',
-        company_size: searchCriteria.companySize || '50-200 employees',
-        location: searchCriteria.location || 'Berlin, DE',
-        target_role: searchCriteria.targetRole || 'CTO',
-        keywords: searchCriteria.keywords,
-        ai_summary: 'Recently published a case study on their need for scalable AI integration. Their tech stack aligns with your offerings.',
-        ai_confidence: 85,
-        relevance_score: 'high',
-        suggested_contact_name: 'Marcus Weber',
-        search_criteria: searchCriteria,
-        ai_insights: {
-          activities: [
-            'Launching AI-driven customer support tools.',
-            'Expanding data center operations.',
-            'Active recruitment for senior DevOps roles.',
-          ],
-          signals: [],
-          synergies: ['Cloud Migration', 'Data Compliance', 'Staff Augmentation'],
+      // Call Apollo API via our server-side route
+      const response = await fetch('/api/apollo/search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      } as any)
+        body: JSON.stringify(searchCriteria),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to search for leads')
+      }
+
+      const { leads } = await response.json()
+
+      if (!leads || leads.length === 0) {
+        alert('No leads found with the given criteria. Try adjusting your search.')
+        return
+      }
+
+      // Create leads in database
+      for (const leadData of leads) {
+        try {
+          await createLead.mutateAsync({
+            ...leadData,
+            status: 'new',
+            generated_by_user_id: undefined, // Will be set by the hook
+          } as any)
+        } catch (error: any) {
+          console.error('Error creating lead:', error)
+          // Continue with other leads even if one fails
+        }
+      }
+
+      alert(`Successfully generated ${leads.length} lead(s)!`)
       
       // Clear form
       setSearchCriteria({
